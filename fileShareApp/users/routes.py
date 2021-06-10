@@ -3,7 +3,8 @@ from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
     Response
 from fileShareApp import db, bcrypt, mail
-from fileShareApp.models import Post, User, Investigations
+from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountForm, \
     RequestResetForm, ResetPasswordForm
 from flask_login import login_user, current_user, logout_user, login_required

@@ -2,7 +2,8 @@ from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
     Response, current_app, send_from_directory
 from fileShareApp import db, bcrypt, mail
-from fileShareApp.models import Post, User, Investigations, Kmtracking
+from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 # from fileShareApp.main.forms import EmployeeForm, AddRestaurantForm, DatabaseForm, AddRoleForm
 from flask_login import login_user, current_user, logout_user, login_required
 import secrets

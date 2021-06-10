@@ -1,5 +1,6 @@
 from fileShareApp import db, bcrypt, mail
-from fileShareApp.models import Post, User, Investigations, Kmtracking,Km_saved_queries
+from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 from sqlalchemy import func, desc
 import pandas as pd
 from flask_login import current_user

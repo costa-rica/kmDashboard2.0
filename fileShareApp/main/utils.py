@@ -1,5 +1,6 @@
 from fileShareApp import db
-from fileShareApp.models import Post, User, Investigations, Kmtracking,Km_saved_queries
+from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 import os
 from flask import current_app
 import json
