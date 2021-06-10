@@ -477,12 +477,12 @@ section.dashboard .inv_km_notes textarea {
   width: 85%;
 }
 
-section.dashboard .investigation_entery_bottom {
+section.dashboard .investigation_entry_bottom {
   display: -ms-grid;
   display: grid;
   -ms-grid-rows: 1fr;
       grid-template-rows: 1fr;
-      grid-template-areas: "inv_files " "km_categories" "inv_update" "inv_date_update";
+      grid-template-areas: "inv_files " "km_categories" "inv_update";
 }
 
 section.dashboard .inv_files {
@@ -606,8 +606,6 @@ section.dashboard .verify_box_and_label > input {
 }
 
 section.dashboard .inv_date_update {
-  -ms-grid-row: 4;
-  -ms-grid-column: 1;
   grid-area: inv_date_update;
   display: -webkit-box;
   display: -ms-flexbox;

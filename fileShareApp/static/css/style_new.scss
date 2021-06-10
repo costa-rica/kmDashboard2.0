@@ -332,14 +332,13 @@ section.dashboard {
         label {width:15%;}
         textarea {width:85%;}
             }
-    .investigation_entery_bottom {
+    .investigation_entry_bottom {
         display: grid;
         grid-template-rows: 1fr;
         grid-template-areas:
         "inv_files "
         "km_categories"
-        "inv_update"
-        "inv_date_update";
+        "inv_update";
     }
     .inv_files {grid-area: inv_files;
         display: flex;

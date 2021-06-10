@@ -26,8 +26,10 @@ import shutil
 
 from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountForm, \
     RequestResetForm, ResetPasswordForm
+import re
 
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler('fileShareApp_main_log.txt')
@@ -164,7 +166,7 @@ def search():
                 search_limit=search_limit))            
         elif formDict.get('view'):
             inv_id_for_dash=formDict.get('view')
-            return redirect(url_for('main.dashboard',inv_id_for_dash=inv_id_for_dash))
+            return redirect(url_for('main.investigations_dashboard',inv_id_for_dash=inv_id_for_dash))
             
     # print('3investigation_data_list:::', len(investigation_data_list), 'page::',investigation_data_list_page)
     print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
@@ -178,9 +180,9 @@ def search():
 
 
 
-@main.route("/dashboard", methods=["GET","POST"])
+@main.route("/investigations_dashboard", methods=["GET","POST"])
 @login_required
-def dashboard():
+def investigations_dashboard():
     print('*TOP OF def dashboard()*')
     
     #view, update
@@ -207,22 +209,37 @@ def dashboard():
     else:
         dash_inv_files=dash_inv.files.split(',')
     
-    
+    #Categories
+    if dash_inv.categories=='':
+        dash_inv_categories=''
+    else:
+        dash_inv_categories=dash_inv.categories.split(',')
+        dash_inv_categories=[i.strip() for i in dash_inv_categories]
+        print('dash_inv_categories:::',dash_inv_categories)
     
     dash_inv_list = [dash_inv.NHTSA_ACTION_NUMBER,dash_inv.MAKE,dash_inv.MODEL,dash_inv.YEAR,
         dash_inv.ODATE.strftime("%Y-%m-%d"),dash_inv.CDATE.strftime("%Y-%m-%d"),dash_inv.CAMPNO,
         dash_inv.COMPNAME, dash_inv.MFR_NAME, dash_inv.SUBJECT, dash_inv.SUMMARY,
-        dash_inv.km_notes, dash_inv.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_inv_files]
+        dash_inv.km_notes, dash_inv.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_inv_files,
+        dash_inv_categories]
     
     #Make lists for investigation_entry_top
     inv_entry_top_names_list=['NHTSA Action Number','Make','Model','Year','Open Date','Close Date',
         'Recall Campaign Number','Component Description','Manufacturer Name']
     inv_entry_top_list=zip(inv_entry_top_names_list,dash_inv_list[:9])
     
-    #make list of checkboxes
+    #make dictionary of category lists from excel file
+    categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
+    df=pd.read_excel(categories_excel)
+    category_list_dict={}
+    for i in range(0,len(df.columns)):
+        category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
+        # category_list_dict[df.columns[i]]=category_list_dict[df.columns[i]].dropna()
     
-    checkbox_list_count=5
-    checkbox_list=['checkbox_'+str(i) for i in range(0,checkbox_list_count)]
+    category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
+    
+    # checkbox_list_count=5
+    # checkbox_list=['checkbox_'+str(i) for i in range(0,checkbox_list_count)]
     # for i in checkbox_list:
         # if getattr(dash_inv, i)=='Yes':
             # dash_inv_list.append('checked')
@@ -241,6 +258,9 @@ def dashboard():
         filesDict = request.files.to_dict()
         
         if formDict.get('update_inv'):
+            print('formDict:::',formDict)
+            # print('argsDict:::',argsDict)
+            # print('filesDict::::',filesDict)
             updateInvestigation(formDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
 
             if request.files.get('investigation_file'):
@@ -262,12 +282,13 @@ def dashboard():
                 else:
                     dash_inv.files =dash_inv.files +','+ uploaded_file.filename
                 db.session.commit()                
-            return redirect(url_for('main.dashboard', inv_id_for_dash=inv_id_for_dash))
+            return redirect(url_for('main.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
         
-    return render_template('dashboard.html',inv_entry_top_list=inv_entry_top_list,
+    return render_template('dashboard_inv.html',inv_entry_top_list=inv_entry_top_list,
         dash_inv_list=dash_inv_list, str=str, len=len, inv_id_for_dash=inv_id_for_dash,
-        verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, checkbox_list=checkbox_list,
-        int=int)
+        verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
+        category_list_dict=category_list_dict, list=list,
+        category_group_dict_no_space=category_group_dict_no_space)
 
 
 
@@ -306,7 +327,7 @@ def delete_file(inv_id_for_dash,filename):
         os.rmdir(current_inv_files_dir)
     
     flash('file has been deleted!', 'success')
-    return redirect(url_for('main.dashboard', inv_id_for_dash=inv_id_for_dash))
+    return redirect(url_for('main.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
 
 
 
