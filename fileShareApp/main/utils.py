@@ -38,7 +38,8 @@ def investigations_query_util(query_file_name):
                 # j[0]=int(j[0])
                 investigations = investigations.filter(getattr(Investigations,i)==int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 investigations = investigations.filter(getattr(Investigations,i)==j[0])
             elif j[0]!='':
                 investigations = investigations.filter(getattr(Investigations,i)==j[0])
@@ -47,14 +48,16 @@ def investigations_query_util(query_file_name):
                 # j[0]=int(j[0])
                 investigations = investigations.filter(getattr(Investigations,i)<int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 investigations = investigations.filter(getattr(Investigations,i)<j[0])
         elif j[1]== "greater_than":
             if i in ['id','YEAR'] and j[0]!='':
                 # j[0]=int(j[0])
                 investigations = investigations.filter(getattr(Investigations,i)>int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 investigations = investigations.filter(getattr(Investigations,i)>j[0])
         elif j[1] =="string_contains" and j[0]!='':
             investigations = investigations.filter(getattr(Investigations,i).contains(j[0]))

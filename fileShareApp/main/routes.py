@@ -4,7 +4,6 @@ from flask import render_template, url_for, redirect, flash, request, abort, ses
 from fileShareApp import db, bcrypt, mail
 from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
-# from fileShareApp.main.forms import EmployeeForm, AddRestaurantForm, DatabaseForm, AddRoleForm
 from flask_login import login_user, current_user, logout_user, login_required
 import secrets
 import os
@@ -19,13 +18,11 @@ import xlsxwriter
 from flask_mail import Message
 from fileShareApp.main.utils import investigations_query_util, queryToDict, search_criteria_dictionary_util,\
     updateInvestigation, create_categories_xlsx
-# from fileShareApp.dmr.utils
 import openpyxl
 from werkzeug.utils import secure_filename
 import json
 import glob
 import shutil
-import xlrd
 
 from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountForm, \
     RequestResetForm, ResetPasswordForm
@@ -191,7 +188,7 @@ def dashboard():
         print('request.args.get(inv_id_for_dash, should build verified_by_list')
         inv_id_for_dash = int(request.args.get('inv_id_for_dash'))
         dash_inv= db.session.query(Investigations).get(inv_id_for_dash)
-        verified_by_list =db.session.query(Kmtracking.updated_to, Kmtracking.time_stamp).filter_by(
+        verified_by_list =db.session.query(Tracking_inv.updated_to, Tracking_inv.time_stamp).filter_by(
             investigations_table_id=inv_id_for_dash,field_updated='verified_by_user').all()
         verified_by_list=[[i[0],i[1].strftime('%Y/%m/%d %#I:%M%p')] for i in verified_by_list]
         print('verified_by_list:::',verified_by_list)
@@ -226,11 +223,11 @@ def dashboard():
     
     checkbox_list_count=5
     checkbox_list=['checkbox_'+str(i) for i in range(0,checkbox_list_count)]
-    for i in checkbox_list:
-        if getattr(dash_inv, i)=='Yes':
-            dash_inv_list.append('checked')
-        else:
-            dash_inv_list.append('')
+    # for i in checkbox_list:
+        # if getattr(dash_inv, i)=='Yes':
+            # dash_inv_list.append('checked')
+        # else:
+            # dash_inv_list.append('')
     
     #make list of text inputs
     

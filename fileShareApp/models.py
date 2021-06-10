@@ -20,10 +20,10 @@ class User(db.Model, UserMixin):
     permission = db.Column(db.Text)
     theme = db.Column(db.Text)
     posts = db.relationship('Post', backref='author', lazy=True)
-    track_inv = db.relationship('Tracking_inv', backref='inv_updator', lazy=True)
-    track_re = db.relationship('Tracking_inv', backref='inv_updator', lazy=True)
-    query_string_inv = db.relationship('Saved_queries_inv', backref='inv_query_creator', lazy=True)
-    query_string_re = db.relationship('Saved_queries_re', backref='re_query_creator', lazy=True)
+    track_inv = db.relationship('Tracking_inv', backref='updator_inv', lazy=True)
+    track_re = db.relationship('Tracking_re', backref='updator_re', lazy=True)
+    query_string_inv = db.relationship('Saved_queries_inv', backref='query_creator_inv', lazy=True)
+    query_string_re = db.relationship('Saved_queries_re', backref='query_creator_re', lazy=True)
 
     def get_reset_token(self, expires_sec=1800):
         s=Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -132,7 +132,7 @@ class Recalls(db.Model):
     date_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
     files = db.Column(db.Text)
     categories=db.Column(db.Text)
-    km_tracking_id = db.relationship('Tracking_rec', backref='update_re_record', lazy=True)
+    km_tracking_id = db.relationship('Tracking_re', backref='update_re_record', lazy=True)
     
 
     def __repr__(self):
