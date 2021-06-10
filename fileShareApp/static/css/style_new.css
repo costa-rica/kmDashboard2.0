@@ -1,0 +1,662 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;0,900;1,300&display=swap");
+body {
+  background: #afafaf;
+  margin: 0;
+  font-family: Roboto;
+}
+
+.navbar {
+  background: white;
+  padding: 2em;
+}
+
+.navbar img.km-logo {
+  width: 150px;
+  float: left;
+  position: relative;
+}
+
+.navbar ul#nav_horizontal_list li {
+  list-style-type: none;
+  float: right;
+  display: inline;
+  padding-left: 1em;
+}
+
+img.mobile-menu {
+  display: none;
+}
+
+/*Login*/
+section.LoginSection {
+  padding: 200px 10px 100px 5px;
+}
+
+section.LoginSection .container h2 {
+  padding-left: 20%;
+}
+
+section.LoginSection .container .form-elements {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
+  -ms-grid-rows: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+      grid-template-areas: "email-label email-input ." "password-label password-input ." ". form-group ." ". form-check .";
+}
+
+section.LoginSection .container .email-label {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  grid-area: email-label;
+  padding-right: 3em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.LoginSection .container .email-input {
+  -ms-grid-row: 1;
+  -ms-grid-column: 2;
+  grid-area: email-input;
+}
+
+section.LoginSection .container .password-label {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: password-label;
+  padding-right: 3em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.LoginSection .container .password-input {
+  -ms-grid-row: 2;
+  -ms-grid-column: 2;
+  grid-area: password-input;
+}
+
+section.LoginSection .container .form-check {
+  -ms-grid-row: 4;
+  -ms-grid-column: 2;
+  grid-area: form-check;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.LoginSection .container .form-group {
+  -ms-grid-row: 1;
+  -ms-grid-column: 2;
+  grid-area: form-group;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.LoginSection .container .form-group .submit-button1 {
+  padding-top: .5em;
+}
+
+section.bottom-part {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  padding-bottom: 75px;
+}
+
+/* Register */
+section.RegisterSection {
+  padding: 200px 10px 100px 5px;
+}
+
+section.RegisterSection .container .form-elements {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
+  -ms-grid-rows: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+      grid-template-areas: "email-label email-input ." "password-label password-input ." "confirm_password-label confirm_password-input ." ". form-submit .";
+}
+
+section.RegisterSection .container .email-label {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  grid-area: email-label;
+  padding-right: 3em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.RegisterSection .container .email-input {
+  -ms-grid-row: 1;
+  -ms-grid-column: 2;
+  grid-area: email-input;
+}
+
+section.RegisterSection .container .password-label {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: password-label;
+  padding-right: 3em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.RegisterSection .container .password-input {
+  -ms-grid-row: 2;
+  -ms-grid-column: 2;
+  grid-area: password-input;
+}
+
+section.RegisterSection .container .confirm_password-label {
+  -ms-grid-row: 3;
+  -ms-grid-column: 1;
+  grid-area: confirm_password-label;
+  padding-right: 3em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.RegisterSection .container .confirm_password-input {
+  -ms-grid-row: 3;
+  -ms-grid-column: 2;
+  grid-area: confirm_password-input;
+}
+
+section.RegisterSection .container .form-submit {
+  -ms-grid-row: 3;
+  -ms-grid-column: 3;
+  grid-area: form-submit;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.RegisterSection .container .form-submit .submit-button1 {
+  padding-top: .5em;
+}
+
+/* Reset Request */
+section.ResetPasswordSection {
+  padding: 200px 10px 100px 5px;
+}
+
+section.ResetPasswordSection .container {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
+  -ms-grid-rows: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      grid-template-areas: ". form-group ." ". form-submit .";
+}
+
+section.ResetPasswordSection .form-group {
+  -ms-grid-row: 1;
+  -ms-grid-column: 2;
+  grid-area: form-group;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.ResetPasswordSection .form-submit {
+  -ms-grid-row: 3;
+  -ms-grid-column: 3;
+  grid-area: form-submit;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+/* Reset Token */
+section.EnterNewPasswordSection {
+  padding: 200px 10px 100px 5px;
+}
+
+section.EnterNewPasswordSection .container .form-elements {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
+  -ms-grid-rows: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      grid-template-areas: "password-label1 password-input1 ." "confirm_password-label1 confirm_password-input1 ." ". . form-submit";
+}
+
+section.EnterNewPasswordSection .container .password-label1 {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  grid-area: password-label1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.EnterNewPasswordSection .container .password-input1 {
+  -ms-grid-row: 1;
+  -ms-grid-column: 2;
+  grid-area: password-input1;
+}
+
+section.EnterNewPasswordSection .container .confirm_password-label1 {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: confirm_password-label1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.EnterNewPasswordSection .container .confirm_password-input1 {
+  -ms-grid-row: 2;
+  -ms-grid-column: 2;
+  grid-area: confirm_password-input1;
+}
+
+section.EnterNewPasswordSection .container .form-submit {
+  -ms-grid-row: 3;
+  -ms-grid-column: 3;
+  grid-area: form-submit;
+}
+
+/*Home*/
+/*Search*/
+section.search .container {
+  padding: 50px 10px 50px 5px;
+  background: #bebebe;
+  padding: 20px;
+  border-color: #525252;
+  border-style: solid;
+  border-radius: 1em;
+  width: 85%;
+}
+
+section.search .custom_search {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 20% 30% auto;
+      grid-template-columns: 20% 30% auto;
+}
+
+section.search .custom_search div:nth-child(3n-2) {
+  -ms-grid-column-align: end;
+      justify-self: end;
+  padding-right: 2%;
+}
+
+section.search .text_search_form {
+  width: 100%;
+}
+
+section.search .dict_search {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 20% 30% auto;
+      grid-template-columns: 20% 30% auto;
+}
+
+section.search .dict_search div:nth-child(3n-2) {
+  -ms-grid-column-align: end;
+      justify-self: end;
+  padding-right: 2%;
+}
+
+section.search .search_limit_form {
+  background: #c8c8c8;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  padding-left: .2em;
+}
+
+.table_contents {
+  font-size: .7em;
+  background: #bebebe;
+  padding: 5px;
+  border-color: #525252;
+  border-style: solid;
+  border-radius: 1em;
+}
+
+.table_contents .td_characteristics {
+  height: 1.4em;
+  overflow: hidden;
+}
+
+.table_contents .dash_id_button {
+  border-radius: .3em;
+}
+
+.table_contents .dash_id_button:hover {
+  font-weight: bold;
+  background-color: #525252;
+}
+
+/*Dashboard*/
+section.dashboard h2 {
+  margin: 20px 0 0 20px;
+}
+
+section.dashboard .container {
+  padding: 50px 10px 50px 5px;
+  background: #bebebe;
+  padding: 20px;
+  border-color: #525252;
+  border-style: solid;
+  border-radius: 1em;
+  width: 85%;
+}
+
+section.dashboard .above_dash {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding-bottom: 2em;
+}
+
+section.dashboard .investigation_entry_top {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (minmax(23rem, 1fr))[auto-fit];
+      grid-template-columns: repeat(auto-fit, minmax(23rem, 1fr));
+}
+
+section.dashboard .investigation_entry_top input {
+  height: 20px;
+  margin-left: 10px;
+  background: #afafaf;
+}
+
+section.dashboard .investigation_entry_top > * {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.dashboard .investigation_entry_top > * .inv_attr_title_wider {
+  font-size: .9em;
+  text-align: right;
+}
+
+section.dashboard .investigation_entry_top > * .wider_input {
+  width: 60%;
+  font-size: .75em;
+}
+
+section.dashboard .inv_subject {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding-bottom: 5px;
+}
+
+section.dashboard .inv_subject label {
+  width: 15%;
+}
+
+section.dashboard .inv_subject input {
+  width: 85%;
+}
+
+section.dashboard .inv_summary {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding-bottom: 5px;
+}
+
+section.dashboard .inv_summary label {
+  width: 15%;
+}
+
+section.dashboard .inv_summary textarea {
+  width: 85%;
+}
+
+section.dashboard .inv_km_notes {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding-bottom: 5px;
+}
+
+section.dashboard .inv_km_notes label {
+  width: 15%;
+}
+
+section.dashboard .inv_km_notes textarea {
+  width: 85%;
+}
+
+section.dashboard .investigation_entery_bottom {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-rows: 1fr;
+      grid-template-rows: 1fr;
+      grid-template-areas: "inv_files " "km_categories" "inv_update" "inv_date_update";
+}
+
+section.dashboard .inv_files {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  grid-area: inv_files;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  height: 10em;
+  padding-left: 20px;
+}
+
+section.dashboard .inv_files .file_input {
+  padding: 10px 0 0 0;
+}
+
+section.dashboard .inv_files .remove-image {
+  display: none;
+  top: -10px;
+  right: -10px;
+  border-radius: 10em;
+  padding: 1px 3px 1px;
+  /*impact size*/
+  text-decoration: none;
+  font: 700 21px/20px sans-serif;
+  background: #555;
+  border: 3px solid #fff;
+  color: #FFF;
+  -webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  -webkit-transition: background 0.5s;
+  transition: background 0.5s;
+  margin-left: 20px;
+}
+
+section.dashboard .inv_files .remove-image:hover {
+  background: #E54E4E;
+  padding: 3px 7px 5px;
+  top: -11px;
+  right: -11px;
+}
+
+section.dashboard .inv_files .remove-image:active {
+  background: #E54E4E;
+  top: -10px;
+  right: -11px;
+}
+
+section.dashboard .km_categories {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: km_categories;
+  background: tan;
+  padding: .5em;
+  border-color: #525252;
+  border-style: solid;
+  border-radius: 1em;
+}
+
+section.dashboard .km_categories_checkboxes {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (minmax(10rem, 1fr))[auto-fit];
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+section.dashboard .checkbox_group {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+section.dashboard .checkbox_group > label {
+  text-align: left;
+}
+
+section.dashboard .inv_update {
+  -ms-grid-row: 3;
+  -ms-grid-column: 1;
+  grid-area: inv_update;
+  justify-self: end;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+section.dashboard .update_inv {
+  height: 30px;
+  border-radius: .3em;
+  background-color: #4b86df;
+  -ms-flex-item-align: end;
+      align-self: flex-end;
+}
+
+section.dashboard .verify_box_and_label {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.dashboard .verify_box_and_label > input {
+  cursor: pointer;
+  height: 25px;
+  margin-right: .3em;
+}
+
+section.dashboard .inv_date_update {
+  -ms-grid-row: 4;
+  -ms-grid-column: 1;
+  grid-area: inv_date_update;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.dashboard .span_text {
+  color: #828282;
+}
+
+section.dashboard label {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  text-align: right;
+  margin-bottom: 5px;
+}
+
+/*Reports*/
+.download_group {
+  background: tan;
+  padding: .5em;
+  border-color: #525252;
+  border-style: solid;
+  border-radius: 1em;
+  margin-bottom: 1em;
+}
+
+.download_group_inputs {
+  padding-left: 2em;
+}
+
+.timestamp_group {
+  float: right;
+  margin-right: 5em;
+}
+
+.timestamp_input {
+  background: #afafaf;
+  text-align: center;
+}
+/*# sourceMappingURL=style_new.css.map */

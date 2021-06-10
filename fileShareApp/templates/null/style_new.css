@@ -1,0 +1,85 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,700&display=swap");
+body {
+  background: #afafaf;
+  margin: 0;
+  font-family: Roboto;
+}
+
+.navbar {
+  background: white;
+  padding: 2.7em;
+}
+
+.navbar img.km-logo {
+  width: 150px;
+  float: left;
+  position: relative;
+  top: -30px;
+}
+
+.navbar ul {
+  list-style-type: none;
+  float: right;
+}
+
+img.mobile-menu {
+  display: none;
+}
+
+section.LoginSection {
+  padding: 200px 10px 100px 5px;
+}
+
+section.LoginSection .form-elements {
+  padding-left: 100px;
+  width: 70%;
+  /*.send-credentials a, input {
+                float: right;
+                padding-left: 1em;
+        }*/
+}
+
+section.LoginSection .form-elements .email-form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: space-evenly;
+      -ms-flex-pack: space-evenly;
+          justify-content: space-evenly;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+section.LoginSection .form-elements .email-form label.email-label {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+section.LoginSection .form-elements .send-credentials {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+section.LoginSection .form-elements .send-credentials a {
+  padding-left: 1em;
+}
+
+section.bottom-part {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  padding-bottom: 75px;
+}
+/*# sourceMappingURL=style_new.css.map */

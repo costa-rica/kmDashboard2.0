@@ -1,0 +1,18 @@
+.crop img {
+	/*width: 230px;*/
+	height: 60px;
+	margin:  -120px 0 -140px 0;/*top, _ bottom right left side*/
+    }
+
+.navbar{padding: 2rem;
+background: rgb(190,190,200);}
+
+body {
+  background-color: rgb(250,250,250);}
+
+loginButtonDiv {
+  position: relative;
+  float: right;
+}
+
+blacktext { color: 'black'}

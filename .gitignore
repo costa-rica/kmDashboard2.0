@@ -1,0 +1,7 @@
+__pycache__/
+*.ipynb
+fileShareApp/__pycache__/
+*.zip
+*.xlsx
+awsVmSockMethod/
+*log.txt

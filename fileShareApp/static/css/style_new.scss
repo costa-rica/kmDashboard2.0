@@ -1,0 +1,458 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;0,900;1,300&display=swap');
+body {
+    background: rgb(175, 175, 175);
+    margin: 0;
+    font-family: Roboto;
+}
+
+
+.navbar {
+    background: white;
+    padding: 2em;
+    
+    img.km-logo {
+        width: 150px;
+        float: left;
+        position: relative;
+        
+    }
+    
+    ul#nav_horizontal_list li {
+        list-style-type: none;
+        float: right;
+        display: inline;
+        padding-left:1em;
+
+    }    
+}
+
+img.mobile-menu {
+    display: none;
+}
+
+/*Login*/
+section.LoginSection {
+    padding: 200px 10px 100px 5px;
+    .container {
+        h2 {
+            padding-left: 20%;
+        }
+        .form-elements {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+            grid-template-areas:
+            "email-label email-input ."
+            "password-label password-input ."
+            ". form-group ."
+            ". form-check .";
+        }
+
+        .email-label {
+            grid-area: email-label;
+            padding-right: 3em;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .email-input {
+            grid-area: email-input;
+        }
+        .password-label {
+            grid-area: password-label;
+            padding-right: 3em;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .password-input{
+            grid-area: password-input;
+        }
+        .form-check {
+            grid-area: form-check;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .form-group {
+            grid-area: form-group;
+            display: flex;
+            justify-content: flex-end;
+            .submit-button1{
+                padding-top: .5em;
+            }
+        }
+    }
+}
+
+
+section.bottom-part {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    padding-bottom: 75px;
+
+}
+
+/* Register */
+section.RegisterSection {
+    padding: 200px 10px 100px 5px;
+    .container{
+        .form-elements{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+            grid-template-areas:
+            "email-label email-input ."
+            "password-label password-input ."
+            "confirm_password-label confirm_password-input ."
+            ". form-submit .";
+        }
+
+        .email-label {
+            grid-area: email-label;
+            padding-right: 3em;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .email-input {
+            grid-area: email-input;
+        }
+        .password-label {
+            grid-area: password-label;
+            padding-right: 3em;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .password-input {
+            grid-area: password-input;
+        }
+        .confirm_password-label {
+            grid-area: confirm_password-label;
+            padding-right: 3em;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .confirm_password-input {
+            grid-area: confirm_password-input;
+        }
+
+        .form-submit {
+            grid-area: form-submit;
+            display: flex;
+            justify-content: flex-end;
+            .submit-button1{
+                padding-top: .5em;
+            }
+        }
+
+
+    }
+}
+
+/* Reset Request */
+section.ResetPasswordSection {
+    padding: 200px 10px 100px 5px;
+    .container{
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        grid-template-areas:
+        ". form-group ."
+        ". form-submit .";
+    }
+    .form-group {
+        grid-area: form-group;
+        display: flex;
+        justify-content: flex-end;
+    }
+    .form-submit {
+        grid-area: form-submit;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+}
+
+/* Reset Token */
+section.EnterNewPasswordSection {
+    padding: 200px 10px 100px 5px;
+
+    .container {
+        .form-elements {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            grid-template-areas:
+            "password-label1 password-input1 ."
+            "confirm_password-label1 confirm_password-input1 ."
+            ". . form-submit";
+        }
+        .password-label1 {
+            grid-area: password-label1;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .password-input1 {
+            grid-area: password-input1;
+        }
+        .confirm_password-label1 {
+            grid-area: confirm_password-label1;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .confirm_password-input1 {
+            grid-area: confirm_password-input1;
+        }
+        .form-submit{
+            grid-area: form-submit;
+        }
+    }
+}
+
+/*Home*/
+
+/*Search*/
+section.search {
+    .container {
+        padding: 50px 10px 50px 5px;
+        background: rgb(190,190,190);
+        padding: 20px;
+        border-color:rgb(82, 82, 82);
+        border-style: solid;
+        border-radius: 1em;
+        width:85%;
+    }
+    .custom_search {
+        display: grid;
+        grid-template-columns: 20% 30% auto;
+    }
+    .custom_search div:nth-child(3n-2) {
+        justify-self: end;
+        padding-right: 2%;
+    }
+    .text_search_form {
+        width:100%;
+    }
+
+    .dict_search {
+        display: grid;
+        grid-template-columns: 20% 30% auto;
+    }
+    .dict_search div:nth-child(3n-2) {
+        justify-self: end;
+        padding-right: 2%;
+    }
+    .search_limit_form {
+        background: rgb(200,200,200);
+        padding-top: 1em;
+        padding-bottom: 1em;
+        padding-left:.2em;
+    }
+}
+
+
+.table_contents {
+    font-size: .7em;
+    background: rgb(190,190,190);
+    padding: 5px;
+    border-color:rgb(82, 82, 82);
+    border-style: solid;
+    border-radius: 1em;
+    
+    .td_characteristics {
+        height: 1.4em;
+        overflow:hidden;
+    }
+    .dash_id_button {
+        border-radius: .3em;
+        &:hover {
+            font-weight: bold;
+            background-color:rgb(82, 82, 82);
+        }
+    }
+}
+
+
+
+/*Dashboard*/
+section.dashboard {
+    h2 {
+        margin: 20px 0 0 20px;
+    }
+    .container {
+        padding: 50px 10px 50px 5px;
+        background: rgb(190,190,190);
+        padding: 20px;
+        border-color:rgb(82, 82, 82);
+        border-style: solid;
+        border-radius: 1em;
+        width:85%;
+    }
+    .above_dash {
+        display: flex;
+        justify-content: space-between;
+        padding-bottom:2em;
+    }    
+  
+    .investigation_entry_top {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(23rem, 1fr));
+        input {
+            height: 20px;
+            margin-left: 10px;
+            background:rgb(175, 175, 175);
+        }
+    }
+    .investigation_entry_top > * {
+        display: flex;
+        justify-content: flex-end;
+        .inv_attr_title_wider{
+            font-size:.9em;
+            text-align: right;
+        }
+        .wider_input{
+            width: 60%;
+            font-size: .75em;
+        }
+    }
+
+    .inv_subject {
+        display: flex;
+        padding-bottom:5px;
+        label { width: 15%}
+        input {width: 85%}
+    }
+    .inv_summary {
+        display: flex;
+        padding-bottom:5px;
+        label {width:15%}
+        textarea {width:85%}
+    }
+    .inv_km_notes {
+        display: flex;
+        padding-bottom:5px;
+        label {width:15%;}
+        textarea {width:85%;}
+            }
+    .investigation_entery_bottom {
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-areas:
+        "inv_files "
+        "km_categories"
+        "inv_update"
+        "inv_date_update";
+    }
+    .inv_files {grid-area: inv_files;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        height: 10em;
+        padding-left: 20px;
+        .file_input {
+            padding: 10px 0 0 0;
+        }
+        .remove-image {
+            display: none;
+            top: -10px;
+            right: -10px;
+            border-radius: 10em;
+            
+            padding: 1px 3px 1px;/*impact size*/
+            text-decoration: none;
+            font: 700 21px/20px sans-serif;
+            background: #555;
+            border: 3px solid #fff;
+            color: #FFF;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                -webkit-transition: background 0.5s;
+                transition: background 0.5s;
+                margin-left: 20px;
+            }
+            .remove-image:hover {
+                background: #E54E4E;
+                padding: 3px 7px 5px;
+                top: -11px;
+            right: -11px;
+            }
+            .remove-image:active {
+                background: #E54E4E;
+                top: -10px;
+            right: -11px;
+            }
+    }
+    .km_categories{
+        grid-area: km_categories;
+        background: tan;
+        padding: .5em;
+        border-color:rgb(82, 82, 82);
+        border-style: solid;
+        border-radius: 1em;
+    }
+    .km_categories_checkboxes{
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(10rem, 1fr));
+    }
+    .checkbox_group {
+        display:flex;
+    }
+    .checkbox_group > label {
+        text-align: left;
+    }
+    .inv_update {
+        grid-area: inv_update;
+        justify-self: end;
+        display: flex;
+        flex-direction: column;
+    }
+    .update_inv {
+        height: 30px;
+        border-radius: .3em;
+        background-color:rgb(75, 134, 223);
+        align-self: flex-end;
+    }
+    .verify_box_and_label {
+        display:flex;
+        justify-content: flex-end;
+    }
+    .verify_box_and_label > input {
+        cursor: pointer;
+        height: 25px;
+        margin-right: .3em;
+    }
+    .inv_date_update {grid-area: inv_date_update;
+        display: flex;
+        justify-content: flex-end;
+    }
+    .span_text {
+        color: rgb(130,130,130);
+    }
+    label {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        text-align: right;
+        margin-bottom: 5px;
+    }
+}
+
+/*Reports*/
+.download_group {
+    background: tan;
+    padding: .5em;
+    border-color:rgb(82, 82, 82);
+    border-style: solid;
+    border-radius: 1em;
+    margin-bottom: 1em;
+    
+}
+.download_group_inputs {
+    padding-left:2em;
+}
+.timestamp_group {
+    float: right;
+    margin-right: 5em;
+}
+.timestamp_input {
+    background:rgb(175, 175, 175);
+    text-align:center;
+}

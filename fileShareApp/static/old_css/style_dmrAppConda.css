@@ -1,0 +1,156 @@
+.navbar{padding: 2rem;
+background: rgb(200,200,200);}
+.navbar-brand{/*Logo*/}
+.navbar-toggler{/*The three lines signifying the navbar menue when the window width shrinks*/
+/*border: none;
+padding 10px 6px;
+outline: none;*/
+}
+body {
+  background-color: rgb(220,220,220);}
+
+.navbar-toggler span {/*if i want to format the top line*/
+/*display: block;
+width: 22px;*/
+}
+
+.lightPadding{padding-top:.5em;padding-left:1em;
+	padding-bottom:.5em;padding-right:1em;}
+
+/*.crop {
+	width: 200px;
+	height: 200px;
+	overflow: hidden;
+}*/
+
+.crop img {
+	/*width: 230px;*/
+	height: 230px;
+	margin:  -200px 0 -140px 0;/*top, _ bottom right left side*/
+    }
+
+/*index page */
+.div-box{ border-radius: .75em;
+	width: 90%;background-color: rgb(200,200,200); margin-left:2%;
+	 padding-top:.5em;padding-left:1em;padding-bottom:.5em;
+	 padding-right:1em;}
+.spacePageBorder{padding-left:5em;padding-right:5em;
+	padding-top:5em;padding-bottom:5em;}}
+
+/*data tools page*/
+.dataToolsGrid {display: grid;
+    grid-template-columns:5% 80% 1fr;
+    grid-template-areas:
+    ". security . "
+    ". bls ."
+    ". dla .";
+    grid-gap:.25em}
+.dataToolsGrid a {text-decoration:none;}
+.security {border-radius: .75em; grid-area: security;
+	padding-top:10px;background-color:rgb(176, 196, 222);}
+.bls { border-radius: .75em;grid-area: bls;
+	background-color:rgb(192, 192, 192)}
+.dla { border-radius: .75em;grid-area: dla;
+	background-color:rgb(176, 196, 222)}
+.p-dt{margin-left:2%; margin-right:2%; color:black}
+.h3-dt{margin-left:1%; color:black}
+
+/*getSts*/
+.getSts p {margin-left:1%;}
+.getStsBox {border-radius: .75em; background-color:rgb(210,180,140);
+	border-width:.2em;border-style:solid;
+	border-color:black;
+	width:75%; margin-left: 2%;}
+.getSts button {margin-left:2%;}
+.getStsBox textarea {width:80%;
+}
+
+.fileUploadInput{background-color:rgb(240,240,240);
+	border-radius: .25em; width:78%}
+
+/*priceindices*/
+.series_idCol{ width:15%;}
+.smallText{ font-size: 1em;
+ /* Give whatever width you want */
+white-space: normal !important;
+}
+.buttonCol{ width:10%;text-align: center;}
+.downloadIndexButton{ padding-top:2.5em;}
+.clearButton{ padding-top:2.5em;}
+.clearButton button{background-color:rgb(200, 200, 200)}
+.addHeader{text-align: center;}
+.metaSection { border-radius: .75em;
+	background-color:rgb(200, 200, 200);width:70%}
+
+.checkboxBoarder input{margin-left:2%;}
+.periodictySection { border-radius: .75em;
+	background-color:rgb(200, 200, 200);width:70%}
+.textareaCaption{ margin:0;}
+.title {float: left;}
+.pageLink{float: right;}
+.heading1{font-size: 1.3em;}
+.heading2 {float: left;  position:absolute;
+  bottom:0;}
+
+/*CAGE code Search*/
+.cageBox {border-radius: .75em; background-color:rgb(210,180,140);
+	border-width:.2em;border-style:solid;
+	border-color:black;
+	width:75%; margin-left: 2%;
+	padding-bottom:3em;}
+.exactCheck{margin-left: 15%;float: left;}
+.exactCheck label {text-align: center;}
+/*.cageBox row {padding:0px; padding-bottom:0px;line-height:.2em;}
+*/
+.cageRow {padding:0px; padding-bottom:0px;
+line-height:.2em; height: .5em; vertical-align: bottom;}
+.cageButton{float: right;}
+.criteriaLabel{float: right;}
+.greyButton button{background-color:rgb(200, 200, 200);
+float: right;}
+
+
+/*Blog*/
+.blogTitle{}
+.blogHeading1{}
+.blogHeading1 h2{color: rgb(170, 170, 170);}
+.blogHeading1 h4{color: rgb(120, 160, 170);}
+.sectionWriting {padding:1em; /*background-color:rgb(180, 180, 0)*/}
+.sectionVideo{}
+.tocList{ }
+.codeBackground{background-color:rgb(180, 180, 180);
+width:80%; padding:.5em;}
+/*.testCode{padding:1em;background-color:rgb(0, 0, 180)}*/
+
+
+
+
+/* PARKING LOT - OLD SITE
+
+.h1-index{margin-left:0%}
+.h3-index{margin-bottom:1px}
+.p-index{margin-left:4%; margin-top:1px; margin-bottom:1px}
+.img-index{ margin-left:10%; border:0; }
+#nav-bar{
+    position: sticky;
+    top:0;
+    z-index:10}
+
+body{width: 60%; margin-left:4%;}
+
+.container1 {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.h2-cage{margin-left:2%}
+.p-cage{margin-left:4%; background-color:#B0C4DE}
+.button-cage{margin-left:2%}
+*/

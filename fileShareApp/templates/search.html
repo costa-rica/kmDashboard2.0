@@ -1,0 +1,212 @@
+{% extends "layout.html" %}
+{% block title %} Home {% endblock %}
+{% block main %}
+            
+<section class="search" id="search">
+    <div class="container">
+        
+        <form method="POST" action="" enctype="multipart/form-data">
+        
+            <h4>Search Criteria</h4>
+            <div class="rows_search_form">
+
+                <div class="dict_search">
+                    {% for db_name, criteria in column_names_dict.items() %}
+                        {% if db_name in ('id','ODATE', 'CDATE','YEAR') %}
+                            <div class="label_search_form">
+                                {{ criteria }}
+                            </div>
+                            {% if db_name == 'id' %}
+                            <div class="text_search_form">
+                                <input type="text" class="" name="{{ 'sc_' + db_name }}" 
+                                    value= "{{ search_criteria_dictionary.get(db_name).0 }}">
+                            </div>
+                            {% elif db_name == 'YEAR' %}
+                                <div class="text_search_form">
+                                    <input type="text" class="" name="{{ 'sc_' + db_name }}" placeholder="YYYY"
+                                        value= "{{ search_criteria_dictionary.get(db_name).0 }}">
+                                </div>
+                            {% else %}
+                                <div class="text_search_form">
+                                    <input type="text" class="" name="{{ 'sc_' + db_name }}" placeholder="YYYY-MM-DD"
+                                        value= "{{ str(search_criteria_dictionary.get(db_name).0)[:10] }}">
+                                </div>
+                            {% endif %}<!--if criteria in ('id','ODATE', 'CDATE','YEAR'); if criteria == 'id'; elif criteria == 'YEAR'-->
+                            <div class="checkbox_search_form">
+                            {% if search_criteria_dictionary.get(db_name).1 == "less_than" %}
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" checked=true> Less Than
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact Match
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" > Greater Than
+                            {% elif search_criteria_dictionary.get(db_name).1 == "greater_than" %}
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" > Less Than
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact Match
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" checked=true> Greater Than                           
+                            {% else %}
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than"> Less Than
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact Match
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than"> Greater Than
+                            {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "less_than"; get(criteria).1 == "greater_than" -->
+                            </div>
+                        
+                        {% else %}
+                            <div class="label_search_form">
+                                {{ criteria }}
+                            </div>
+                            
+                            {% if db_name == 'MAKE' %}
+                            <div class="text_search_form">
+                                <input type="text" class="text_input" name="{{ 'sc_' + db_name }}"  list="makeList"
+                                    value= "{{ search_criteria_dictionary.get(db_name).0 }}">
+                                <datalist id="makeList">
+                                    {% for i in make_list %}
+                                        <option>{{ i }}</option>
+                                    {% endfor %}
+                                </datalist>
+                            </div>
+                            {% else %}
+                            <div class="text_search_form">
+                                <input type="text" class="" name="{{ 'sc_' + db_name }}" 
+                                    value= "{{ search_criteria_dictionary.get(db_name).0 }}">
+                            </div>
+                            {% endif %}<!--if criteria == 'MAKE'-->
+
+                            <div class="checkbox_search_form">
+                            {% if search_criteria_dictionary.get(criteria).1 == "exact" %}
+                                <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact Match
+                                {% else %}
+                                <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact"> Exact Match
+                            {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "exact"-->
+                            </div>
+                        {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->
+                    {% endfor %}<!-- { for criteria in column_names } -->
+                    
+                </div>
+
+                <div class="search_button">
+                    <input type="submit" name="refine_search_button" value="Refine Search">
+                </div>
+            </div>
+            
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
+                Save Search
+            </button>
+
+
+            <!-- Save Search Modal -->
+            <div class="modal fade" id="saveSearchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+            
+                    <div class="save_search_form">
+                        <label for="save_search_name">Name for query:</label>
+                        <input type="text" name="save_search_name" id="save_search_name">
+                        
+                    </div>
+            
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nevermind</button>
+                    <button type="submit" class="btn btn-primary" name="save_query_button"
+                    value="save_query">Save query</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <div class="search_limit_form">
+                Current search record count: {{ investigation_count }} 
+                <div>
+                    Limit size of loaded records: <input type="text" class="" name="search_limit" 
+                    value= "{{ search_limit }}" placeholder="I'll take my chances...">
+                </div>
+                <div>
+                    {% if disable_load_previous %}
+                    <input type="submit" name="load_previous" value="Load Previous" disabled>
+                    {% else %}
+                    <input type="submit" name="load_previous" value="Load Previous">
+                    {% endif %}
+                    {% if disable_load_next %}
+                    <input type="submit" name="load_next" value="Load Next" disabled>
+                    {% else %}
+                    <input type="submit" name="load_next" value="Load Next">
+                    {% endif %}
+                    {{ loaded_dict[investigation_data_list_page] }}
+                
+                
+                </div>
+
+            </div>
+
+            
+        </form>
+    </div>
+</section>
+
+
+
+<section class="investigation_table">
+    <div class="container">
+        <form method="POST" action="" enctype="multipart/form-data">
+        {% if no_hits_flag %}
+        No Investigations found with selected criteria
+        {% else %}
+            <div class="table_contents">
+                <table id="example" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Dash Id</th>
+                            {% for name in column_names %}
+                                {% if name=='NHTSA_ACTION_NUMBER' %}
+                                    <th>NHTSA Action Number</th>
+                                {% elif name!='id' %}
+                                    <th>{{name}}</th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in table_data %}
+                        <tr>
+                            <td><input type="submit" class="dash_id_button"
+                                name="view" value="{{ row[column_names[0]] }}"></td>
+                            {% for index in range(1,len(column_names)) %}
+                                <td ><div class="td_characteristics">
+                                    {{ row[column_names[index]] }}
+                                </div></td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+            
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        </form>
+    </div>
+</section>
+
+
+    
+<!--Source of datatable: https://datatables.net/examples/styling/bootstrap5.html -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script language="JavaScript" type="text/javascript" src="../static/js/jquery-3.5.1.js"></script>
+<script language="JavaScript" type="text/javascript" src="../static/js/jquery.dataTables.min.js"></script>
+<script language="JavaScript" type="text/javascript" src="../static/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- for modals-->
+<script src="../static/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#example').DataTable();
+    } );
+
+    
+</script>
+{% endblock %}

@@ -1,0 +1,201 @@
+from flask import Blueprint
+from flask import render_template, url_for, redirect, flash, request, abort, session,\
+    Response, current_app, send_from_directory
+from fileShareApp import db, bcrypt, mail
+from fileShareApp.models import Post, User, Investigations
+# from fileShareApp.main.forms import EmployeeForm, AddRestaurantForm, DatabaseForm, AddRoleForm
+from flask_login import login_user, current_user, logout_user, login_required
+import secrets
+import os
+from PIL import Image
+from datetime import datetime, date, time
+import datetime
+from sqlalchemy import func, desc
+import pandas as pd
+import io
+from wsgiref.util import FileWrapper
+import xlsxwriter
+from flask_mail import Message
+# from fileShareApp.main.utils 
+from fileShareApp.buckets.utils import queryToDict, updateInvestigation, \
+    search_criteria_dictionary_util, investigations_query_util
+import openpyxl
+from werkzeug.utils import secure_filename
+import json
+import glob
+import ast
+from fileShareApp.custom_dict import doubleQuoteDict
+# from flask_login import login_user, current_user, logout_user, login_required
+
+buckets = Blueprint('buckets', __name__)
+
+
+
+@buckets.route("/home", methods=["GET","POST"])
+@login_required
+def home():
+    print('*TOP OF def home()*')
+    print('request.kwargs:::',type(request.args),request.args)
+    print('request.args dictionary:::',request.args.to_dict())
+    formDict = request.form.to_dict()
+    print('reqeust.form:::',formDict)
+    #all
+    column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
+        'ODATE','CDATE','CAMPNO','SUBJECT']
+
+    #view, search, update
+    # sc_dictionary=request.args.get('query_file_name')
+
+    #login
+    # if sc_dictionary==None:
+        # sc_dictionary={"MAKE": ["KIA", "exact"]}
+        # with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'search_query_dict.txt'),'w') as dict_file:
+            # json.dump(sc_dictionary,dict_file)
+
+    
+
+    if request.args.get('query_file_name'):
+        query_file_name=request.args.get('query_file_name')
+        print('request.args exists::::',request.args.get('query_file_name'))
+    else:
+        query_file_name= 'query00000.txt'
+
+
+    #all
+    investigations_query, search_criteria_dictionary = investigations_query_util(query_file_name)
+    no_hits_flag = False
+
+    #if the submitted query has zero hits, do default and send flash
+    if len(investigations_query) ==0:
+        no_hits_flag = True
+        investigations_query, search_criteria_dictionary = investigations_query_util('query00000.txt')
+
+    # print('query_file_name::::', query_file_name)
+    # with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name)) as json_file:
+        # search_criteria_dictionary=json.load(json_file)
+    
+    #all
+    #make search_criteria_dict complete with empty values for keys not searched
+    for i in column_names:
+        if i not in search_criteria_dictionary:
+            search_criteria_dictionary[i]=""
+    
+    print('investigations_query:::',investigations_query, 'no_hits_flag:::', no_hits_flag)
+    
+    #view, update
+    print('$$$$this should be a number:',request.args.get('inv_id_for_dash'))
+    if request.args.get('inv_id_for_dash'):
+        inv_id_for_dash = request.args.get('inv_id_for_dash')
+        dash_inv= db.session.query(Investigations).get(inv_id_for_dash)
+        print('dash_inv::::', type(dash_inv), dash_inv)
+        # for x in investigations_query:
+            # print('x in investigations_query is:::',type(x.id), x.id)
+            # if str(x.id) == inv_id_for_dash:
+                # dash_inv =x 
+        # print('request.args.get inv_id_for_dash')
+        
+    #login, search
+    else:
+        dash_inv=investigations_query[0]
+        inv_id_for_dash=dash_inv.id
+
+    #all
+    if dash_inv.files != '':
+        if (",") in dash_inv.files:
+            file_list=dash_inv.files.split(",")
+        elif ("[") in dash_inv.files:
+            dash_inv_files = ast.literal_eval(dash_inv.files)
+            file_list=dash_inv_files
+        else:
+            file_list=[]
+            file_list.append(dash_inv.files)
+
+        dash_inv_list = [dash_inv.NHTSA_ACTION_NUMBER,dash_inv.MAKE,dash_inv.MODEL,dash_inv.YEAR,
+            dash_inv.COMPNAME, dash_inv.MFR_NAME, dash_inv.ODATE.date(), dash_inv.CDATE.date(), dash_inv.CAMPNO,
+            dash_inv.SUBJECT, dash_inv.SUMMARY, dash_inv.km_notes, dash_inv.date_updated.date(), file_list]
+    elif no_hits_flag == True:
+        dash_inv_list=['','','','','','','','','','','','','','','','','','','']
+        inv_id_for_dash='no investigations found'
+    else:
+        dash_inv_list = [dash_inv.NHTSA_ACTION_NUMBER,dash_inv.MAKE,dash_inv.MODEL,dash_inv.YEAR,
+            dash_inv.COMPNAME, dash_inv.MFR_NAME, dash_inv.ODATE.date(), dash_inv.CDATE.date(), dash_inv.CAMPNO,
+            dash_inv.SUBJECT, dash_inv.SUMMARY, dash_inv.km_notes, dash_inv.date_updated.date(), dash_inv.files]
+    
+    #all
+    #Make investigations to dictionary for bit table bottom of home screen
+    investigations_data = queryToDict(investigations_query, column_names)#List of dicts each dict is row
+
+    #all
+    #make make_list drop down options
+    with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'make_list.txt')) as json_file:
+        make_list=json.load(json_file)
+        json_file.close()
+        
+    if request.method == 'POST':
+        formDict = doubleQuoteDict(request.form)
+        argsDict = request.args.to_dict()
+        filesDict = request.files.to_dict()
+        print('requst.method=== -POST')
+        if formDict.get('view'):
+            print('@@@@@2VIEW')
+            return redirect(url_for('buckets.home', inv_id_for_dash=formDict.get('view'),
+                query_file_name=query_file_name))
+        elif no_hits_flag == True:
+            print('@@@@@@@no_hits_fla')
+            flash('Your query returned no new results. Below is default query.', 'warning')
+            return redirect(url_for('buckets.home', query_file_name=query_file_name))
+        elif formDict.get('search_filter_button'):
+            print('@@@@@@ search_filter_button')
+            query_file_name = search_criteria_dictionary_util(formDict)
+            return redirect(url_for('buckets.home', query_file_name=query_file_name))
+        elif formDict.get('update_inv'):
+            print('@@@@@@route - updateInvestigation')
+            # print('argsDict:::',len(argsDict),argsDict)
+            # print('formDict::::', len(formDict),formDict)
+            if len(argsDict)==0 and len(formDict)>0:
+                print('@@@@this should execute@@@')
+                updateInvestigation(formDict, inv_id_for_dash=inv_id_for_dash)
+            elif len(argsDict)>0 and len(formDict)==0:
+                print('NOT THIS&&&&&')
+                updateInvestigation(argsDict)
+            else:
+                print('*****unexpected case of argsDict and formDict lengths***')
+                print('lengths arre, args: ',len(argsDict),'form: ',len(formDict))
+            if request.files.get('investigation_file'):
+                uploaded_file = request.files['investigation_file']
+                uploaded_file.save(os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],uploaded_file.filename))
+                existing_data = db.session.query(Investigations).get(argsDict['inv_id_for_dash'])
+                if dash_inv.files =='':
+                    file_list = uploaded_file.filename
+                else:
+                    file_list=dash_inv.files +',' + uploaded_file.filename
+                
+                dash_inv.files=str(file_list)
+                db.session.commit()
+            return redirect(url_for('buckets.home', inv_id_for_dash=inv_id_for_dash,
+                query_file_name=query_file_name))
+
+    return render_template('home_dashboard.html', table_data = investigations_data, column_names=column_names,
+        len=len, dash_inv_list=dash_inv_list, inv_id_for_dash=inv_id_for_dash, make_list = make_list,
+        query_file_name=query_file_name, search_criteria_dictionary=search_criteria_dictionary)
+
+
+
+
+@buckets.route("/delete_file/<inv_id_for_dash>/<filename>", methods=["GET","POST"])
+# @posts.route('/post/<post_id>/update', methods = ["GET", "POST"])
+@login_required
+def delete_file(inv_id_for_dash,filename):
+    dash_inv =db.session.query(Investigations).get(inv_id_for_dash)
+    print('delete_file route - dash_inv::::',dash_inv.files)
+    if (",") in dash_inv.files:
+        file_list=dash_inv.files.split(",")
+        file_list.remove(filename)
+        print('file_list::::', file_list)
+        dash_inv.files=str(file_list)
+    else:
+        dash_inv.files=''
+    db.session.commit()
+    flash('file has been deleted!', 'success')
+    return redirect(url_for('buckets.home', inv_id_for_dash=inv_id_for_dash))
+        

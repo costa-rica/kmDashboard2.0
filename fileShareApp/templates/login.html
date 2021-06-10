@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block title %} Login {% endblock %}
+{% block main %}
+    <section class="LoginSection">
+        <div class="container">
+
+            <h2>Login Here</h2>
+
+            
+            <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    <div class="form-elements">
+
+                        <div class="email-label">
+                            {{ form.email.label(class="") }}
+                        </div>
+                        <div class="email-input">
+                            {% if form.email.errors %}
+                            {{ form.email(class="") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            {{ form.email(class="") }}
+                            {% endif %}
+                        </div>
+
+
+                        <div class="password-label">
+                            {{ form.password.label(class="") }}
+                        </div>
+                        <div class="password-input">
+                            {% if form.password.errors %}
+                            {{ form.password(class="") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            {{ form.password(class="") }}
+                            {% endif %}
+                        </div>
+
+
+                    <div class="form-check">
+                        {{ form.remember(class="form-check-input") }}
+                        {{ form.remember.label(class="form-check-label") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.submit(class="submit-button1") }}
+                        <small class="text-muted blacktext">
+                            <a href="{{ url_for('users.reset_password') }}">forgot password?</a>
+                        </small>
+                    </div>
+                </div>
+
+
+
+
+            </form>
+            
+            
+        </div>
+    </section>
+
+
+
+    <section class="bottom-part">
+        
+            <hr>
+            <a href="{{ url_for('users.register') }}">Register</a>
+        
+    </section>
+
+    {% endblock %}
