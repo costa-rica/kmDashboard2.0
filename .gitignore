@@ -5,3 +5,4 @@ fileShareApp/__pycache__/
 *.xlsx
 awsVmSockMethod/
 *log.txt
+investigations_recall_files/

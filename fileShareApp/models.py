@@ -5,7 +5,6 @@ from flask import current_app
 from flask_login import UserMixin
 
 from flask_script import Manager
-# from flask_migrate import Migrate, MigrateCommand
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -14,7 +13,6 @@ def load_user(user_id):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    # username=db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     image_file = db.Column(db.String(100),nullable=False, default='default.jpg')
     password = db.Column(db.String(100), nullable=False)
@@ -22,12 +20,10 @@ class User(db.Model, UserMixin):
     permission = db.Column(db.Text)
     theme = db.Column(db.Text)
     posts = db.relationship('Post', backref='author', lazy=True)
-    km_tracking = db.relationship('Kmtracking', backref='updator', lazy=True)
-    query_string = db.relationship('Km_saved_queries', backref='query_creator', lazy=True)
-    # sharedfile = db.relationship('Sharedfile', backref='fileauthor', lazy=True)
-    # dmrsEntry = db.relationship('Dmrs', backref='dmrUser', lazy=True)
-    # shiftsEntry = db.relationship('Shifts', backref='dmrShiftUser', lazy=True)
-    # employeeId = db.relationship('Employees', backref='employeeUser', lazy=True)
+    track_inv = db.relationship('Tracking_inv', backref='inv_updator', lazy=True)
+    track_re = db.relationship('Tracking_inv', backref='inv_updator', lazy=True)
+    query_string_inv = db.relationship('Saved_queries_inv', backref='inv_query_creator', lazy=True)
+    query_string_re = db.relationship('Saved_queries_re', backref='re_query_creator', lazy=True)
 
     def get_reset_token(self, expires_sec=1800):
         s=Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -73,23 +69,16 @@ class Investigations(db.Model):
     km_notes=db.Column(db.Text)
     date_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
     files = db.Column(db.Text)
-    km_tracking_id = db.relationship('Kmtracking', backref='update_record', lazy=True)
-    checkbox_0=db.Column(db.String(10))
-    checkbox_1=db.Column(db.String(10))
-    checkbox_2=db.Column(db.String(10))
-    checkbox_3=db.Column(db.String(10))
-    checkbox_4=db.Column(db.String(10))
-    textbox_1=db.Column(db.String(100))
-    textbox_2=db.Column(db.String(100))
-    textbox_3=db.Column(db.String(100))
-    textbox_4=db.Column(db.String(100))
+    categories=db.Column(db.Text)
+    km_tracking_id = db.relationship('Tracking_inv', backref='update_inv_record', lazy=True)
+    
 
     def __repr__(self):
-        return f"Sharedfile('{self.id}',NHTSA_ACTION_NUMBER:'{self.NHTSA_ACTION_NUMBER}'," \
+        return f"Investigations('{self.id}',NHTSA_ACTION_NUMBER:'{self.NHTSA_ACTION_NUMBER}'," \
         f"'SUBJECT: {self.SUBJECT}', ODATE: '{self.ODATE}', CDATE: '{self.CDATE}')"
     
 
-class Kmtracking(db.Model):
+class Tracking_inv(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     field_updated = db.Column(db.Text)
     updated_from = db.Column(db.Text)
@@ -99,10 +88,10 @@ class Kmtracking(db.Model):
     investigations_table_id=db.Column(db.Integer, db.ForeignKey('investigations.id'), nullable=False)
     
     def __repr__(self):
-        return f"Kmtracking(investigations_table_id: '{self.investigations_table_id}'," \
+        return f"Tracking_inv(investigations_table_id: '{self.investigations_table_id}'," \
         f"field_updated: '{self.field_updated}', updated_by: '{self.updated_by}')"
 
-class Km_saved_queries(db.Model):
+class Saved_queries_inv(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     query_name = db.Column(db.Text)
     query = db.Column(db.Text)
@@ -112,3 +101,67 @@ class Km_saved_queries(db.Model):
     def __repr__(self):
         return f"Km_saved_queries(id: '{self.id}', 'query_name: '{self.query_name}'," \
         f"query_creator_id: '{self.created_by}')"
+
+
+class Recalls(db.Model):
+    RECORD_ID = db.Column(db.Integer, primary_key=True)
+    CAMPNO=db.Column(db.Text)
+    MAKE=db.Column(db.Text)
+    MODEL=db.Column(db.Text)
+    YEAR=db.Column(db.Integer)
+    MFGCAMPNO=db.Column(db.Text)
+    COMPNAME=db.Column(db.Text)
+    MFR_NAME=db.Column(db.Text)
+    BGMAN =db.Column(db.Date, nullable=True)
+    ENDMAN =db.Column(db.Date, nullable=True)
+    RCLTYPECD=db.Column(db.Text)
+    POTAFF=db.Column(db.Float)
+    ODATE=db.Column(db.Date, nullable=True)
+    INFLUENCED_BY=db.Column(db.Text)
+    MRGTXT=db.Column(db.Text)
+    RCDATE=db.Column(db.Date, nullable=True)
+    DATEA=db.Column(db.Date,nullable=True)
+    RPNO=db.Column(db.Text)
+    FMVSS=db.Column(db.Text)
+    DESC_DEFECT=db.Column(db.Text)
+    CONSEQUENCE_DEFECT=db.Column(db.Text)
+    CORRECTIVE_ACTION=db.Column(db.Text)
+    NOTES=db.Column(db.Text)
+    RCL_CMPT_ID=db.Column(db.Text)
+    km_notes=db.Column(db.Text)
+    date_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    files = db.Column(db.Text)
+    categories=db.Column(db.Text)
+    km_tracking_id = db.relationship('Tracking_rec', backref='update_re_record', lazy=True)
+    
+
+    def __repr__(self):
+        return f"Recalls('{self.RECORD_ID}',MAKE:'{self.MAKE}'," \
+        f"'Component Name: {self.COMPNAME}', Manuf Name: '{self.MFGNAME}', Recall Date: '{self.RECDATE}')"
+
+    
+
+class Tracking_re(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    field_updated = db.Column(db.Text)
+    updated_from = db.Column(db.Text)
+    updated_to = db.Column(db.Text)
+    updated_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    recall_table_id=db.Column(db.Integer, db.ForeignKey('recall.RECORD_ID'), nullable=False)
+    
+    def __repr__(self):
+        return f"Tracking_re(id: '{self.id}'," \
+        f"field_updated: '{self.field_updated}', updated_by: '{self.updated_by}')"
+
+class Saved_queries_re(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    query_name = db.Column(db.Text)
+    query = db.Column(db.Text)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    used_count =db.Column(db.Integer)
+    
+    def __repr__(self):
+        return f"Km_saved_queries(id: '{self.id}', 'query_name: '{self.query_name}'," \
+        f"query_creator_id: '{self.created_by}')"
+
