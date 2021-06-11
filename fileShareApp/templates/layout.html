@@ -47,7 +47,7 @@
                     {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('users.logout') }}">Logout</a></li>
                     
-                    <li><a href="{{ url_for('main.reports') }}">Reports</a></li>
+                    <li><a href="{{ url_for('dashboards.reports') }}">Reports</a></li>
                     <li><a href="{{ url_for('main.search') }}">Search</a></li>
                     <li><a href="{{ url_for('main.home') }}">Home</a></li>
                     {% else %}

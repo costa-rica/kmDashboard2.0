@@ -6,3 +6,4 @@ fileShareApp/__pycache__/
 awsVmSockMethod/
 *log.txt
 investigations_recall_files/
+fileShareApp/static/files/

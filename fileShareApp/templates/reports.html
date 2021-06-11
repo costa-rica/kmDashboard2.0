@@ -14,14 +14,14 @@
                 <h5>Investigations Spreadsheet Report</h5>
                 <div class='download_group_inputs'>
                     <div>
-                        <input type="submit" name="build_excel_report" value="Build Excel Report"/>[~2mins]
+                        <input type="submit" name="build_excel_report" value="Build Excel Report"/>
                         <div class="timestamp_group">
                             Availible file time stamp: <input type="text" class="timestamp_input"  value="{{ time_stamp }}" readonly>
                         </div>
                         
                     </div>
                     <div>
-                        <a href="{{ url_for('main.investigation_categories', excel_file_name=excel_file_name) }}">Download</a> 
+                        <a href="{{ url_for('dashboards.investigation_categories', excel_file_name=excel_file_name) }}">Download</a> 
                     </div>
                     <i>Due to the time it takes to make the excel file, the creating and downloading processes are seperated. Click 'Build Excel Report'
                         to make the file. Then 'Download' to download the file. The time stamp is availible for the user to determine if a new report
@@ -33,7 +33,7 @@
             
             <div class='download_group'>
                 <h5>Investigation Files</h5>
-                <a href="{{ url_for('main.files_zip') }}">Download Investigation Files</a> 
+                <a href="{{ url_for('dashboards.files_zip') }}">Download Investigation Files</a> 
             </div>
 
         </form>

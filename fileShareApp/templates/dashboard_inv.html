@@ -69,7 +69,7 @@
                         <a href="{{ url_for('static', filename='files/' + file ) }}"> {{ file }} </a>
                         <!--https://codepen.io/eliorivero/pen/zEFqb-->
                         <a class="remove-image" 
-                        href="{{ url_for('main.delete_file', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 
+                        href="{{ url_for('dashboards.delete_file', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 
                         style="display: inline;">&#215;</a>
                         <br/>
                         {% endfor %}
