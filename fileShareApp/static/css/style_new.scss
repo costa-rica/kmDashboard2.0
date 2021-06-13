@@ -220,13 +220,11 @@ section.search {
         border-radius: 1em;
         width:85%;
     }
-    .recalls_search_heading  {
+    .search_heading_inv  {
         b {color: rgb(214, 116, 36);}
-        
-        /*
-        width:30%;
-        border-radius: 1em;
-        padding-left: 2em;*/
+    }
+    .search_heading_re  {
+        b {color: rgb(235, 97, 43);}
     }
     .custom_search {
         display: grid;

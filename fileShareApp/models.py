@@ -148,7 +148,7 @@ class Tracking_re(db.Model):
     updated_to = db.Column(db.Text)
     updated_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    recall_table_id=db.Column(db.Integer, db.ForeignKey('recalls.RECORD_ID'), nullable=False)
+    recalls_table_id=db.Column(db.Integer, db.ForeignKey('recalls.RECORD_ID'), nullable=False)
     
     def __repr__(self):
         return f"Tracking_re(id: '{self.id}'," \

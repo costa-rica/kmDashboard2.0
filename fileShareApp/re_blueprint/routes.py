@@ -46,8 +46,8 @@ re_blueprint = Blueprint('re_blueprint', __name__)
 @re_blueprint.route("/search_recalls", methods=["GET","POST"])
 @login_required
 def search_recalls():
-    print('*TOP OF def search_investigations()*')
-    logger.info('in search_investigations page')
+    print('*TOP OF def search_recalls()*')
+    logger.info('in search_recalls page')
 
 
     # column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
@@ -61,6 +61,9 @@ def search_recalls():
        'COMPNAME', 'MFGNAME', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
        'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
        'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
+    # column_names=['RECORD_ID', 'CAMPNO', 'MAKETXT', 'MODELTXT', 'YEAR', 'MFGCAMPNO',
+       # 'COMPNAME', 'MFGNAME', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
+       # 'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA']
     column_names_dict={'RECORD_ID':'Record ID','CAMPNO':'Recall Campaign Number','MAKETXT':'Make',
         'MODELTXT':'Model','YEAR':'Year', 'COMPNAME':'Component Name',
         'MFGNAME':'Manufacturer Name',
@@ -69,7 +72,7 @@ def search_recalls():
         # 'ENDMAN':'ENDMAN',
         # 'RCLTYPECD':'RCLTYPECD',
         # 'POTAFF':'POTAFF',
-        # 'ODATE':'ODATE',
+        'ODATE':'ODATE',
         # 'INFLUENCED_BY':'INFLUENCED_BY',
         # 'MFGTXT':'MFGTXT',
         # 'RCDATE':'RCDATE',
@@ -95,7 +98,7 @@ def search_recalls():
             no_hits_flag = True        
 
     
-    #Make investigations to dictionary for bit table bottom of home screen
+    #Make recalls to dictionary for bit table bottom of home screen
     recalls_data = queryToDict(recalls_query, column_names)#List of dicts each dict is row
     
     #break data into smaller lists to paginate if number of returns greatere than inv_count_limit
@@ -180,13 +183,14 @@ def search_recalls():
                 investigation_data_list_page=investigation_data_list_page,
                 search_limit=search_limit))            
         elif formDict.get('view'):
-            inv_id_for_dash=formDict.get('view')
-            return redirect(url_for('re_blueprint.investigations_dashboard',inv_id_for_dash=inv_id_for_dash))
+            re_id_for_dash=formDict.get('view')
+            return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
             
-    # print('3investigation_data_list:::', len(investigation_data_list), 'page::',investigation_data_list_page)
+    print('length of column names:::',len(column_names))
+    print('length of table data row 1:::', len(investigation_data_list[int(investigation_data_list_page)][0]))
     print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
     return render_template('search_recalls.html',table_data = investigation_data_list[int(investigation_data_list_page)], 
-        column_names_dict=column_names_dict, column_names=column_names[:11],
+        column_names_dict=column_names_dict, column_names=column_names,
         len=len, make_list = make_list, query_file_name=query_file_name,
         search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
         investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
@@ -198,18 +202,18 @@ def search_recalls():
 
 
 
-@re_blueprint.route("/investigations_dashboard", methods=["GET","POST"])
+@re_blueprint.route("/recalls_dashboard", methods=["GET","POST"])
 @login_required
-def investigations_dashboard():
+def recalls_dashboard():
     print('*TOP OF def dashboard()*')
     
     #view, update
-    if request.args.get('inv_id_for_dash'):
-        print('request.args.get(inv_id_for_dash, should build verified_by_list')
-        inv_id_for_dash = int(request.args.get('inv_id_for_dash'))
-        dash_inv= db.session.query(Investigations).get(inv_id_for_dash)
-        verified_by_list =db.session.query(Tracking_inv.updated_to, Tracking_inv.time_stamp).filter_by(
-            investigations_table_id=inv_id_for_dash,field_updated='verified_by_user').all()
+    if request.args.get('re_id_for_dash'):
+        print('request.args.get(re_id_for_dash, should build verified_by_list')
+        re_id_for_dash = int(request.args.get('re_id_for_dash'))
+        dash_re= db.session.query(Recalls).get(re_id_for_dash)
+        verified_by_list =db.session.query(Tracking_re.updated_to, Tracking_re.time_stamp).filter_by(
+            recalls_table_id=re_id_for_dash,field_updated='verified_by_user').all()
         verified_by_list=[[i[0],i[1].strftime('%Y/%m/%d %#I:%M%p')] for i in verified_by_list]
         print('verified_by_list:::',verified_by_list)
     else:
@@ -222,29 +226,29 @@ def investigations_dashboard():
         checkbox_verified = ''
     
     #FILES This turns the string in files column to a list if something exists
-    if dash_inv.files=='':
-        dash_inv_files=''
+    if dash_re.files=='':
+        dash_re_files=''
     else:
-        dash_inv_files=dash_inv.files.split(',')
+        dash_re_files=dash_re.files.split(',')
     
     #Categories
-    if dash_inv.categories=='':
-        dash_inv_categories=''
+    if dash_re.categories=='':
+        dash_re_categories=''
     else:
-        dash_inv_categories=dash_inv.categories.split(',')
-        dash_inv_categories=[i.strip() for i in dash_inv_categories]
-        print('dash_inv_categories:::',dash_inv_categories)
+        dash_re_categories=dash_re.categories.split(',')
+        dash_re_categories=[i.strip() for i in dash_re_categories]
+        print('dash_re_categories:::',dash_re_categories)
     
-    dash_inv_list = [dash_inv.NHTSA_ACTION_NUMBER,dash_inv.MAKE,dash_inv.MODEL,dash_inv.YEAR,
-        dash_inv.ODATE.strftime("%Y-%m-%d"),dash_inv.CDATE.strftime("%Y-%m-%d"),dash_inv.CAMPNO,
-        dash_inv.COMPNAME, dash_inv.MFR_NAME, dash_inv.SUBJECT, dash_inv.SUMMARY,
-        dash_inv.km_notes, dash_inv.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_inv_files,
-        dash_inv_categories]
+    dash_re_list = [dash_re.RECORD_ID,dash_re.MAKETXT,dash_re.MODELTXT,dash_re.YEAR,
+        dash_re.ODATE.strftime("%Y-%m-%d"),dash_re.MFGCAMPNO,dash_re.RCLTYPECD,
+        dash_re.COMPNAME, dash_re.MFGNAME, dash_re.CONSEQUENCE_DEFCT, dash_re.CORRECTIVE_ACTION,
+        dash_re.km_notes, dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files,
+        dash_re_categories]
     
     #Make lists for investigation_entry_top
-    inv_entry_top_names_list=['NHTSA Action Number','Make','Model','Year','Open Date','Close Date',
+    re_entry_top_names_list=['NHTSA Action Number','Make','Model','Year','Open Date','Close Date',
         'Recall Campaign Number','Component Description','Manufacturer Name']
-    inv_entry_top_list=zip(inv_entry_top_names_list,dash_inv_list[:9])
+    re_entry_top_list=zip(re_entry_top_names_list,dash_re_list[:9])
     
     #make dictionary of category lists from excel file
     categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
@@ -268,61 +272,61 @@ def investigations_dashboard():
             print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
             # print('filesDict::::',filesDict)
-            updateInvestigation(formDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
+            updateInvestigation(formDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
 
             if request.files.get('investigation_file'):
                 #updates file name in database
-                updateInvestigation(filesDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
+                updateInvestigation(filesDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
                 
                 #SAVE file in dir named after NHTSA action num _ dash_id
                 uploaded_file = request.files['investigation_file']
-                current_inv_files_dir_name = dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
+                current_inv_files_dir_name = dash_re.NHTSA_ACTION_NUMBER + '_'+str(re_id_for_dash)
                 current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
                 
                 if not os.path.exists(current_inv_files_dir):
                     os.makedirs(current_inv_files_dir)
                 uploaded_file.save(os.path.join(current_inv_files_dir,uploaded_file.filename))
                 
-                #Investigations database files column - set value as string comma delimeted
-                if dash_inv.files =='':
-                    dash_inv.files =uploaded_file.filename
+                #recalls database files column - set value as string comma delimeted
+                if dash_re.files =='':
+                    dash_re.files =uploaded_file.filename
                 else:
-                    dash_inv.files =dash_inv.files +','+ uploaded_file.filename
+                    dash_re.files =dash_re.files +','+ uploaded_file.filename
                 db.session.commit()                
-            return redirect(url_for('re_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
+            return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash))
         
-    return render_template('dashboard_inv.html',inv_entry_top_list=inv_entry_top_list,
-        dash_inv_list=dash_inv_list, str=str, len=len, inv_id_for_dash=inv_id_for_dash,
+    return render_template('dashboard_re.html',re_entry_top_list=re_entry_top_list,
+        dash_re_list=dash_re_list, str=str, len=len, re_id_for_dash=re_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,
         category_group_dict_no_space=category_group_dict_no_space)
 
 
 
-@re_blueprint.route("/delete_file/<inv_id_for_dash>/<filename>", methods=["GET","POST"])
+@re_blueprint.route("/delete_file/<re_id_for_dash>/<filename>", methods=["GET","POST"])
 # @posts.route('/post/<post_id>/update', methods = ["GET", "POST"])
 @login_required
-def delete_file(inv_id_for_dash,filename):
+def delete_file(re_id_for_dash,filename):
     #update Investigations table files column
-    dash_inv =db.session.query(Investigations).get(inv_id_for_dash)
-    print('delete_file route - dash_inv::::',dash_inv.files)
+    dash_re =db.session.query(Investigations).get(re_id_for_dash)
+    print('delete_file route - dash_re::::',dash_re.files)
     file_list=''
-    if (",") in dash_inv.files and len(dash_inv.files)>1:
-        file_list=dash_inv.files.split(",")
+    if (",") in dash_re.files and len(dash_re.files)>1:
+        file_list=dash_re.files.split(",")
         file_list.remove(filename)
-    dash_inv.files=''
+    dash_re.files=''
     db.session.commit()
     if len(file_list)>0:
         for i in range(0,len(file_list)):
             if i==0:
-                dash_inv.files = file_list[i]
+                dash_re.files = file_list[i]
             else:
-                dash_inv.files = dash_inv.files +',' + file_list[i]
+                dash_re.files = dash_re.files +',' + file_list[i]
     db.session.commit()
     
     
     #Remove files from files dir
-    current_inv_files_dir_name = dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
+    current_inv_files_dir_name = dash_re.NHTSA_ACTION_NUMBER + '_'+str(re_id_for_dash)
     current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
     files_dir_and_filename=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],
         current_inv_files_dir_name, filename)
@@ -334,7 +338,7 @@ def delete_file(inv_id_for_dash,filename):
         os.rmdir(current_inv_files_dir)
     
     flash('file has been deleted!', 'success')
-    return redirect(url_for('re_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
+    return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash))
 
 
 
@@ -471,7 +475,7 @@ def investigation_categories():
     
 
     
-    #Make investigations to dictionary for bit table bottom of home screen
+    #Make recalls to dictionary for bit table bottom of home screen
     # recalls_data = queryToDict(recalls_query, column_names)#List of dicts each dict is row
     
     #break data into smaller lists to paginate if number of returns greatere than inv_count_limit
@@ -533,23 +537,23 @@ def investigation_categories():
             # print('@@@@@@ refine_search_button')
             # query_file_name = search_criteria_dictionary_util(formDict)
             
-            # return redirect(url_for('main.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+            # return redirect(url_for('main.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 # investigation_data_list_page=0,search_limit=search_limit))
         # elif formDict.get('load_previous'):
             # investigation_data_list_page=investigation_data_list_page-1
             
-            # return redirect(url_for('main.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+            # return redirect(url_for('main.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 # investigation_data_list_page=investigation_data_list_page,
                 # search_limit=search_limit))
         # elif formDict.get('load_next'):
             # investigation_data_list_page=investigation_data_list_page+1
             
-            # return redirect(url_for('main.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+            # return redirect(url_for('main.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 # investigation_data_list_page=investigation_data_list_page,
                 # search_limit=search_limit))            
         # elif formDict.get('view'):
-            # inv_id_for_dash=formDict.get('view')
-            # return redirect(url_for('re_blueprint.investigations_dashboard',inv_id_for_dash=inv_id_for_dash))
+            # re_id_for_dash=formDict.get('view')
+            # return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
             
     # print('3investigation_data_list:::', len(investigation_data_list), 'page::',investigation_data_list_page)
     # print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)

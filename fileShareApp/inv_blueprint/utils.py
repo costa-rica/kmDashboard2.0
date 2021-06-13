@@ -38,8 +38,8 @@ def investigations_query_util(query_file_name):
                 # j[0]=int(j[0])
                 investigations = investigations.filter(getattr(Investigations,i)==int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
-                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 investigations = investigations.filter(getattr(Investigations,i)==j[0])
             elif j[0]!='':
                 investigations = investigations.filter(getattr(Investigations,i)==j[0])
@@ -48,16 +48,16 @@ def investigations_query_util(query_file_name):
                 # j[0]=int(j[0])
                 investigations = investigations.filter(getattr(Investigations,i)<int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
-                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 investigations = investigations.filter(getattr(Investigations,i)<j[0])
         elif j[1]== "greater_than":
             if i in ['id','YEAR'] and j[0]!='':
                 # j[0]=int(j[0])
                 investigations = investigations.filter(getattr(Investigations,i)>int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
-                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 investigations = investigations.filter(getattr(Investigations,i)>j[0])
         elif j[1] =="string_contains" and j[0]!='':
             investigations = investigations.filter(getattr(Investigations,i).contains(j[0]))
@@ -88,7 +88,7 @@ def search_criteria_dictionary_util(formDict):
     for i,j in match_type_dict.items():
         search_query_dict[i]=[list(search_query_dict[i])[0],j]
 
-    query_file_name='current_query.txt'
+    query_file_name='current_query_re.txt'
     with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
         json.dump(search_query_dict,dict_file)
     print('END search_criteria_dictionary_util(formDict), returns query_file_name')

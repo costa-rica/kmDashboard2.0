@@ -10,11 +10,12 @@ import pandas as pd
 
 
 def queryToDict(query_data, column_names):
-    not_include_list=['INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
-        'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
+    # not_include_list=['INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
+        # 'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
+    # not_include_list=['CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
     db_row_list =[]
     for i in query_data:
-        row = {key: value for key, value in i.__dict__.items() if key not in ['_sa_instance_state'] + not_include_list}
+        row = {key: value for key, value in i.__dict__.items() if key not in ['_sa_instance_state']}
         db_row_list.append(row)
     return db_row_list
 
@@ -40,8 +41,8 @@ def recalls_query_util(query_file_name):
                 # j[0]=int(j[0])
                 recalls = recalls.filter(getattr(Recalls,i)==int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
-                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 recalls = recalls.filter(getattr(Recalls,i)==j[0])
             elif j[0]!='':
                 recalls = recalls.filter(getattr(Recalls,i)==j[0])
@@ -50,16 +51,16 @@ def recalls_query_util(query_file_name):
                 # j[0]=int(j[0])
                 recalls = recalls.filter(getattr(Recalls,i)<int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
-                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 recalls = recalls.filter(getattr(Recalls,i)<j[0])
         elif j[1]== "greater_than":
             if i in ['id','YEAR'] and j[0]!='':
                 # j[0]=int(j[0])
                 recalls = recalls.filter(getattr(Recalls,i)>int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
-                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
-                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 recalls = recalls.filter(getattr(Recalls,i)>j[0])
         elif j[1] =="string_contains" and j[0]!='':
             recalls = recalls.filter(getattr(Recalls,i).contains(j[0]))
@@ -90,7 +91,7 @@ def search_criteria_dictionary_util(formDict):
     for i,j in match_type_dict.items():
         search_query_dict[i]=[list(search_query_dict[i])[0],j]
 
-    query_file_name='current_query.txt'
+    query_file_name='current_query_inv.txt'
     with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
         json.dump(search_query_dict,dict_file)
     print('END search_criteria_dictionary_util(formDict), returns query_file_name')

@@ -6,7 +6,7 @@
     <div class="container">
                 
         <form method="POST" action="" enctype="multipart/form-data">
-            <div class="recalls_search_heading">
+            <div class="search_heading_re">
                 <h4>Search <u><b>Recalls</b></u></h4>
             </div>
             
@@ -159,18 +159,22 @@
                 <table id="proxies" class="display table nowrap responsive" style="width: 100%">
                     <thead>
                         <tr>
-                            {% for header in range(0,200) %}
+                            {% for header in column_names %}
                                 <th>{{header}}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in range(0,9) %}
-                            <tr>
-                                {% for index in range(0, 200) %}
-                                    <td>{{ str(row) + ',' + str(index) }}</td>
-                                {% endfor %}
-                            </tr>
+                        {% for row in table_data %}
+                        <tr>
+                            <td><input type="submit" class="dash_id_button"
+                                name="view" value="{{ row[column_names[0]] }}"></td>
+                            {% for index in range(1,len(column_names)) %}
+                                <td ><div class="td_characteristics">
+                                    {{ row[column_names[index]] }}
+                                </div></td>
+                            {% endfor %}
+                        </tr>
                         {% endfor %}
                 
                     </tbody>

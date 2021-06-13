@@ -315,15 +315,12 @@ section.search .container {
   width: 85%;
 }
 
-section.search .recalls_search_heading {
-  /*
-        width:30%;
-        border-radius: 1em;
-        padding-left: 2em;*/
+section.search .search_heading_inv b {
+  color: #d67424;
 }
 
-section.search .recalls_search_heading b {
-  color: #d67424;
+section.search .search_heading_re b {
+  color: #eb612b;
 }
 
 section.search .custom_search {
