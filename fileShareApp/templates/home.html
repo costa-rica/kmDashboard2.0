@@ -8,9 +8,11 @@
             Welcome to the NHTSA Investigations Data Dashboard<br/><br/>
         </div>
         <div class="select_page">
-            <a href="{{ url_for('main.search') }}">Search Investigations</a>
+            <a href="{{ url_for('inv_blueprint.search_investigations') }}">Search Investigations</a>
             <br/>
-            <a href="{{ url_for('dashboards.reports') }}">Reports</a>
+            <a href="{{ url_for('re_blueprint.search_recalls') }}">Search Recalls</a>
+            <br/>
+            <a href="{{ url_for('inv_blueprint.reports') }}">Reports</a>
         </div>
     </div>
 </section>

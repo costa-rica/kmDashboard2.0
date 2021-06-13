@@ -9,7 +9,7 @@
 
         <div class="above_dash">
             Viewing KM Dash Investigation ID: {{ inv_id_for_dash }}
-            <a href="{{ url_for('main.search', query_file_name='current_query.txt') }}">Back to query</a>
+            <a href="{{ url_for('inv_blueprint.search_investigations', query_file_name='current_query_inv.txt') }}">Back to query</a>
         </div>
 
                 
@@ -69,7 +69,7 @@
                         <a href="{{ url_for('static', filename='files/' + file ) }}"> {{ file }} </a>
                         <!--https://codepen.io/eliorivero/pen/zEFqb-->
                         <a class="remove-image" 
-                        href="{{ url_for('dashboards.delete_file', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 
+                        href="{{ url_for('inv_blueprint.delete_file', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 
                         style="display: inline;">&#215;</a>
                         <br/>
                         {% endfor %}

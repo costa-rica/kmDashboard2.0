@@ -37,12 +37,12 @@ def create_app(config_class=Config):
     mail.init_app(app)
 
 
-    from fileShareApp.main.routes import main
-    from fileShareApp.dashboards.routes import dashboards
+    from fileShareApp.inv_blueprint.routes import inv_blueprint
+    from fileShareApp.re_blueprint.routes import re_blueprint
     from fileShareApp.users.routes import users
     from fileShareApp.errors.handlers import errors
-    app.register_blueprint(main)
-    app.register_blueprint(dashboards)
+    app.register_blueprint(inv_blueprint)
+    app.register_blueprint(re_blueprint)
     app.register_blueprint(users)
     app.register_blueprint(errors)
 

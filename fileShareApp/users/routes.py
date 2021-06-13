@@ -22,6 +22,16 @@ from fileShareApp.users.utils import save_picture, send_reset_email, userPermiss
 
 users = Blueprint('users', __name__)
 
+
+
+@users.route("/home")
+@login_required
+def home():
+    
+    return render_template('home.html')
+
+
+
 @users.route("/register", methods=["GET","POST"])
 def register():
     if current_user.is_authenticated:
@@ -57,7 +67,7 @@ def login():
         if user and bcrypt.check_password_hash(user.password,form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))
+            return redirect(next_page) if next_page else redirect(url_for('users.home'))
             #^^^ another good thing turnary condition ^^^
         else:
             flash('Login unsuccessful', 'danger')

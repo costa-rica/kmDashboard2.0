@@ -136,8 +136,8 @@ class Recalls(db.Model):
     
 
     def __repr__(self):
-        return f"Recalls('{self.RECORD_ID}',MAKE:'{self.MAKE}'," \
-        f"'Component Name: {self.COMPNAME}', Manuf Name: '{self.MFGNAME}', Recall Date: '{self.RECDATE}')"
+        return f"Recalls('{self.RECORD_ID}',MAKE:'{self.MAKETXT}'," \
+        f"'Component Name: {self.COMPNAME}', Manuf Name: '{self.MFGNAME}', Recall Date: '{self.RCDATE}')"
 
     
 

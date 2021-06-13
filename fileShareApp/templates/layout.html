@@ -19,7 +19,7 @@
 
 
 
-	
+
 
   
     <title>{% block title %}{% endblock %}</title>
@@ -47,9 +47,9 @@
                     {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('users.logout') }}">Logout</a></li>
                     
-                    <li><a href="{{ url_for('dashboards.reports') }}">Reports</a></li>
-                    <li><a href="{{ url_for('main.search') }}">Search</a></li>
-                    <li><a href="{{ url_for('main.home') }}">Home</a></li>
+                    <li><a href="{{ url_for('inv_blueprint.reports') }}">Reports</a></li>
+                    <li><a href="{{ url_for('inv_blueprint.search_investigations') }}">Search</a></li>
+                    <li><a href="{{ url_for('users.home') }}">Home</a></li>
                     {% else %}
                     <li><a href="{{ url_for('users.login') }}">Login</a></li>
                     {% endif %}

@@ -8,6 +8,94 @@ from datetime import date, datetime
 from flask_login import current_user
 import pandas as pd
 
+
+def queryToDict(query_data, column_names):
+    not_include_list=['INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
+        'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
+    db_row_list =[]
+    for i in query_data:
+        row = {key: value for key, value in i.__dict__.items() if key not in ['_sa_instance_state'] + not_include_list}
+        db_row_list.append(row)
+    return db_row_list
+
+
+def recalls_query_util(query_file_name):
+    recalls = db.session.query(Recalls)
+    with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name)) as json_file:
+        search_criteria_dict=json.load(json_file)
+        json_file.close()
+
+    if search_criteria_dict.get("refine_search_button"):
+        del search_criteria_dict["refine_search_button"]
+    if search_criteria_dict.get("save_search_name"):
+        del search_criteria_dict["save_search_name"]
+    if search_criteria_dict.get('save_query_button'):
+        del search_criteria_dict['save_query_button']
+    if search_criteria_dict.get('search_limit'):
+        del search_criteria_dict['search_limit']
+
+    for i,j in search_criteria_dict.items():
+        if j[1]== "exact":
+            if i in ['id','YEAR'] and j[0]!='':
+                # j[0]=int(j[0])
+                recalls = recalls.filter(getattr(Recalls,i)==int(j[0]))
+            elif i in ['ODATE','CDATE'] and j[0]!='':
+                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                recalls = recalls.filter(getattr(Recalls,i)==j[0])
+            elif j[0]!='':
+                recalls = recalls.filter(getattr(Recalls,i)==j[0])
+        elif j[1]== "less_than":
+            if i in ['id','YEAR'] and j[0]!='':
+                # j[0]=int(j[0])
+                recalls = recalls.filter(getattr(Recalls,i)<int(j[0]))
+            elif i in ['ODATE','CDATE'] and j[0]!='':
+                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                recalls = recalls.filter(getattr(Recalls,i)<j[0])
+        elif j[1]== "greater_than":
+            if i in ['id','YEAR'] and j[0]!='':
+                # j[0]=int(j[0])
+                recalls = recalls.filter(getattr(Recalls,i)>int(j[0]))
+            elif i in ['ODATE','CDATE'] and j[0]!='':
+                # j[0]=datetime.strptime(j[0].strip(),'%Y-%m-%d')
+                j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
+                recalls = recalls.filter(getattr(Recalls,i)>j[0])
+        elif j[1] =="string_contains" and j[0]!='':
+            recalls = recalls.filter(getattr(Recalls,i).contains(j[0]))
+    # recalls=recalls.filter(getattr(recalls,'YEAR')>2015).all()
+    recalls=recalls.all()
+    msg="""END recalls_query_util(query_file_name), returns recalls,
+search_criteria_dict. len(recalls) is 
+    """
+    print(msg, len(recalls), 'search_criteria_dict: ',search_criteria_dict)
+    return (recalls,search_criteria_dict)
+
+
+def search_criteria_dictionary_util(formDict):   
+    print('formDict in search_criteria_dictionary_util:::',formDict)
+    #remove prefix 'sc_'
+    formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
+    
+    #make dict of any exact items
+    match_type_dict={}
+    for i,j in formDict.items():
+        if "match_type_" in i:
+            match_type_dict[i[11:]]=j
+
+    #make search dict w/out exact keys
+    search_query_dict = {i:[j,"string_contains"] for i,j in formDict.items() if "match_type_" not in i}
+    
+    #if match_type
+    for i,j in match_type_dict.items():
+        search_query_dict[i]=[list(search_query_dict[i])[0],j]
+
+    query_file_name='current_query.txt'
+    with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
+        json.dump(search_query_dict,dict_file)
+    print('END search_criteria_dictionary_util(formDict), returns query_file_name')
+    return query_file_name
+    
 def updateInvestigation(dict, **kwargs):
     date_flag=False
     print('in updateInvestigation - dict:::',dict,'kwargs:::',kwargs)
@@ -36,7 +124,7 @@ def updateInvestigation(dict, **kwargs):
     update_data['categories']=assigned_categories
     
     
-    existing_data = db.session.query(Investigations).get(kwargs.get('inv_id_for_dash'))
+    existing_data = db.session.query(recalls).get(kwargs.get('inv_id_for_dash'))
     Investigations_attr=['SUBJECT','SUMMARY','km_notes','date_updated','files', 'categories']
     at_least_one_field_changed = False
     #loop over existing data attributes
