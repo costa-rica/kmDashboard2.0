@@ -455,6 +455,26 @@ section.dashboard .inv_subject input {
   width: 85%;
 }
 
+section.dashboard .re_long1 {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding-bottom: 5px;
+  font-size: small;
+}
+
+section.dashboard .re_long1 label {
+  width: 15%;
+}
+
+section.dashboard .re_long1 textarea {
+  width: 85%;
+}
+
+section.dashboard .re_long1 input {
+  width: 85%;
+}
+
 section.dashboard .inv_summary {
   display: -webkit-box;
   display: -ms-flexbox;

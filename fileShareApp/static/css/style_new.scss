@@ -326,6 +326,14 @@ section.dashboard {
         label { width: 15%}
         input {width: 85%}
     }
+    .re_long1 {
+        display: flex;
+        padding-bottom:5px;
+        font-size: small;
+        label {width:15%;}
+        textarea {width:85%;}
+        input {width: 85%}
+    }
     .inv_summary {
         display: flex;
         padding-bottom:5px;
@@ -337,7 +345,7 @@ section.dashboard {
         padding-bottom:5px;
         label {width:15%;}
         textarea {width:85%;}
-            }
+    }
     .investigation_entry_bottom {
         display: grid;
         grid-template-rows: 1fr;

@@ -17,7 +17,7 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.re_blueprint.utils import recalls_query_util, queryToDict, search_criteria_dictionary_util, \
-    updateInvestigation, create_categories_xlsx
+    update_recall, create_categories_xlsx, update_files_re
 import openpyxl
 from werkzeug.utils import secure_filename
 import json
@@ -107,12 +107,12 @@ def search_recalls():
         search_limit=int(request.args.get('search_limit'))
     else:
         search_limit=100 #login default record loading
-    investigation_data_list=[]
+    recall_data_list=[]
     i=0
     loaded_dict = {}
-    print('1investigation_data_list:::', len(investigation_data_list))
+    print('1recall_data_list:::', len(recall_data_list))
     while i*search_limit <investigation_count:
-        investigation_data_list.append(
+        recall_data_list.append(
             recalls_data[i * search_limit: (i +1) * search_limit])
         if (i +1)* search_limit<=investigation_count:
             loaded_dict[i]=f'[Loaded {i * search_limit} through {(i +1)* search_limit}]'
@@ -120,33 +120,33 @@ def search_recalls():
             loaded_dict[i]=f'[Loaded {i * search_limit} through {investigation_count}]'
         i+=1
     if investigation_count==0:
-        investigation_data_list=[['No data']]
+        recall_data_list=[['No data']]
         loaded_dict[i]='search returns no records'
     
 
     
-    print('2investigation_data_list:::', len(investigation_data_list))
+    print('2recall_data_list:::', len(recall_data_list))
     
     #Keep track of what page user was on
-    if request.args.get('investigation_data_list_page'):
-        investigation_data_list_page=int(request.args.get('investigation_data_list_page'))
+    if request.args.get('recall_data_list_page'):
+        recall_data_list_page=int(request.args.get('recall_data_list_page'))
     else:
-        investigation_data_list_page=0
+        recall_data_list_page=0
 
     #make a flag to disable load previous
-    if investigation_data_list_page == 0:
+    if recall_data_list_page == 0:
         disable_load_previous=True
-        print('if investigation_data_list_page == 0:')
-        if len(investigation_data_list)==1:
+        print('if recall_data_list_page == 0:')
+        if len(recall_data_list)==1:
             disable_load_next = True
         else:
             disable_load_next = False
             print(' else disable_load_next = False')
     else:
         disable_load_previous=False
-        if len(investigation_data_list)>investigation_data_list_page+1:
+        if len(recall_data_list)>recall_data_list_page+1:
             disable_load_next = False
-            print('if len(investigation_data_list)>investigation_data_list_page+1:')
+            print('if len(recall_data_list)>recall_data_list_page+1:')
         else:
             disable_load_next = True
         
@@ -169,32 +169,32 @@ def search_recalls():
             query_file_name = search_criteria_dictionary_util(formDict)
             
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                investigation_data_list_page=0,search_limit=search_limit))
+                recall_data_list_page=0,search_limit=search_limit))
         elif formDict.get('load_previous'):
-            investigation_data_list_page=investigation_data_list_page-1
+            recall_data_list_page=recall_data_list_page-1
             
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                investigation_data_list_page=investigation_data_list_page,
+                recall_data_list_page=recall_data_list_page,
                 search_limit=search_limit))
         elif formDict.get('load_next'):
-            investigation_data_list_page=investigation_data_list_page+1
+            recall_data_list_page=recall_data_list_page+1
             
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                investigation_data_list_page=investigation_data_list_page,
+                recall_data_list_page=recall_data_list_page,
                 search_limit=search_limit))            
         elif formDict.get('view'):
             re_id_for_dash=formDict.get('view')
             return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
             
     print('length of column names:::',len(column_names))
-    print('length of table data row 1:::', len(investigation_data_list[int(investigation_data_list_page)][0]))
+    print('length of table data row 1:::', len(recall_data_list[int(recall_data_list_page)][0]))
     print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
-    return render_template('search_recalls.html',table_data = investigation_data_list[int(investigation_data_list_page)], 
+    return render_template('search_recalls.html',table_data = recall_data_list[int(recall_data_list_page)], 
         column_names_dict=column_names_dict, column_names=column_names,
         len=len, make_list = make_list, query_file_name=query_file_name,
         search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
         investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
-        investigation_data_list_page=investigation_data_list_page, disable_load_previous=disable_load_previous,
+        recall_data_list_page=recall_data_list_page, disable_load_previous=disable_load_previous,
         disable_load_next=disable_load_next)
 
 
@@ -209,13 +209,13 @@ def recalls_dashboard():
     
     #view, update
     if request.args.get('re_id_for_dash'):
-        print('request.args.get(re_id_for_dash, should build verified_by_list')
+        # print('request.args.get(re_id_for_dash, should build verified_by_list')
         re_id_for_dash = int(request.args.get('re_id_for_dash'))
         dash_re= db.session.query(Recalls).get(re_id_for_dash)
         verified_by_list =db.session.query(Tracking_re.updated_to, Tracking_re.time_stamp).filter_by(
             recalls_table_id=re_id_for_dash,field_updated='verified_by_user').all()
         verified_by_list=[[i[0],i[1].strftime('%Y/%m/%d %#I:%M%p')] for i in verified_by_list]
-        print('verified_by_list:::',verified_by_list)
+        # print('verified_by_list:::',verified_by_list)
     else:
         verified_by_list=[]
 
@@ -239,16 +239,25 @@ def recalls_dashboard():
         dash_re_categories=[i.strip() for i in dash_re_categories]
         print('dash_re_categories:::',dash_re_categories)
     
-    dash_re_list = [dash_re.RECORD_ID,dash_re.MAKETXT,dash_re.MODELTXT,dash_re.YEAR,
-        dash_re.ODATE.strftime("%Y-%m-%d"),dash_re.MFGCAMPNO,dash_re.RCLTYPECD,
-        dash_re.COMPNAME, dash_re.MFGNAME, dash_re.CONSEQUENCE_DEFCT, dash_re.CORRECTIVE_ACTION,
-        dash_re.km_notes, dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files,
-        dash_re_categories]
-    
+    dash_re_list = [dash_re.RECORD_ID, dash_re.CAMPNO, dash_re.MAKETXT, dash_re.MODELTXT, dash_re.YEAR,
+        dash_re.MFGCAMPNO, dash_re.COMPNAME, dash_re.MFGNAME, dash_re.BGMAN.strftime("%Y-%m-%d"),
+        dash_re.ENDMAN, dash_re.RCLTYPECD, dash_re.POTAFF, dash_re.ODATE.strftime("%Y-%m-%d"),
+        dash_re.INFLUENCED_BY, dash_re.MFGTXT, dash_re.RCDATE.strftime("%Y-%m-%d"), 
+        dash_re.DATEA.strftime("%Y-%m-%d"), dash_re.RPNO, dash_re.FMVSS, dash_re.DESC_DEFECT, dash_re.CONSEQUENCE_DEFCT,
+        dash_re.CORRECTIVE_ACTION,dash_re.NOTES, dash_re.RCL_CMPT_ID,dash_re.km_notes,
+        dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files, dash_re_categories]
+
+#files 24
+
     #Make lists for investigation_entry_top
-    re_entry_top_names_list=['NHTSA Action Number','Make','Model','Year','Open Date','Close Date',
-        'Recall Campaign Number','Component Description','Manufacturer Name']
-    re_entry_top_list=zip(re_entry_top_names_list,dash_re_list[:9])
+    re_entry_top_names_list=['Record ID', 'CAMPNO', 'Make', 'Model', 'Year', 'MFGCAMPNO',
+       'COMPNAME', 'Manufacturer Name', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
+       'Open Date', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
+       'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION', 'NOTES','RCL_CMPT_ID']
+    
+
+    re_entry_top_list=zip(re_entry_top_names_list[:19],dash_re_list[:19])
+    re_entry_top2_list=zip(re_entry_top_names_list[19:],dash_re_list[19:])
     
     #make dictionary of category lists from excel file
     categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
@@ -268,24 +277,24 @@ def recalls_dashboard():
         argsDict = request.args.to_dict()
         filesDict = request.files.to_dict()
         
-        if formDict.get('update_inv'):
+        if formDict.get('update_re'):
             print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
-            # print('filesDict::::',filesDict)
-            updateInvestigation(formDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
+            print('filesDict::::',filesDict)
+            update_recall(formDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
 
             if request.files.get('investigation_file'):
                 #updates file name in database
-                updateInvestigation(filesDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
+                update_files_re(filesDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
                 
                 #SAVE file in dir named after NHTSA action num _ dash_id
-                uploaded_file = request.files['investigation_file']
-                current_inv_files_dir_name = dash_re.NHTSA_ACTION_NUMBER + '_'+str(re_id_for_dash)
-                current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
+                uploaded_file = request.files['recall_file']
+                current_re_files_dir_name = dash_re.RECORD_ID + '_'+str(re_id_for_dash)
+                current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
                 
-                if not os.path.exists(current_inv_files_dir):
-                    os.makedirs(current_inv_files_dir)
-                uploaded_file.save(os.path.join(current_inv_files_dir,uploaded_file.filename))
+                if not os.path.exists(current_re_files_dir):
+                    os.makedirs(current_re_files_dir)
+                uploaded_file.save(os.path.join(current_re_files_dir,uploaded_file.filename))
                 
                 #recalls database files column - set value as string comma delimeted
                 if dash_re.files =='':
@@ -299,7 +308,7 @@ def recalls_dashboard():
         dash_re_list=dash_re_list, str=str, len=len, re_id_for_dash=re_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,
-        category_group_dict_no_space=category_group_dict_no_space)
+        category_group_dict_no_space=category_group_dict_no_space, re_entry_top2_list=re_entry_top2_list)
 
 
 

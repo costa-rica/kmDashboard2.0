@@ -15,6 +15,7 @@
                 
         <div class="investigation_entry_top">
             {% for i, j in re_entry_top_list %}
+             
                 {% if len(str(j))>23 %}
                 <div >
                     {% if len(str(i))>10 %}
@@ -22,18 +23,19 @@
                     {% else %}
                         <div class="inv_attr_title">{{ i }}:</div>
                     {% endif %}
-                    <input type="text" class="wider_input" name="{{ 'inv_' + i }}" value="{{ j }}" readonly>
+                    <input type="text" class="wider_input" name="{{ 're_' + i }}" value="{{ j }}" readonly>
                 </div>
-            {% else %}
+                {% else %}
                 <div >
                     {% if len(str(i))>10 %}
                         <div class="inv_attr_title_wider">{{ i }}:</div>
                     {% else %}
                         <div class="inv_attr_title">{{ i }}:</div>
                     {% endif %}
-                    <input type="text" class="" name="{{ 'inv_' + i }}" value="{{ j }}" readonly>
+                    <input type="text" class="" name="{{ 're_' + i }}" value="{{ j }}" readonly>
                 </div>
                 {% endif %}
+            
             {% endfor %}
         </div>
 
@@ -41,19 +43,23 @@
 
 
         <div class="investigation_entery_middle">
-            <div class="inv_subject">
-                <label>Subject:</label>
-                <input type="text" class="" name="inv_subject" value="{{ dash_re_list[9] }}" readonly>
-            </div>
+            {% for i, j in re_entry_top2_list %}
+            <div class="re_long1">
+                <label>{{ i }}:</label>
+                {% if len(str(j))>127 %}
+                <textarea id="note" name="{{ 're_' + i }}"  >{{ j }}</textarea>
+                {% else %}
+                <input type="text" class="" name="{{ 're_' + i }}" value="{{ j }}" readonly>
+                {% endif %}
+ 
+                
 
-            <label class="inv_summary">
-                Summary:
-                <textarea class="" name="inv_summary_textarea"  row=3 readonly>{{ dash_re_list[10] }}</textarea>
-            </label>
+            </div>
+            {% endfor %}
 
             <label class="inv_km_notes">
                 KM Notes:
-                <textarea class="" name="inv_km_notes_textarea" rows=3  >{{ dash_re_list[11] }}</textarea>
+                <textarea class="" name="re_km_notes_textarea" rows=3  >{{ dash_re_list[24] }}</textarea>
             </label>
         </div>
 
@@ -63,9 +69,9 @@
             <div class="inv_files">
                 <div class="file_list">
                     <h4><u>Files</u></h4>
-                    {% if len(dash_re_list[13])>0 %}
+                    {% if len(dash_re_list[26])>0 %}
 
-                        {%for file in dash_re_list[13] %}
+                        {%for file in dash_re_list[26] %}
                         <a href="{{ url_for('static', filename='files/' + file ) }}"> {{ file }} </a>
                         <!--https://codepen.io/eliorivero/pen/zEFqb-->
                         <a class="remove-image" 
@@ -87,7 +93,7 @@
                 {% if re_id_for_dash =='no recalls found' %}
                 No record to update
                 {% else %}
-                <input type="submit" class="update_inv" name="update_inv" value="Update">
+                <input type="submit" class="update_inv" name="update_re" value="Update">
 
                 <div class="verify_box_and_label">
                     <input type="checkbox" class="unique_name_checkbox" name="verified_by_user"
@@ -104,7 +110,7 @@
                 {% endif %}
                 
                 <label class="inv_date_updated" >
-                    <span class="span_text"> This investigation was updated last:  {{ dash_re_list[12] }} </span>
+                    <span class="span_text"> This investigation was updated last:  {{ dash_re_list[25] }} </span>
                 </label>
             </div>
 
@@ -208,6 +214,7 @@
         </form>
     </div>
 </section>
+
 
 <!-- for modals-->
 <script src="../static/js/bootstrap.min.js"></script>
