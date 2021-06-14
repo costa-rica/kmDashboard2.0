@@ -308,6 +308,8 @@ section.EnterNewPasswordSection .container .form-submit {
 section.search .container {
   padding: 50px 10px 50px 5px;
   background: #bebebe;
+  background: url("dev2.thegoodeconomist.com/search_investigations") #18ca62;
+  background: url("dev2.thegoodeconomist.com/search_recalls") #b2be46;
   padding: 20px;
   border-color: #525252;
   border-style: solid;
@@ -684,5 +686,22 @@ section.dashboard label {
 .timestamp_input {
   background: #afafaf;
   text-align: center;
+}
+
+.modal_categories_checkboxes {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (minmax(10rem, 1fr))[auto-fit];
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.modal_checkbox_group {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.modal_checkbox_group > label {
+  text-align: left;
 }
 /*# sourceMappingURL=style_new.css.map */

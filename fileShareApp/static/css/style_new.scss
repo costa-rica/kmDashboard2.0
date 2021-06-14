@@ -214,12 +214,15 @@ section.search {
     .container {
         padding: 50px 10px 50px 5px;
         background: rgb(190,190,190);
+        background: url('dev2.thegoodeconomist.com/search_investigations')rgb(24, 202, 98);
+        background: url('dev2.thegoodeconomist.com/search_recalls')rgb(178, 190, 70);
         padding: 20px;
         border-color:rgb(82, 82, 82);
         border-style: solid;
         border-radius: 1em;
         width:85%;
     }
+
     .search_heading_inv  {
         b {color: rgb(214, 116, 36);}
     }
@@ -458,6 +461,7 @@ section.dashboard {
     margin-bottom: 1em;
     
 }
+
 .download_group_inputs {
     padding-left:2em;
 }
@@ -468,4 +472,15 @@ section.dashboard {
 .timestamp_input {
     background:rgb(175, 175, 175);
     text-align:center;
+}
+.modal_categories_checkboxes{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(10rem, 1fr));
+
+}
+.modal_checkbox_group {
+    display:flex;
+}
+.modal_checkbox_group > label {
+    text-align: left;
 }

@@ -66,10 +66,10 @@
                     {% if len(dash_inv_list[13])>0 %}
 
                         {%for file in dash_inv_list[13] %}
-                        <a href="{{ url_for('static', filename='files/' + file ) }}"> {{ file }} </a>
+                        <a href="{{ url_for('static', filename='files/'+ current_inv_files_dir_name+ '/' + file ) }}"> {{ file }} </a>
                         <!--https://codepen.io/eliorivero/pen/zEFqb-->
                         <a class="remove-image" 
-                        href="{{ url_for('inv_blueprint.delete_file', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 
+                        href="{{ url_for('inv_blueprint.delete_file_inv', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 
                         style="display: inline;">&#215;</a>
                         <br/>
                         {% endfor %}

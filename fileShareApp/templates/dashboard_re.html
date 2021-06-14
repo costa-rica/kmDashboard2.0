@@ -72,10 +72,10 @@
                     {% if len(dash_re_list[26])>0 %}
 
                         {%for file in dash_re_list[26] %}
-                        <a href="{{ url_for('static', filename='files/' + file ) }}"> {{ file }} </a>
+                        <a href="{{ url_for('static', filename='files/'+ current_re_files_dir_name +'/' + file ) }}"> {{ file }} </a>
                         <!--https://codepen.io/eliorivero/pen/zEFqb-->
                         <a class="remove-image" 
-                        href="{{ url_for('re_blueprint.delete_file', re_id_for_dash=re_id_for_dash, filename = file) }}" 
+                        href="{{ url_for('re_blueprint.delete_file_re', re_id_for_dash=re_id_for_dash, filename = file) }}" 
                         style="display: inline;">&#215;</a>
                         <br/>
                         {% endfor %}

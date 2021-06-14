@@ -207,6 +207,12 @@ def search_recalls():
 def recalls_dashboard():
     print('*TOP OF def dashboard()*')
     
+    #for deleting files only
+    if request.args.get('current_re_files_dir_name'):
+        current_re_files_dir_name=request.args.get('current_re_files_dir_name')
+    else:
+        current_re_files_dir_name='No file passed'
+        
     #view, update
     if request.args.get('re_id_for_dash'):
         # print('request.args.get(re_id_for_dash, should build verified_by_list')
@@ -283,13 +289,13 @@ def recalls_dashboard():
             print('filesDict::::',filesDict)
             update_recall(formDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
 
-            if request.files.get('investigation_file'):
+            if request.files.get('recall_file'):
                 #updates file name in database
                 update_files_re(filesDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
                 
                 #SAVE file in dir named after NHTSA action num _ dash_id
                 uploaded_file = request.files['recall_file']
-                current_re_files_dir_name = dash_re.RECORD_ID + '_'+str(re_id_for_dash)
+                current_re_files_dir_name = 'Recall_'+str(re_id_for_dash)
                 current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
                 
                 if not os.path.exists(current_re_files_dir):
@@ -302,22 +308,24 @@ def recalls_dashboard():
                 else:
                     dash_re.files =dash_re.files +','+ uploaded_file.filename
                 db.session.commit()                
-            return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash))
+            return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash,
+                current_re_files_dir_name=current_re_files_dir_name))
         
     return render_template('dashboard_re.html',re_entry_top_list=re_entry_top_list,
         dash_re_list=dash_re_list, str=str, len=len, re_id_for_dash=re_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,
-        category_group_dict_no_space=category_group_dict_no_space, re_entry_top2_list=re_entry_top2_list)
+        category_group_dict_no_space=category_group_dict_no_space, re_entry_top2_list=re_entry_top2_list,
+        current_re_files_dir_name=current_re_files_dir_name)
 
 
 
-@re_blueprint.route("/delete_file/<re_id_for_dash>/<filename>", methods=["GET","POST"])
+@re_blueprint.route("/delete_file_re/<re_id_for_dash>/<filename>", methods=["GET","POST"])
 # @posts.route('/post/<post_id>/update', methods = ["GET", "POST"])
 @login_required
-def delete_file(re_id_for_dash,filename):
+def delete_file_re(re_id_for_dash,filename):
     #update Investigations table files column
-    dash_re =db.session.query(Investigations).get(re_id_for_dash)
+    dash_re =db.session.query(Recalls).get(re_id_for_dash)
     print('delete_file route - dash_re::::',dash_re.files)
     file_list=''
     if (",") in dash_re.files and len(dash_re.files)>1:
@@ -335,65 +343,30 @@ def delete_file(re_id_for_dash,filename):
     
     
     #Remove files from files dir
-    current_inv_files_dir_name = dash_re.NHTSA_ACTION_NUMBER + '_'+str(re_id_for_dash)
-    current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
+    current_re_files_dir_name = str(dash_re.RECORD_ID) + '_'+str(re_id_for_dash)
+    current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
     files_dir_and_filename=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],
-        current_inv_files_dir_name, filename)
+        current_re_files_dir_name, filename)
     
     if os.path.exists(files_dir_and_filename):
         os.remove(files_dir_and_filename)
     
-    if len(os.listdir(current_inv_files_dir))==0:
-        os.rmdir(current_inv_files_dir)
+    if len(os.listdir(current_re_files_dir))==0:
+        os.rmdir(current_re_files_dir)
     
     flash('file has been deleted!', 'success')
     return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash))
 
 
 
-@re_blueprint.route("/reports", methods=["GET","POST"])
+
+
+
+
+
+@re_blueprint.route("/recall_categories", methods=["GET","POST"])
 @login_required
-def reports():
-    excel_file_name='investigation_categories_report.xlsx'
-    if os.path.exists(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name)):
-        # Read Excel and turn entire sheet to a df
-        time_stamp_df = pd.read_excel(os.path.join(
-            current_app.config['UTILITY_FILES_FOLDER'],excel_file_name),
-            'Notes',header=None)
-        time_stamp = time_stamp_df.loc[0,1].to_pydatetime().strftime("%Y-%m-%d %I:%M:%S %p")
-    else:
-        time_stamp='no current file'
-
-    print('time_stamp_df:::', time_stamp, type(time_stamp))
-    if request.method == 'POST':
-        formDict = request.form.to_dict()
-        print('formDict::::',formDict)
-        if formDict.get('build_excel_report'):
-
-            create_categories_xlsx('investigation_categories_report.xlsx')
-            logger.info('in search page')
-        return redirect(url_for('re_blueprint.reports'))
-    return render_template('reports.html', excel_file_name=excel_file_name, time_stamp=time_stamp)
-
-
-
-@re_blueprint.route("/files_zip", methods=["GET","POST"])
-@login_required
-def files_zip():
-    if os.path.exists(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'Investigation_files')):
-        os.remove(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'Investigation_files'))
-    shutil.make_archive(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER'],'Investigation_files'), "zip", os.path.join(
-        current_app.config['UPLOADED_FILES_FOLDER']))
-
-    return send_from_directory(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER']),'Investigation_files.zip', as_attachment=True)
-
-
-@re_blueprint.route("/investigation_categories", methods=["GET","POST"])
-@login_required
-def investigation_categories():
+def recall_categories():
     excel_file_name=request.args.get('excel_file_name')
 
     return send_from_directory(os.path.join(

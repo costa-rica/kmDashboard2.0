@@ -205,8 +205,8 @@ def update_files_re(filesDict, **kwargs):
     formToDbCrosswalkDict = {'investigation_file': 'files'}
 
     update_data = {formToDbCrosswalkDict.get(i): j for i,j in filesDict.items()}
-    existing_data = db.session.query(Investigations).get(kwargs.get('re_id_for_dash'))
-    # for i in Investigations_attr:
+    existing_data = db.session.query(Recalls).get(kwargs.get('re_id_for_dash'))
+    
     at_least_one_field_changed = False
     if update_data.get('files') not in [existing_data.files,'']:
     #if different an not null then add

@@ -181,6 +181,11 @@ def search_investigations():
 def investigations_dashboard():
     print('*TOP OF def dashboard()*')
     
+    if request.args.get('current_inv_files_dir_name'):
+        current_inv_files_dir_name=request.args.get('current_inv_files_dir_name')
+    else:
+        current_inv_files_dir_name='No file passed'
+    
     #view, update
     if request.args.get('inv_id_for_dash'):
         print('request.args.get(inv_id_for_dash, should build verified_by_list')
@@ -254,7 +259,7 @@ def investigations_dashboard():
                 
                 #SAVE file in dir named after NHTSA action num _ dash_id
                 uploaded_file = request.files['investigation_file']
-                current_inv_files_dir_name = dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
+                current_inv_files_dir_name = 'Investigation_' + dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
                 current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
                 
                 if not os.path.exists(current_inv_files_dir):
@@ -269,20 +274,21 @@ def investigations_dashboard():
                 db.session.commit()
             else:
                 updateInvestigation(formDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
-            return redirect(url_for('inv_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
+            return redirect(url_for('inv_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash,
+                current_inv_files_dir_name=current_inv_files_dir_name))
         
     return render_template('dashboard_inv.html',inv_entry_top_list=inv_entry_top_list,
         dash_inv_list=dash_inv_list, str=str, len=len, inv_id_for_dash=inv_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
-        category_list_dict=category_list_dict, list=list,
+        category_list_dict=category_list_dict, list=list,current_inv_files_dir_name=current_inv_files_dir_name,
         category_group_dict_no_space=category_group_dict_no_space)
 
 
 
-@inv_blueprint.route("/delete_file/<inv_id_for_dash>/<filename>", methods=["GET","POST"])
+@inv_blueprint.route("/delete_file_inv/<inv_id_for_dash>/<filename>", methods=["GET","POST"])
 # @posts.route('/post/<post_id>/update', methods = ["GET", "POST"])
 @login_required
-def delete_file(inv_id_for_dash,filename):
+def delete_file_inv(inv_id_for_dash,filename):
     #update Investigations table files column
     dash_inv =db.session.query(Investigations).get(inv_id_for_dash)
     print('delete_file route - dash_inv::::',dash_inv.files)
@@ -322,13 +328,24 @@ def delete_file(inv_id_for_dash,filename):
 @inv_blueprint.route("/reports", methods=["GET","POST"])
 @login_required
 def reports():
-    excel_file_name='investigation_categories_report.xlsx'
+    excel_file_name_inv='investigation_report.xlsx'
+    excel_file_name_re='recalls_report.xlsx'
+    
+    #get columns from each reports
+    column_names_inv=Investigations.__table__.columns.keys()
+    column_names_re=Recalls.__table__.columns.keys()
+    categories_dict=''
     if os.path.exists(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name)):
+        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv)):
         # Read Excel and turn entire sheet to a df
         time_stamp_df = pd.read_excel(os.path.join(
-            current_app.config['UTILITY_FILES_FOLDER'],excel_file_name),
+            current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv),
             'Notes',header=None)
+        categories_df =pd.read_excel(os.path.join(
+            current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv),
+            'Investigation Data')
+        categories_dict={i:'checked' for i in list(categories_df.columns)}
+        print('categories_dict:::', categories_dict)
         time_stamp = time_stamp_df.loc[0,1].to_pydatetime().strftime("%Y-%m-%d %I:%M:%S %p")
     else:
         time_stamp='no current file'
@@ -336,13 +353,16 @@ def reports():
     print('time_stamp_df:::', time_stamp, type(time_stamp))
     if request.method == 'POST':
         formDict = request.form.to_dict()
-        print('formDict::::',formDict)
-        if formDict.get('build_excel_report'):
+        print('reports - formDict::::',formDict)
+        if formDict.get('build_excel_report_inv'):
+            
+            column_names_for_df=[i for i in column_names_inv if i in list(formDict.keys())]
 
-            create_categories_xlsx('investigation_categories_report.xlsx')
+            create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict)
             logger.info('in search page')
         return redirect(url_for('inv_blueprint.reports'))
-    return render_template('reports.html', excel_file_name=excel_file_name, time_stamp=time_stamp)
+    return render_template('reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp=time_stamp,
+        column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict=categories_dict)
 
 
 
@@ -362,10 +382,10 @@ def files_zip():
 @inv_blueprint.route("/investigation_categories", methods=["GET","POST"])
 @login_required
 def investigation_categories():
-    excel_file_name=request.args.get('excel_file_name')
+    excel_file_name_inv=request.args.get('excel_file_name_inv')
 
     return send_from_directory(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER']),excel_file_name, as_attachment=True)
+        current_app.config['UTILITY_FILES_FOLDER']),excel_file_name_inv, as_attachment=True)
 
 
 
@@ -388,158 +408,3 @@ def investigation_categories():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @main.route("/search_recalls", methods=["GET","POST"])
-# @login_required
-# def search_recalls_2():
-    # print('*TOP OF def search_recalls()*')
-    # logger.info('in search_recalls page')
-
-
-
-    # column_names=['RECORD_ID', 'CAMPNO', 'MAKETXT', 'MODELTXT', 'YEAR', 'MFGCAMPNO',
-       # 'COMPNAME', 'MFGNAME', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
-       # 'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
-       # 'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
-    # column_names_dict={'RECORD_ID':'Record ID','CAMPNO':'Recall Campaign Number','MAKETXT':'Make',
-        # 'MODELTXT':'Model','YEAR':'Year', 'COMPNAME':'Component Name',
-        # 'MFGNAME':'Manufacturer Name',
-        # 'BGMAN':'BGMAN',
-        # 'MFGCAMPNO':'MFGCAMPNO',
-        # 'ENDMAN':'ENDMAN',
-        # 'RCLTYPECD':'RCLTYPECD',
-        # 'POTAFF':'POTAFF',
-        # 'ODATE':'ODATE',
-        # 'INFLUENCED_BY':'INFLUENCED_BY',
-        # 'MFGTXT':'MFGTXT',
-        # 'RCDATE':'RCDATE',
-        # 'DATEA':'DATEA','RPNO':'RPNO', 'FMVSS':'FMVSS','DESC_DEFECT':'DESC_DEFECT',
-        # 'CONSEQUENCE_DEFCT':'CONSEQUENCE_DEFCT','CORRECTIVE_ACTION':'CORRECTIVE_ACTION','RCL_CMPT_ID':'RCL_CMPT_ID'}
-    
-    # make make_list drop down options
-    # with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'make_list_recalls.txt')) as json_file:
-        # make_list=json.load(json_file)
-        # json_file.close()
-    
-        # Get/identify query to run for table
-    # if request.args.get('query_file_name'):
-        # query_file_name=request.args.get('query_file_name')
-        # investigations_query, search_criteria_dictionary = investigations_query_util(query_file_name)
-        # no_hits_flag = False
-        # if len(investigations_query) ==0:
-            # no_hits_flag = True
-    # elif request.args.get('no_hits_flag')==True:
-        # investigations_query, search_criteria_dictionary = ([],{})
-    # else:
-        # query_file_name= 'default_query_inv.txt'
-        # investigations_query, search_criteria_dictionary = investigations_query_util(query_file_name)
-        # no_hits_flag = False
-        # if len(investigations_query) ==0:
-            # no_hits_flag = True      
-    
-
-    
-    # Make investigations to dictionary for bit table bottom of home screen
-    # investigations_data = queryToDict(investigations_query, column_names)#List of dicts each dict is row
-    
-    # break data into smaller lists to paginate if number of returns greatere than inv_count_limit
-    # investigation_count=len(investigations_data)
-    # if request.args.get('search_limit'):
-        # search_limit=int(request.args.get('search_limit'))
-    # else:
-        # search_limit=100 #login default record loading
-    # investigation_data_list=[]
-    # i=0
-    # loaded_dict = {}
-    # print('1investigation_data_list:::', len(investigation_data_list))
-    # while i*search_limit <investigation_count:
-        # investigation_data_list.append(
-            # investigations_data[i * search_limit: (i +1) * search_limit])
-        # if (i +1)* search_limit<=investigation_count:
-            # loaded_dict[i]=f'[Loaded {i * search_limit} through {(i +1)* search_limit}]'
-        # else:
-            # loaded_dict[i]=f'[Loaded {i * search_limit} through {investigation_count}]'
-        # i+=1
-    # if investigation_count==0:
-        # investigation_data_list=[['No data']]
-        # loaded_dict[i]='search returns no records'
-        
-        
-            
-    # print('2investigation_data_list:::', len(investigation_data_list))
-    
-    # Keep track of what page user was on
-    # if request.args.get('investigation_data_list_page'):
-        # investigation_data_list_page=int(request.args.get('investigation_data_list_page'))
-    # else:
-        # investigation_data_list_page=0
-
-    # make a flag to disable load previous
-    # if investigation_data_list_page == 0:
-        # disable_load_previous=True
-        # print('if investigation_data_list_page == 0:')
-        # if len(investigation_data_list)==1:
-            # disable_load_next = True
-        # else:
-            # disable_load_next = False
-            # print(' else disable_load_next = False')
-    # else:
-        # disable_load_previous=False
-        # if len(investigation_data_list)>investigation_data_list_page+1:
-            # disable_load_next = False
-            # print('if len(investigation_data_list)>investigation_data_list_page+1:')
-        # else:
-            # disable_load_next = True
-        
-    
-    # if request.method == 'POST':
-        # print('!!!!in POST method no_hits_flag:::', no_hits_flag)
-        # formDict = request.form.to_dict()
-        # print('formDict:::',formDict)
-        # search_limit=formDict.get('search_limit')
-        # if formDict.get('refine_search_button'):
-            # print('@@@@@@ refine_search_button')
-            # query_file_name = search_criteria_dictionary_util(formDict)
-            
-            # return redirect(url_for('main.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                # investigation_data_list_page=0,search_limit=search_limit))
-        # elif formDict.get('load_previous'):
-            # investigation_data_list_page=investigation_data_list_page-1
-            
-            # return redirect(url_for('main.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                # investigation_data_list_page=investigation_data_list_page,
-                # search_limit=search_limit))
-        # elif formDict.get('load_next'):
-            # investigation_data_list_page=investigation_data_list_page+1
-            
-            # return redirect(url_for('main.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                # investigation_data_list_page=investigation_data_list_page,
-                # search_limit=search_limit))            
-        # elif formDict.get('view'):
-            # inv_id_for_dash=formDict.get('view')
-            # return redirect(url_for('inv_blueprint.investigations_dashboard',inv_id_for_dash=inv_id_for_dash))
-            
-    # print('3investigation_data_list:::', len(investigation_data_list), 'page::',investigation_data_list_page)
-    # print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
-
-    
-    # return render_template('search_recalls.html', table_data=investigation_data_list[int(investigation_data_list_page)], 
-        # column_names_dict=column_names_dict, column_names=column_names,
-        # len=len, make_list = make_list, query_file_name=query_file_name,
-        # search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
-        # investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
-        # investigation_data_list_page=investigation_data_list_page, disable_load_previous=disable_load_previous,
-        # disable_load_next=disable_load_next)

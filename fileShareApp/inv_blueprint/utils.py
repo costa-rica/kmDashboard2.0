@@ -202,16 +202,20 @@ def update_files(filesDict, **kwargs):
 
 
 
-def create_categories_xlsx(excel_file_name):
+def create_categories_xlsx(excel_file_name, column_names_for_df, formDict):
 
     excelObj=pd.ExcelWriter(os.path.join(
         current_app.config['UTILITY_FILES_FOLDER'],excel_file_name))
 
-    columnNames=Investigations.__table__.columns.keys()
-    colNamesDf=pd.DataFrame([columnNames],columns=columnNames)
+    # columnNames=Investigations.__table__.columns.keys()
+    colNamesDf=pd.DataFrame([column_names_for_df],columns=column_names_for_df)
     colNamesDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False)
 
     queryDf = pd.read_sql_table('investigations', db.engine)
+    queryDf=queryDf[column_names_for_df].copy()
+    queryDf.head()
+    #copy queryDF with only the columns selected. If no columns selected use all:
+    
     queryDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False,startrow=1)
     inv_data_workbook=excelObj.book
     notes_worksheet = inv_data_workbook.add_worksheet('Notes')
