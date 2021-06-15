@@ -17,7 +17,7 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.inv_blueprint.utils import investigations_query_util, queryToDict, search_criteria_dictionary_util, \
-    updateInvestigation, create_categories_xlsx, update_files
+    updateInvestigation, create_categories_xlsx, update_files, existing_report
 import openpyxl
 from werkzeug.utils import secure_filename
 import json
@@ -334,23 +334,22 @@ def reports():
     #get columns from each reports
     column_names_inv=Investigations.__table__.columns.keys()
     column_names_re=Recalls.__table__.columns.keys()
-    categories_dict=''
+    categories_dict_inv={}
+    categories_dict_re={}
     if os.path.exists(os.path.join(
         current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv)):
-        # Read Excel and turn entire sheet to a df
-        time_stamp_df = pd.read_excel(os.path.join(
-            current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv),
-            'Notes',header=None)
-        categories_df =pd.read_excel(os.path.join(
-            current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv),
-            'Investigation Data')
-        categories_dict={i:'checked' for i in list(categories_df.columns)}
-        print('categories_dict:::', categories_dict)
-        time_stamp = time_stamp_df.loc[0,1].to_pydatetime().strftime("%Y-%m-%d %I:%M:%S %p")
+        categories_dict_inv,time_stamp_inv=existing_report(excel_file_name_inv, 'investigations')
+        print('categories_dict_inv:::', type(categories_dict_inv), categories_dict_inv)
     else:
-        time_stamp='no current file'
+        time_stamp_inv='no current file'
+    if os.path.exists(os.path.join(
+        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_re)):
+        categories_dict_re,time_stamp_re=existing_report(excel_file_name_re,'recalls')
+    else:
+        time_stamp_re='no current file'
 
-    print('time_stamp_df:::', time_stamp, type(time_stamp))
+
+    # print('time_stamp_inv_df:::', time_stamp_inv, type(time_stamp_inv))
     if request.method == 'POST':
         formDict = request.form.to_dict()
         print('reports - formDict::::',formDict)
@@ -358,11 +357,16 @@ def reports():
             
             column_names_for_df=[i for i in column_names_inv if i in list(formDict.keys())]
 
-            create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict)
-            logger.info('in search page')
+            create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict, 'investigations')
+        elif formDict.get('build_excel_report_re'):
+            column_names_for_df=[i for i in column_names_re if i in list(formDict.keys())]
+
+            create_categories_xlsx(excel_file_name_re, column_names_for_df, formDict, 'recalls')
+        logger.info('in search page')
         return redirect(url_for('inv_blueprint.reports'))
-    return render_template('reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp=time_stamp,
-        column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict=categories_dict)
+    return render_template('reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp_inv=time_stamp_inv,
+        column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict_inv=categories_dict_inv,
+        categories_dict_re=categories_dict_re,time_stamp_re=time_stamp_re, excel_file_name_re=excel_file_name_re)
 
 
 
@@ -379,15 +383,23 @@ def files_zip():
         current_app.config['UTILITY_FILES_FOLDER']),'Investigation_files.zip', as_attachment=True)
 
 
-@inv_blueprint.route("/investigation_categories", methods=["GET","POST"])
+@inv_blueprint.route("/categories_report_download", methods=["GET","POST"])
 @login_required
-def investigation_categories():
-    excel_file_name_inv=request.args.get('excel_file_name_inv')
+def categories_report_download():
+    excel_file_name=request.args.get('excel_file_name')
 
     return send_from_directory(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER']),excel_file_name_inv, as_attachment=True)
+        current_app.config['UTILITY_FILES_FOLDER']),excel_file_name, as_attachment=True)
 
 
+# @inv_blueprint.route("/investigation_categories", methods=["GET","POST"])
+# @login_required
+# def recall_categories():
+    # excel_file_name_inv=request.args.get('excel_file_name_re')
+
+    # return send_from_directory(os.path.join(
+        # current_app.config['UTILITY_FILES_FOLDER']),excel_file_name_inv, as_attachment=True)
+        
 
 
 

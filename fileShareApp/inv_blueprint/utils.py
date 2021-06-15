@@ -202,21 +202,20 @@ def update_files(filesDict, **kwargs):
 
 
 
-def create_categories_xlsx(excel_file_name, column_names_for_df, formDict):
-
+def create_categories_xlsx(excel_file_name, column_names_for_df, formDict, db_table):
     excelObj=pd.ExcelWriter(os.path.join(
         current_app.config['UTILITY_FILES_FOLDER'],excel_file_name))
 
     # columnNames=Investigations.__table__.columns.keys()
     colNamesDf=pd.DataFrame([column_names_for_df],columns=column_names_for_df)
-    colNamesDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False)
+    colNamesDf.to_excel(excelObj,sheet_name=db_table.capitalize() + ' Data', header=False, index=False)
 
-    queryDf = pd.read_sql_table('investigations', db.engine)
+    queryDf = pd.read_sql_table(db_table, db.engine)
     queryDf=queryDf[column_names_for_df].copy()
     queryDf.head()
     #copy queryDF with only the columns selected. If no columns selected use all:
     
-    queryDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False,startrow=1)
+    queryDf.to_excel(excelObj,sheet_name=db_table.capitalize() + ' Data', header=False, index=False,startrow=1)
     inv_data_workbook=excelObj.book
     notes_worksheet = inv_data_workbook.add_worksheet('Notes')
     notes_worksheet.write('A1','Created:')
@@ -224,3 +223,17 @@ def create_categories_xlsx(excel_file_name, column_names_for_df, formDict):
     time_stamp_format = inv_data_workbook.add_format({'num_format': 'mmm d yyyy hh:mm:ss AM/PM'})
     notes_worksheet.write('B1',datetime.now(), time_stamp_format)
     excelObj.close()
+
+
+def existing_report(excel_file_name, db_table):
+    # Read Excel and turn entire sheet to a df
+    time_stamp_df = pd.read_excel(os.path.join(
+        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name),
+        'Notes',header=None)
+    categories_df =pd.read_excel(os.path.join(
+        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name),
+        db_table.capitalize() + ' Data')
+    categories_dict={i:'checked' for i in list(categories_df.columns)}
+    # print('categories_dict:::', categories_dict)
+    time_stamp = time_stamp_df.loc[0,1].to_pydatetime().strftime("%Y-%m-%d %I:%M:%S %p")
+    return (categories_dict,time_stamp)

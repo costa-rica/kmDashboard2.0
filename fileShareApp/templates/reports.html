@@ -13,32 +13,53 @@
                 
                 <h5>Investigations Spreadsheet Report</h5>
                 <div class='download_group_inputs'>
-                    <!--modal button-->
-                    <button type="button"  data-bs-toggle="modal" data-bs-target="#modalChooseColumns">
-                        Select Columns for Report
-                    </button>
-
-                    <div>
-                        <input type="submit" name="build_excel_report_inv" value="Build Excel Report"/>
-                        <div class="timestamp_group">
-                            Availible file time stamp: <input type="text" class="timestamp_input"  value="{{ time_stamp }}" readonly>
-                        </div>
-                    </div>
-                    <div>
-                        <a href="{{ url_for('inv_blueprint.investigation_categories', excel_file_name_inv=excel_file_name_inv) }}">Download</a> 
-                    </div>
                     Steps to get file:
-                    <ul>
-                        <li>Select columns for excel spreadsheet</li>
-                        <li>Build Excel file</li>
-                        <li>Download</li>
-                    </ul>
-                </div>                
+                    <ol>
+                        <li><!--modal button-->
+                            <button type="button"  data-bs-toggle="modal" data-bs-target="#modalChooseColumnsInv">
+                                Select Columns for Report
+                            </button>
+                        </li>
+                        <li>
+                            <input type="submit" name="build_excel_report_inv" value="Build Excel Report"/>
+                            <div class="timestamp_group">
+                                Availible file time stamp: <input type="text" class="timestamp_input"  value="{{ time_stamp_inv }}" readonly>
+                            </div>
+                        </li>
+                        <li><a href="{{ url_for('inv_blueprint.categories_report_download', excel_file_name=excel_file_name_inv) }}">Download</a> </li>
+                    </ol>
+                </div>
             </div>
             
+
             <div class='download_group'>
-                <h5>Investigation Files</h5>
-                <a href="{{ url_for('inv_blueprint.files_zip') }}">Download Investigation Files</a> <br/>
+                
+                <h5>Recalls Spreadsheet Report</h5>
+                <div class='download_group_inputs'>
+                    Steps to get file:
+                    <ol>
+                        <li><!--modal button-->
+                            <button type="button"  data-bs-toggle="modal" data-bs-target="#modalChooseColumnsRe">
+                                Select Columns for Report
+                            </button>
+                        </li>
+                        <li>
+                            <input type="submit" name="build_excel_report_re" value="Build Excel Report"/>
+                            <div class="timestamp_group">
+                                Availible file time stamp: <input type="text" class="timestamp_input"  value="{{ time_stamp_re }}" readonly>
+                            </div>
+                        </li>
+                        <li><a href="{{ url_for('inv_blueprint.categories_report_download', excel_file_name=excel_file_name_re) }}">Download</a> </li>
+                    </ol>
+                </div>
+            </div>
+
+
+
+
+            <div class='download_group'>
+                <h5>Attched Files for Investigations and Recalls</h5>
+                <a href="{{ url_for('inv_blueprint.files_zip') }}">Download Compressed File</a> <br/>
                 <i>Zip file of all Investigation and Recall reports seperated into folders. 
                     Investigations folder names are 'Investigation_' + NHTSA_ACTION_NUMBER + Investigation ID.
                     Recalls folder names are 'Recall_' + Record ID.</i>
@@ -46,21 +67,20 @@
 
 
 
-            <!-- Modal -->
-            <div class="modal fade" id="modalChooseColumns" tabindex="-1" aria-labelledby="modalChooseColumnsLable" aria-hidden="true">
+            <!-- Investigations Modal -->
+            <div class="modal fade" id="modalChooseColumnsInv" tabindex="-1" aria-labelledby="modalChooseColumnsInvLabel" aria-hidden="true">
                 <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                    <h5 class="modal-title" id="modalChooseColumnsLable"> Select the columns to include in Excel Report</h5>
+                    <h5 class="modal-title" id="modalChooseColumnsInvLabel"> Select the columns to include in Excel Report</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
 
-
                         <div class="modal_categories_checkboxes">
                             {% for i in column_names_inv %}
                             <div class="modal_checkbox_group">
-                                {% if i in categories_dict.keys() %}
+                                {% if i in categories_dict_inv.keys() %}
                                     <input type="checkbox"  name="{{ i }}" id="{{ 'checkbox_' + i }}" value="Yes" checked/>
                                     <label for="{{ 'checkbox_' + i  }}">{{ i }}</label>
                                 {% else %}
@@ -72,13 +92,51 @@
                         </div>
 
                     </div>
-                    <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <!--<button type="button" class="btn btn-primary">Save Categories</button>-->
+                    <div class="modal-footer modal-footer_additional">
+                        <span class="span_1" >*Pre-selected categories are from existing report</span>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <!--<button type="button" class="btn btn-primary">Save Categories</button>-->
                     </div>
                 </div>
                 </div>
             </div>
+
+
+            <!-- Recalls Modal -->
+            <div class="modal fade" id="modalChooseColumnsRe" tabindex="-1" aria-labelledby="modalChooseColumnsReLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="modalChooseColumnsReLabel"> Select the columns to include in Excel Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="modal_categories_checkboxes">
+                            {% for i in column_names_re %}
+                            <div class="modal_checkbox_group">
+                                {% if i in categories_dict_re.keys() %}
+                                    <input type="checkbox"  name="{{ i }}" id="{{ 'checkbox_' + i }}" value="Yes" checked/>
+                                    <label for="{{ 'checkbox_' + i  }}">{{ i }}</label>
+                                {% else %}
+                                <input type="checkbox"  name="{{ i }}" id="{{ 'checkbox_' + i }}" value="Yes" />
+                                <label for="{{ 'checkbox_' + i  }}">{{ i }}</label>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    <div class="modal-footer modal-footer_additional">
+                        <span class="span_1" >*Pre-selected categories are from existing report</span>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <!--<button type="button" class="btn btn-primary">Save Categories</button>-->
+                    </div>
+                </div>
+                </div>
+            </div>
+
+
 
 
         </form>

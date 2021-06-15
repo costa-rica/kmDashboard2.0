@@ -704,4 +704,13 @@ section.dashboard label {
 .modal_checkbox_group > label {
   text-align: left;
 }
+
+.modal-footer_additional {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
 /*# sourceMappingURL=style_new.css.map */

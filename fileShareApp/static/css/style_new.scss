@@ -459,7 +459,6 @@ section.dashboard {
     border-style: solid;
     border-radius: 1em;
     margin-bottom: 1em;
-    
 }
 
 .download_group_inputs {
@@ -476,11 +475,14 @@ section.dashboard {
 .modal_categories_checkboxes{
     display: grid;
     grid-template-columns: repeat(auto-fit,minmax(10rem, 1fr));
-
 }
 .modal_checkbox_group {
     display:flex;
 }
 .modal_checkbox_group > label {
     text-align: left;
+}
+.modal-footer_additional {
+    display: flex;
+    justify-content: space-between;
 }
