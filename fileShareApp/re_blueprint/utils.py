@@ -60,27 +60,27 @@ def recalls_query_util(query_file_name):
     if search_criteria_dict.get('search_limit'):
         del search_criteria_dict['search_limit']
 
-    #take out all keys that contain "cateogry"
+    #put all 'category' elements in another dictionary
     category_dict={}
     for i,j in search_criteria_dict.items():
         if 'category' in i:
             category_dict[i]=j
 
+    #take out all keys that contain "cateogry"
     for i,j in category_dict.items():
         del search_criteria_dict[i]
             
     if category_dict.get('remove_category'):
         del category_dict['remove_category']
-    #put all 'category' elements in another dictionary
     
-    # print('search_criteria_dict - categories removed:::',search_criteria_dict)
+
     #filter recalls query by anything that contains
     for i,j in category_dict.items():
         recalls = recalls.filter(getattr(Recalls,'categories').contains(j[0]))
 
     for i,j in search_criteria_dict.items():
         if j[1]== "exact":
-            if i in ['id','YEAR'] and j[0]!='':
+            if i in ['RECORD_ID','YEAR'] and j[0]!='':
                 # j[0]=int(j[0])
                 recalls = recalls.filter(getattr(Recalls,i)==int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
@@ -90,7 +90,7 @@ def recalls_query_util(query_file_name):
             elif j[0]!='':
                 recalls = recalls.filter(getattr(Recalls,i)==j[0])
         elif j[1]== "less_than":
-            if i in ['id','YEAR'] and j[0]!='':
+            if i in ['RECORD_ID','YEAR'] and j[0]!='':
                 # j[0]=int(j[0])
                 recalls = recalls.filter(getattr(Recalls,i)<int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':
@@ -98,7 +98,7 @@ def recalls_query_util(query_file_name):
                 # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 recalls = recalls.filter(getattr(Recalls,i)<j[0])
         elif j[1]== "greater_than":
-            if i in ['id','YEAR'] and j[0]!='':
+            if i in ['RECORD_ID','YEAR'] and j[0]!='':
                 # j[0]=int(j[0])
                 recalls = recalls.filter(getattr(Recalls,i)>int(j[0]))
             elif i in ['ODATE','CDATE'] and j[0]!='':

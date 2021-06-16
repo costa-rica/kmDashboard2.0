@@ -10,7 +10,7 @@ import pandas as pd
 
 def column_names_inv_util():
     column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
-        'ODATE','CDATE','CAMPNO','SUBJECT']
+        'ODATE','CDATE','CAMPNO','SUBJECT','km_notes','categories']
     return column_names
 
 
@@ -42,6 +42,24 @@ def investigations_query_util(query_file_name):
         del search_criteria_dict['save_query_button']
     if search_criteria_dict.get('search_limit'):
         del search_criteria_dict['search_limit']
+
+    #put all 'category' elements in another dictionary
+    category_dict={}
+    for i,j in search_criteria_dict.items():
+        if 'category' in i:
+            category_dict[i]=j
+
+    #take out all keys that contain "cateogry"
+    for i,j in category_dict.items():
+        del search_criteria_dict[i]
+            
+    if category_dict.get('remove_category'):
+        del category_dict['remove_category']
+
+    #filter recalls query by anything that contains
+    for i,j in category_dict.items():
+        investigations = investigations.filter(getattr(Investigations,'categories').contains(j[0]))
+
 
     for i,j in search_criteria_dict.items():
         if j[1]== "exact":
@@ -77,8 +95,9 @@ def investigations_query_util(query_file_name):
     msg="""END investigations_query_util(query_file_name), returns investigations,
 search_criteria_dict. len(investigations) is 
     """
-    print(msg, len(investigations), 'search_criteria_dict: ',search_criteria_dict)
-    return (investigations,search_criteria_dict)
+    search_criteria_dict.update(category_dict)
+    # print(msg, len(investigations), 'search_criteria_dict: ',search_criteria_dict)
+    return (investigations,search_criteria_dict, category_dict)
 
 
 def search_criteria_dictionary_util(formDict):   

@@ -82,6 +82,39 @@
                         {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->
                     {% endfor %}<!-- { for criteria in column_names } -->
                     
+
+                    <!-- Add Categories search input box-->
+                    {% for x,y in category_dict.items() %}
+                    <div class="label_search_form">
+                        KM {{ x }}:
+                    </div>
+                    <div class="text_search_form">
+                        <input type="text" class="text_input" name="{{ 'sc_' + x }}"  list="categoryList"
+                            value= "{{ y.0 }}">
+                        <datalist id="categoryList">
+                            {% for i in category_list %}
+                                <option>{{ i }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    {% if len(category_dict)>1 %}
+                    <div class="checkbox_search_form">
+                        <!--No checkbox becuase it would be very difficult to exact filter on column with so much csv data-->
+                        <input type="submit" class="search_remove_category_button" name="remove_category" value="{{ x }}">
+                    </div>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+                    {% endfor %}
+                    <div></div>
+                    <div>
+
+                    <input type="submit" class="search_add_category_button" name="add_category" 
+                        value="Add Category">
+                    </div>
+
+
+
                 </div>
 
                 <div class="search_button">
@@ -163,7 +196,7 @@
         No Investigations found with selected criteria
         {% else %}
             <div class="table_contents">
-                <table id="example" class="table table-striped" style="width:100%">
+                <table id="proxies" class="display table nowrap responsive" style="width:100%">
                     <thead>
                         <tr>
                             <th>Dash Id</th>
@@ -200,20 +233,24 @@
 
 
     
-<!--Source of datatable: https://datatables.net/examples/styling/bootstrap5.html -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script language="JavaScript" type="text/javascript" src="../static/js/jquery-3.5.1.js"></script>
-<script language="JavaScript" type="text/javascript" src="../static/js/jquery.dataTables.min.js"></script>
-<script language="JavaScript" type="text/javascript" src="../static/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Datatable -->
+<script src="../static/js/jquery-3.1.1.slim.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../static/css/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="../static/css/css/responsive.dataTables.min.css">
+<script src="../static/js/moment.min.js"></script>
+<script type="text/javascript" src="../static/js/jquery.dataTables-1.1.20.min.js"></script>
+<script type="text/javascript" src="../static/js/dataTables.responsive.min.js"></script>
+<script type="text/javascript" src="../static/js/datetime.js"></script>
+
+
 
 <!-- for modals-->
 <script src="../static/js/bootstrap.min.js"></script>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('#example').DataTable();
-    } );
 
-    
+<script type="text/javascript">
+    $('#proxies').DataTable();
 </script>
+
 {% endblock %}

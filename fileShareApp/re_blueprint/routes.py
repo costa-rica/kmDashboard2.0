@@ -47,9 +47,7 @@ re_blueprint = Blueprint('re_blueprint', __name__)
 def search_recalls():
     print('*TOP OF def search_recalls()*')
     logger.info('in search_recalls page')
-    
     category_list =[y for x in category_list_dict_util().values() for y in x]
-    
     column_names=column_names_re_util()
     column_names_dict=column_names_dict_re_util()
     

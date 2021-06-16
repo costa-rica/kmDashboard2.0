@@ -62,7 +62,7 @@ def search_investigations():
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
         query_file_name=request.args.get('query_file_name')
-        investigations_query, search_criteria_dictionary = investigations_query_util(query_file_name)
+        investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name)
         no_hits_flag = False
         if len(investigations_query) ==0:
             no_hits_flag = True
@@ -70,7 +70,7 @@ def search_investigations():
         investigations_query, search_criteria_dictionary = ([],{})
     else:
         query_file_name= 'default_query_inv.txt'
-        investigations_query, search_criteria_dictionary = investigations_query_util(query_file_name)
+        investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name)
         no_hits_flag = False
         if len(investigations_query) ==0:
             no_hits_flag = True        
@@ -88,7 +88,7 @@ def search_investigations():
     investigation_data_list=[]
     i=0
     loaded_dict = {}
-    print('1investigation_data_list:::', len(investigation_data_list))
+
     while i*search_limit <investigation_count:
         investigation_data_list.append(
             investigations_data[i * search_limit: (i +1) * search_limit])
@@ -102,8 +102,6 @@ def search_investigations():
         loaded_dict[i]='search returns no records'
     
 
-    
-    print('2investigation_data_list:::', len(investigation_data_list))
     
     #Keep track of what page user was on
     if request.args.get('investigation_data_list_page'):
@@ -163,10 +161,33 @@ def search_investigations():
         elif formDict.get('view'):
             inv_id_for_dash=formDict.get('view')
             return redirect(url_for('inv_blueprint.investigations_dashboard',inv_id_for_dash=inv_id_for_dash))
+        
+        
+        
+        
         elif formDict.get('add_category'):
             new_category='category' + str(len(category_dict)+1)
-            category_dict[new_category]=''
+            formDict[new_category]=''
+            del formDict['add_category']
+            # formDict['add_category']=''
+            query_file_name = search_criteria_dictionary_util(formDict)
+            return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                investigation_data_list_page=0,search_limit=search_limit))
+        elif formDict.get('remove_category'):
             
+            category_for_remove = 'sc_'+formDict['remove_category']
+            # del category_dict[formDict['remove_category']]
+            form_dict_cat_element = 'sc_' + formDict['remove_category']
+            print('form_dict_cat_element:::',form_dict_cat_element)
+            
+            del formDict[form_dict_cat_element]
+            print('formDict:::',formDict)
+            
+            query_file_name = search_criteria_dictionary_util(formDict)
+            return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                investigation_data_list_page=0,search_limit=search_limit))
+    
+    print('column_names:::', column_names)
     # print('3investigation_data_list:::', len(investigation_data_list), 'page::',investigation_data_list_page)
     print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
     return render_template('search_investigations.html',table_data = investigation_data_list[int(investigation_data_list_page)], 
@@ -175,7 +196,7 @@ def search_investigations():
         search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
         investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
         investigation_data_list_page=investigation_data_list_page, disable_load_previous=disable_load_previous,
-        disable_load_next=disable_load_next,category_dict=category_dict)
+        disable_load_next=disable_load_next, category_list=category_list,category_dict=category_dict)
 
 
 
