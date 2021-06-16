@@ -69,10 +69,11 @@ def recalls_query_util(query_file_name):
     for i,j in category_dict.items():
         del search_criteria_dict[i]
             
-    
+    if category_dict.get('remove_category'):
+        del category_dict['remove_category']
     #put all 'category' elements in another dictionary
     
-    print('search_criteria_dict - categories removed:::',search_criteria_dict)
+    # print('search_criteria_dict - categories removed:::',search_criteria_dict)
     #filter recalls query by anything that contains
     for i,j in category_dict.items():
         recalls = recalls.filter(getattr(Recalls,'categories').contains(j[0]))
@@ -113,13 +114,13 @@ search_criteria_dict. len(recalls) is
     """
     
     search_criteria_dict.update(category_dict)
-    print(msg, len(recalls), 'search_criteria_dict: ',search_criteria_dict)
-    return (recalls,search_criteria_dict)
+    # print(msg, len(recalls), 'search_criteria_dict: ',search_criteria_dict)
+    return (recalls,search_criteria_dict, category_dict)
 
 
 def search_criteria_dictionary_util(formDict):   
     print('START search_criteria_dictionary_util')
-    print('formDict in search_criteria_dictionary_util:::',formDict)
+    # print('formDict in search_criteria_dictionary_util:::',formDict)
     #remove prefix 'sc_'
     formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
     
@@ -288,3 +289,4 @@ def create_categories_xlsx(excel_file_name):
     notes_worksheet.write('B1',datetime.now(), time_stamp_format)
     excelObj.close()
     print('END create_categories_xlsx')
+

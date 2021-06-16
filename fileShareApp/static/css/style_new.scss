@@ -279,9 +279,25 @@ section.search {
             background-color:rgb(82, 82, 82);
         }
     }
+
 }
 
-
+.search_add_category_button {
+    border-radius: .3em;
+    background: rgb(129, 189, 80);
+    &:hover {
+        font-weight: bold;
+        background-color:rgb(82, 82, 82);
+    }
+}
+.search_remove_category_button {
+    border-radius: .3em;
+    background: rgb(231, 60, 60);
+    &:hover {
+        font-weight: bold;
+        background-color:rgb(82, 82, 82);
+    }
+}
 
 /*Dashboard*/
 section.dashboard {
@@ -329,21 +345,29 @@ section.dashboard {
         display: flex;
         padding-bottom:5px;
         label { width: 15%}
-        input {width: 85%}
+        input {width: 85%;
+            background:rgb(175, 175, 175);
+        }
     }
     .re_long1 {
         display: flex;
         padding-bottom:5px;
         font-size: small;
         label {width:15%;}
-        textarea {width:85%;}
-        input {width: 85%}
+        textarea {width:85%;
+            background:rgb(175, 175, 175);
+        }
+        input {width: 85%;
+            background:rgb(175, 175, 175);
+        }
     }
     .inv_summary {
         display: flex;
         padding-bottom:5px;
         label {width:15%}
-        textarea {width:85%}
+        textarea {width:85%;
+            background:rgb(175, 175, 175);
+        }
     }
     .inv_km_notes {
         display: flex;

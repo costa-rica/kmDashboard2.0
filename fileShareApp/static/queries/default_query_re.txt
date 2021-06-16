@@ -1,1 +1,1 @@
-{"MAKETXT": ["KIA", "exact"]}
+{"MAKETXT": ["KIA", "exact"], "category1": ["", "string_contains"]}

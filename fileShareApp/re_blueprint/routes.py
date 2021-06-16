@@ -28,7 +28,7 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
     RequestResetForm, ResetPasswordForm
 import re
 import logging
-from fileShareApp.inv_blueprint.utils_general import category_list_dict_util
+from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, remove_category_util
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -63,7 +63,7 @@ def search_recalls():
     if request.args.get('query_file_name'):
         query_file_name=request.args.get('query_file_name')
         print('query_file_name:::', query_file_name)
-        recalls_query, search_criteria_dictionary = recalls_query_util(query_file_name)
+        recalls_query, search_criteria_dictionary, category_dict = recalls_query_util(query_file_name)
         no_hits_flag = False
         if len(recalls_query) ==0:
             no_hits_flag = True
@@ -71,7 +71,7 @@ def search_recalls():
         recalls_query, search_criteria_dictionary = ([],{})
     else:
         query_file_name= 'default_query_re.txt'
-        recalls_query, search_criteria_dictionary = recalls_query_util(query_file_name)
+        recalls_query, search_criteria_dictionary, category_dict = recalls_query_util(query_file_name)
         no_hits_flag = False
         if len(recalls_query) ==0:
             no_hits_flag = True        
@@ -161,7 +161,22 @@ def search_recalls():
             return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
         elif formDict.get('add_category'):
             new_category='category' + str(len(category_dict)+1)
-            category_dict[new_category]=''
+            formDict[new_category]=''
+            del formDict['add_category']
+            # formDict['add_category']=''
+            query_file_name = search_criteria_dictionary_util(formDict)
+            return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                recall_data_list_page=0,search_limit=search_limit))
+        elif formDict.get('remove_category'):
+            
+            category_for_remove = 'sc_'+formDict['remove_category']
+            # del category_dict[formDict['remove_category']]
+            form_dict_cat_element = 'sc_' + formDict['remove_category']
+            print('form_dict_cat_element:::',form_dict_cat_element)
+            
+            del formDict[form_dict_cat_element]
+            print('formDict:::',formDict)
+            
             query_file_name = search_criteria_dictionary_util(formDict)
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 recall_data_list_page=0,search_limit=search_limit))

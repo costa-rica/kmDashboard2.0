@@ -387,6 +387,26 @@ section.search .search_limit_form {
   background-color: #525252;
 }
 
+.search_add_category_button {
+  border-radius: .3em;
+  background: #81bd50;
+}
+
+.search_add_category_button:hover {
+  font-weight: bold;
+  background-color: #525252;
+}
+
+.search_remove_category_button {
+  border-radius: .3em;
+  background: #e73c3c;
+}
+
+.search_remove_category_button:hover {
+  font-weight: bold;
+  background-color: #525252;
+}
+
 /*Dashboard*/
 section.dashboard h2 {
   margin: 20px 0 0 20px;
@@ -457,6 +477,7 @@ section.dashboard .inv_subject label {
 
 section.dashboard .inv_subject input {
   width: 85%;
+  background: #afafaf;
 }
 
 section.dashboard .re_long1 {
@@ -473,10 +494,12 @@ section.dashboard .re_long1 label {
 
 section.dashboard .re_long1 textarea {
   width: 85%;
+  background: #afafaf;
 }
 
 section.dashboard .re_long1 input {
   width: 85%;
+  background: #afafaf;
 }
 
 section.dashboard .inv_summary {
@@ -492,6 +515,7 @@ section.dashboard .inv_summary label {
 
 section.dashboard .inv_summary textarea {
   width: 85%;
+  background: #afafaf;
 }
 
 section.dashboard .inv_km_notes {

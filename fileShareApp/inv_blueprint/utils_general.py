@@ -18,3 +18,10 @@ def category_list_dict_util():
     return category_list_dict
 
 
+
+def remove_category_util(formDict):
+    for i,j in formDict.items():
+        if 'remove' in i:
+            print('remove_category_util(formDict):::', i)
+            remove_name = 'sc' + i[6:]
+    return remove_name

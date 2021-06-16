@@ -47,7 +47,7 @@
             <div class="re_long1">
                 <label>{{ i }}:</label>
                 {% if len(str(j))>127 %}
-                <textarea id="note" name="{{ 're_' + i }}"  >{{ j }}</textarea>
+                <textarea id="note" name="{{ 're_' + i }}"  readonly>{{ j }}</textarea>
                 {% else %}
                 <input type="text" class="" name="{{ 're_' + i }}" value="{{ j }}" readonly>
                 {% endif %}
@@ -139,7 +139,7 @@
                                     {% for i in category_list_dict[category] %}
                                     
                                     <div class="checkbox_group">
-                                        {% if i in dash_re_list[14] %}
+                                        {% if i in dash_re_list[27] %}
                                         <input type="checkbox"  name="{{ i }}" id="{{ i }}" value="Yes" checked/>
                                         <label for="{{ i }}">{{ i }}</label>
                                         {% else %}
