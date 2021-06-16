@@ -308,8 +308,10 @@ section.EnterNewPasswordSection .container .form-submit {
 section.search .container {
   padding: 50px 10px 50px 5px;
   background: #bebebe;
-  background: url("dev2.thegoodeconomist.com/search_investigations") #18ca62;
-  background: url("dev2.thegoodeconomist.com/search_recalls") #b2be46;
+  /*
+        background: url('dev2.thegoodeconomist.com/search_investigations')rgb(24, 202, 98);
+        background: url('dev2.thegoodeconomist.com/search_recalls')rgb(178, 190, 70);
+        */
   padding: 20px;
   border-color: #525252;
   border-style: solid;

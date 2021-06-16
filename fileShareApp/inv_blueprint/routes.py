@@ -17,18 +17,18 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.inv_blueprint.utils import investigations_query_util, queryToDict, search_criteria_dictionary_util, \
-    updateInvestigation, create_categories_xlsx, update_files, existing_report
+    updateInvestigation, create_categories_xlsx, update_files, existing_report, column_names_inv_util, \
+    column_names_dict_inv_util
 import openpyxl
 from werkzeug.utils import secure_filename
 import json
 import glob
 import shutil
-
 from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountForm, \
     RequestResetForm, ResetPasswordForm
 import re
-
 import logging
+from fileShareApp.inv_blueprint.utils_general import category_list_dict_util
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -48,13 +48,16 @@ inv_blueprint = Blueprint('inv_blueprint', __name__)
 def search_investigations():
     print('*TOP OF def search_investigations()*')
     logger.info('in search_investigations page')
+    category_list = [y for x in category_list_dict_util().values() for y in x]
+    column_names=column_names_inv_util()
+    column_names_dict=column_names_dict_inv_util()
+    
+    if request.args.get('category_dict'):
+        category_dict=request.args.get('category_dict')
+    else:
+        category_dict={'cateogry1':''}
+        
 
-
-    column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
-        'ODATE','CDATE','CAMPNO','SUBJECT']
-    column_names_dict={'id':'Dash ID','NHTSA_ACTION_NUMBER':'NHTSA Number', 'MAKE':'Make','MODEL':'Model',
-        'YEAR':'Year','COMPNAME':'Component Name','MFR_NAME':'Manufacturer Name','ODATE':'Open Date',
-        'CDATE':'Close Date','CAMPNO':'Recall Campaign Number','SUBJECT':'Subject'}
     
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
@@ -81,7 +84,7 @@ def search_investigations():
     if request.args.get('search_limit'):
         search_limit=int(request.args.get('search_limit'))
     else:
-        search_limit=100 #login default record loading
+        search_limit=investigation_count+1#login default record loading <<<This will change limit
     investigation_data_list=[]
     i=0
     loaded_dict = {}
@@ -145,21 +148,24 @@ def search_investigations():
             
             return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 investigation_data_list_page=0,search_limit=search_limit))
-        elif formDict.get('load_previous'):
-            investigation_data_list_page=investigation_data_list_page-1
+        # elif formDict.get('load_previous'):
+            # investigation_data_list_page=investigation_data_list_page-1
             
-            return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                investigation_data_list_page=investigation_data_list_page,
-                search_limit=search_limit))
-        elif formDict.get('load_next'):
-            investigation_data_list_page=investigation_data_list_page+1
+            # return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                # investigation_data_list_page=investigation_data_list_page,
+                # search_limit=search_limit))
+        # elif formDict.get('load_next'):
+            # investigation_data_list_page=investigation_data_list_page+1
             
-            return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                investigation_data_list_page=investigation_data_list_page,
-                search_limit=search_limit))            
+            # return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                # investigation_data_list_page=investigation_data_list_page,
+                # search_limit=search_limit))            
         elif formDict.get('view'):
             inv_id_for_dash=formDict.get('view')
             return redirect(url_for('inv_blueprint.investigations_dashboard',inv_id_for_dash=inv_id_for_dash))
+        elif formDict.get('add_category'):
+            new_category='category' + str(len(category_dict)+1)
+            category_dict[new_category]=''
             
     # print('3investigation_data_list:::', len(investigation_data_list), 'page::',investigation_data_list_page)
     print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
@@ -169,7 +175,7 @@ def search_investigations():
         search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
         investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
         investigation_data_list_page=investigation_data_list_page, disable_load_previous=disable_load_previous,
-        disable_load_next=disable_load_next)
+        disable_load_next=disable_load_next,category_dict=category_dict)
 
 
 
@@ -230,12 +236,12 @@ def investigations_dashboard():
     inv_entry_top_list=zip(inv_entry_top_names_list,dash_inv_list[:9])
     
     #make dictionary of category lists from excel file
-    categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
-    df=pd.read_excel(categories_excel)
-    category_list_dict={}
-    for i in range(0,len(df.columns)):
-        category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
-
+    # categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
+    # df=pd.read_excel(categories_excel)
+    # category_list_dict={}
+    # for i in range(0,len(df.columns)):
+        # category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
+    category_list_dict=category_list_dict_util()
     
     category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
 
@@ -390,17 +396,6 @@ def categories_report_download():
 
     return send_from_directory(os.path.join(
         current_app.config['UTILITY_FILES_FOLDER']),excel_file_name, as_attachment=True)
-
-
-# @inv_blueprint.route("/investigation_categories", methods=["GET","POST"])
-# @login_required
-# def recall_categories():
-    # excel_file_name_inv=request.args.get('excel_file_name_re')
-
-    # return send_from_directory(os.path.join(
-        # current_app.config['UTILITY_FILES_FOLDER']),excel_file_name_inv, as_attachment=True)
-        
-
 
 
 

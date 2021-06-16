@@ -9,6 +9,31 @@ from flask_login import current_user
 import pandas as pd
 
 
+def column_names_dict_re_util():
+    column_names_dict={'RECORD_ID':'Record ID','CAMPNO':'Recall Campaign Number','MAKETXT':'Make',
+    'MODELTXT':'Model','YEAR':'Year', 'COMPNAME':'Component Name',
+    'MFGNAME':'Manufacturer Name',
+    'BGMAN':'BGMAN',
+    'MFGCAMPNO':'MFGCAMPNO',
+    'ENDMAN':'ENDMAN',
+    'RCLTYPECD':'RCLTYPECD',
+    'POTAFF':'POTAFF',
+    'ODATE':'ODATE',
+    'INFLUENCED_BY':'INFLUENCED_BY',
+    'MFGTXT':'MFGTXT',
+    'RCDATE':'RCDATE',
+    'DATEA':'DATEA','RPNO':'RPNO', 'FMVSS':'FMVSS','DESC_DEFECT':'DESC_DEFECT',
+    'CONSEQUENCE_DEFCT':'CONSEQUENCE_DEFCT','CORRECTIVE_ACTION':'CORRECTIVE_ACTION','RCL_CMPT_ID':'RCL_CMPT_ID'}
+    return column_names_dict
+
+def column_names_re_util():
+    column_names=['RECORD_ID', 'CAMPNO', 'MAKETXT', 'MODELTXT', 'YEAR', 'MFGCAMPNO',
+       'COMPNAME', 'MFGNAME', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
+       'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
+       'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID','categories']
+    return column_names
+
+
 def queryToDict(query_data, column_names):
     # not_include_list=['INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
         # 'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
@@ -34,6 +59,23 @@ def recalls_query_util(query_file_name):
         del search_criteria_dict['save_query_button']
     if search_criteria_dict.get('search_limit'):
         del search_criteria_dict['search_limit']
+
+    #take out all keys that contain "cateogry"
+    category_dict={}
+    for i,j in search_criteria_dict.items():
+        if 'category' in i:
+            category_dict[i]=j
+
+    for i,j in category_dict.items():
+        del search_criteria_dict[i]
+            
+    
+    #put all 'category' elements in another dictionary
+    
+    print('search_criteria_dict - categories removed:::',search_criteria_dict)
+    #filter recalls query by anything that contains
+    for i,j in category_dict.items():
+        recalls = recalls.filter(getattr(Recalls,'categories').contains(j[0]))
 
     for i,j in search_criteria_dict.items():
         if j[1]== "exact":
@@ -69,6 +111,8 @@ def recalls_query_util(query_file_name):
     msg="""END recalls_query_util(query_file_name), returns recalls,
 search_criteria_dict. len(recalls) is 
     """
+    
+    search_criteria_dict.update(category_dict)
     print(msg, len(recalls), 'search_criteria_dict: ',search_criteria_dict)
     return (recalls,search_criteria_dict)
 
@@ -92,7 +136,7 @@ def search_criteria_dictionary_util(formDict):
     for i,j in match_type_dict.items():
         search_query_dict[i]=[list(search_query_dict[i])[0],j]
 
-    query_file_name='current_query_inv.txt'
+    query_file_name='current_query_re.txt'
     with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
         json.dump(search_query_dict,dict_file)
     print('END search_criteria_dictionary_util(formDict), returns query_file_name')

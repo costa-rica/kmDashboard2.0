@@ -16,7 +16,7 @@
             <div class="rows_search_form">
                 <div class="dict_search">
                     {% for db_name, criteria in column_names_dict.items() %}
-                        {% if db_name in ('RECORD_ID','ODATE', 'CDATE','YEAR') %}
+                        {% if db_name in ('RECORD_ID','ODATE', 'CDATE','YEAR', 'RCDATE', 'DATEA', 'BGMAN', 'ENDMAN') %}
                         <div class="label_search_form">
                             {{ criteria }}
                         </div>
@@ -57,7 +57,7 @@
                             {{ criteria }}
                         </div>
                         
-                        {% if db_name == 'MAKE' %}
+                        {% if db_name == 'MAKETXT' %}
                         <div class="text_search_form">
                             <input type="text" class="text_input" name="{{ 'sc_' + db_name }}"  list="makeList"
                                 value= "{{ search_criteria_dictionary.get(db_name).0 }}">
@@ -72,7 +72,7 @@
                             <input type="text" class="" name="{{ 'sc_' + db_name }}" 
                                 value= "{{ search_criteria_dictionary.get(db_name).0 }}">
                         </div>
-                        {% endif %}<!--if criteria == 'MAKE'-->
+                        {% endif %}<!--if criteria == 'MAKETXT'-->
 
                         <div class="checkbox_search_form">
                         {% if search_criteria_dictionary.get(criteria).1 == "exact" %}
@@ -84,16 +84,46 @@
                     {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->
                 {% endfor %}<!-- { for criteria in column_names } -->
                 
+
+<!-- Add Categories search input box-->
+                {% for x,y in category_dict.items() %}
+                    <div class="label_search_form">
+                        KM {{ x }}:
+                    </div>
+                    <div class="text_search_form">
+                        <input type="text" class="text_input" name="{{ 'sc_' + x }}"  list="categoryList"
+                            value= "{{ y }}">
+                        <datalist id="categoryList">
+                            {% for i in category_list %}
+                                <option>{{ i }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="checkbox_search_form">
+                        <!--No checkbox becuase it would be very difficult to exact filter on column with so much csv data-->
+                        <input type="submit" class="dash_id_button" name="remove_category" value="{{ 'remove ' + x }}">
+                    </div>
+                {% endfor %}
+
+                <div>
+                    
+                    <input type="submit" class="dash_id_button" name="add_category" value="add cagetory">
+                </div>
+                
+
+
             </div>
             
             <div class="search_button">
                 <input type="submit" name="refine_search_button" value="Refine Search">
             </div>
         </div>
-        
+        <!--
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
             Save Search
         </button>
+        -->
+
 
 
         <!-- Save Search Modal -->
@@ -120,30 +150,6 @@
                 </div>
             </div>
             </div>
-        </div>
-
-        <div class="search_limit_form">
-            Current search record count: {{ investigation_count }} 
-            <div>
-                Limit size of loaded records: <input type="text" class="" name="search_limit" 
-                value= "{{ search_limit }}" placeholder="I'll take my chances...">
-            </div>
-            <div>
-                {% if disable_load_previous %}
-                <input type="submit" name="load_previous" value="Load Previous" disabled>
-                {% else %}
-                <input type="submit" name="load_previous" value="Load Previous">
-                {% endif %}
-                {% if disable_load_next %}
-                <input type="submit" name="load_next" value="Load Next" disabled>
-                {% else %}
-                <input type="submit" name="load_next" value="Load Next">
-                {% endif %}
-                {{ loaded_dict[investigation_data_list_page] }}
-            
-            
-            </div>
-
         </div>
 
         

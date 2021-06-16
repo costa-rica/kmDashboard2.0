@@ -8,6 +8,17 @@ from datetime import date, datetime
 from flask_login import current_user
 import pandas as pd
 
+def column_names_inv_util():
+    column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
+        'ODATE','CDATE','CAMPNO','SUBJECT']
+    return column_names
+
+
+def column_names_dict_inv_util():
+    column_names_dict={'id':'Dash ID','NHTSA_ACTION_NUMBER':'NHTSA Number', 'MAKE':'Make','MODEL':'Model',
+        'YEAR':'Year','COMPNAME':'Component Name','MFR_NAME':'Manufacturer Name','ODATE':'Open Date',
+        'CDATE':'Close Date','CAMPNO':'Recall Campaign Number','SUBJECT':'Subject'}
+    return column_names_dict
 
 def queryToDict(query_data, column_names):
     db_row_list =[]
@@ -88,7 +99,7 @@ def search_criteria_dictionary_util(formDict):
     for i,j in match_type_dict.items():
         search_query_dict[i]=[list(search_query_dict[i])[0],j]
 
-    query_file_name='current_query_re.txt'
+    query_file_name='current_query_inv.txt'
     with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
         json.dump(search_query_dict,dict_file)
     print('END search_criteria_dictionary_util(formDict), returns query_file_name')

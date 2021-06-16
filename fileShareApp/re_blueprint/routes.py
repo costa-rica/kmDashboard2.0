@@ -17,19 +17,18 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.re_blueprint.utils import recalls_query_util, queryToDict, search_criteria_dictionary_util, \
-    update_recall, create_categories_xlsx, update_files_re
+    update_recall, create_categories_xlsx, update_files_re, column_names_dict_re_util, \
+    column_names_re_util
 import openpyxl
 from werkzeug.utils import secure_filename
 import json
 import glob
 import shutil
-
 from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountForm, \
     RequestResetForm, ResetPasswordForm
 import re
-
 import logging
-
+from fileShareApp.inv_blueprint.utils_general import category_list_dict_util
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -48,42 +47,22 @@ re_blueprint = Blueprint('re_blueprint', __name__)
 def search_recalls():
     print('*TOP OF def search_recalls()*')
     logger.info('in search_recalls page')
-
-
-    # column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
-        # 'ODATE','CDATE','CAMPNO','SUBJECT']
-    # column_names_dict={'id':'Dash ID','NHTSA_ACTION_NUMBER':'NHTSA Number', 'MAKE':'Make','MODEL':'Model',
-        # 'YEAR':'Year','COMPNAME':'Component Name','MFR_NAME':'Manufacturer Name','ODATE':'Open Date',
-        # 'CDATE':'Close Date','CAMPNO':'Recall Campaign Number','SUBJECT':'Subject'}
     
+    category_list =[y for x in category_list_dict_util().values() for y in x]
     
-    column_names=['RECORD_ID', 'CAMPNO', 'MAKETXT', 'MODELTXT', 'YEAR', 'MFGCAMPNO',
-       'COMPNAME', 'MFGNAME', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
-       'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
-       'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
-    # column_names=['RECORD_ID', 'CAMPNO', 'MAKETXT', 'MODELTXT', 'YEAR', 'MFGCAMPNO',
-       # 'COMPNAME', 'MFGNAME', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
-       # 'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA']
-    column_names_dict={'RECORD_ID':'Record ID','CAMPNO':'Recall Campaign Number','MAKETXT':'Make',
-        'MODELTXT':'Model','YEAR':'Year', 'COMPNAME':'Component Name',
-        'MFGNAME':'Manufacturer Name',
-        # 'BGMAN':'BGMAN',
-        # 'MFGCAMPNO':'MFGCAMPNO',
-        # 'ENDMAN':'ENDMAN',
-        # 'RCLTYPECD':'RCLTYPECD',
-        # 'POTAFF':'POTAFF',
-        'ODATE':'ODATE',
-        # 'INFLUENCED_BY':'INFLUENCED_BY',
-        # 'MFGTXT':'MFGTXT',
-        # 'RCDATE':'RCDATE',
-        # 'DATEA':'DATEA','RPNO':'RPNO', 'FMVSS':'FMVSS','DESC_DEFECT':'DESC_DEFECT',
-        'CONSEQUENCE_DEFCT':'CONSEQUENCE_DEFCT','CORRECTIVE_ACTION':'CORRECTIVE_ACTION','RCL_CMPT_ID':'RCL_CMPT_ID'}
+    column_names=column_names_re_util()
+    column_names_dict=column_names_dict_re_util()
     
+    if request.args.get('category_dict'):
+        category_dict=request.args.get('category_dict')
+    else:
+        category_dict={'category1':''}
     
     
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
         query_file_name=request.args.get('query_file_name')
+        print('query_file_name:::', query_file_name)
         recalls_query, search_criteria_dictionary = recalls_query_util(query_file_name)
         no_hits_flag = False
         if len(recalls_query) ==0:
@@ -102,31 +81,28 @@ def search_recalls():
     recalls_data = queryToDict(recalls_query, column_names)#List of dicts each dict is row
     
     #break data into smaller lists to paginate if number of returns greatere than inv_count_limit
-    investigation_count=len(recalls_data)
+    recall_count=len(recalls_data)
     if request.args.get('search_limit'):
         search_limit=int(request.args.get('search_limit'))
     else:
-        search_limit=100 #login default record loading
+        search_limit=recall_count+1#login default record loading <<<This will change limit
     recall_data_list=[]
     i=0
     loaded_dict = {}
-    print('1recall_data_list:::', len(recall_data_list))
-    while i*search_limit <investigation_count:
+
+    while i*search_limit <recall_count:
         recall_data_list.append(
             recalls_data[i * search_limit: (i +1) * search_limit])
-        if (i +1)* search_limit<=investigation_count:
+        if (i +1)* search_limit<=recall_count:
             loaded_dict[i]=f'[Loaded {i * search_limit} through {(i +1)* search_limit}]'
         else:
-            loaded_dict[i]=f'[Loaded {i * search_limit} through {investigation_count}]'
+            loaded_dict[i]=f'[Loaded {i * search_limit} through {recall_count}]'
         i+=1
-    if investigation_count==0:
+    if recall_count==0:
         recall_data_list=[['No data']]
         loaded_dict[i]='search returns no records'
     
 
-    
-    print('2recall_data_list:::', len(recall_data_list))
-    
     #Keep track of what page user was on
     if request.args.get('recall_data_list_page'):
         recall_data_list_page=int(request.args.get('recall_data_list_page'))
@@ -151,8 +127,6 @@ def search_recalls():
             disable_load_next = True
         
     
-    
-    #make a flag to disable load next
 
     #make make_list drop down options
     with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'make_list_recalls.txt')) as json_file:
@@ -185,17 +159,20 @@ def search_recalls():
         elif formDict.get('view'):
             re_id_for_dash=formDict.get('view')
             return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
+        elif formDict.get('add_category'):
+            new_category='category' + str(len(category_dict)+1)
+            category_dict[new_category]=''
+            query_file_name = search_criteria_dictionary_util(formDict)
+            return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                recall_data_list_page=0,search_limit=search_limit))
             
-    print('length of column names:::',len(column_names))
-    print('length of table data row 1:::', len(recall_data_list[int(recall_data_list_page)][0]))
-    print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
     return render_template('search_recalls.html',table_data = recall_data_list[int(recall_data_list_page)], 
         column_names_dict=column_names_dict, column_names=column_names,
         len=len, make_list = make_list, query_file_name=query_file_name,
         search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
-        investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
+        recall_count=f'{recall_count:,}', loaded_dict=loaded_dict,
         recall_data_list_page=recall_data_list_page, disable_load_previous=disable_load_previous,
-        disable_load_next=disable_load_next)
+        disable_load_next=disable_load_next, category_list=category_list,category_dict=category_dict)
 
 
 
@@ -266,12 +243,12 @@ def recalls_dashboard():
     re_entry_top2_list=zip(re_entry_top_names_list[19:],dash_re_list[19:])
     
     #make dictionary of category lists from excel file
-    categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
-    df=pd.read_excel(categories_excel)
-    category_list_dict={}
-    for i in range(0,len(df.columns)):
-        category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
-
+    # categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
+    # df=pd.read_excel(categories_excel)
+    # category_list_dict={}
+    # for i in range(0,len(df.columns)):
+        # category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
+    category_list_dict=category_list_dict_util()
     
     category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
 
@@ -364,13 +341,6 @@ def delete_file_re(re_id_for_dash,filename):
 
 
 
-@re_blueprint.route("/recall_categories", methods=["GET","POST"])
-@login_required
-def recall_categories():
-    excel_file_name=request.args.get('excel_file_name')
-
-    return send_from_directory(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER']),excel_file_name, as_attachment=True)
 
 
 
@@ -384,167 +354,3 @@ def recall_categories():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @main.route("/search_recalls", methods=["GET","POST"])
-# @login_required
-# def search_recalls_2():
-    # print('*TOP OF def search_recalls()*')
-    # logger.info('in search_recalls page')
-
-
-
-    # column_names=['RECORD_ID', 'CAMPNO', 'MAKETXT', 'MODELTXT', 'YEAR', 'MFGCAMPNO',
-       # 'COMPNAME', 'MFGNAME', 'BGMAN', 'ENDMAN', 'RCLTYPECD', 'POTAFF',
-       # 'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
-       # 'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','RCL_CMPT_ID']
-    # column_names_dict={'RECORD_ID':'Record ID','CAMPNO':'Recall Campaign Number','MAKETXT':'Make',
-        # 'MODELTXT':'Model','YEAR':'Year', 'COMPNAME':'Component Name',
-        # 'MFGNAME':'Manufacturer Name',
-        # 'BGMAN':'BGMAN',
-        # 'MFGCAMPNO':'MFGCAMPNO',
-        # 'ENDMAN':'ENDMAN',
-        # 'RCLTYPECD':'RCLTYPECD',
-        # 'POTAFF':'POTAFF',
-        # 'ODATE':'ODATE',
-        # 'INFLUENCED_BY':'INFLUENCED_BY',
-        # 'MFGTXT':'MFGTXT',
-        # 'RCDATE':'RCDATE',
-        # 'DATEA':'DATEA','RPNO':'RPNO', 'FMVSS':'FMVSS','DESC_DEFECT':'DESC_DEFECT',
-        # 'CONSEQUENCE_DEFCT':'CONSEQUENCE_DEFCT','CORRECTIVE_ACTION':'CORRECTIVE_ACTION','RCL_CMPT_ID':'RCL_CMPT_ID'}
-    
-    #make make_list drop down options
-    # with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'make_list_recalls.txt')) as json_file:
-        # make_list=json.load(json_file)
-        # json_file.close()
-    
-        #Get/identify query to run for table
-    # if request.args.get('query_file_name'):
-        # query_file_name=request.args.get('query_file_name')
-        # recalls_query, search_criteria_dictionary = recalls_query_util(query_file_name)
-        # no_hits_flag = False
-        # if len(recalls_query) ==0:
-            # no_hits_flag = True
-    # elif request.args.get('no_hits_flag')==True:
-        # recalls_query, search_criteria_dictionary = ([],{})
-    # else:
-        # query_file_name= 'default_query_inv.txt'
-        # recalls_query, search_criteria_dictionary = recalls_query_util(query_file_name)
-        # no_hits_flag = False
-        # if len(recalls_query) ==0:
-            # no_hits_flag = True      
-    
-
-    
-    #Make recalls to dictionary for bit table bottom of home screen
-    # recalls_data = queryToDict(recalls_query, column_names)#List of dicts each dict is row
-    
-    #break data into smaller lists to paginate if number of returns greatere than inv_count_limit
-    # investigation_count=len(recalls_data)
-    # if request.args.get('search_limit'):
-        # search_limit=int(request.args.get('search_limit'))
-    # else:
-        # search_limit=100 #login default record loading
-    # investigation_data_list=[]
-    # i=0
-    # loaded_dict = {}
-    # print('1investigation_data_list:::', len(investigation_data_list))
-    # while i*search_limit <investigation_count:
-        # investigation_data_list.append(
-            # recalls_data[i * search_limit: (i +1) * search_limit])
-        # if (i +1)* search_limit<=investigation_count:
-            # loaded_dict[i]=f'[Loaded {i * search_limit} through {(i +1)* search_limit}]'
-        # else:
-            # loaded_dict[i]=f'[Loaded {i * search_limit} through {investigation_count}]'
-        # i+=1
-    # if investigation_count==0:
-        # investigation_data_list=[['No data']]
-        # loaded_dict[i]='search returns no records'
-        
-        
-            
-    # print('2investigation_data_list:::', len(investigation_data_list))
-    
-    # Keep track of what page user was on
-    # if request.args.get('investigation_data_list_page'):
-        # investigation_data_list_page=int(request.args.get('investigation_data_list_page'))
-    # else:
-        # investigation_data_list_page=0
-
-    # make a flag to disable load previous
-    # if investigation_data_list_page == 0:
-        # disable_load_previous=True
-        # print('if investigation_data_list_page == 0:')
-        # if len(investigation_data_list)==1:
-            # disable_load_next = True
-        # else:
-            # disable_load_next = False
-            # print(' else disable_load_next = False')
-    # else:
-        # disable_load_previous=False
-        # if len(investigation_data_list)>investigation_data_list_page+1:
-            # disable_load_next = False
-            # print('if len(investigation_data_list)>investigation_data_list_page+1:')
-        # else:
-            # disable_load_next = True
-        
-    
-    # if request.method == 'POST':
-        # print('!!!!in POST method no_hits_flag:::', no_hits_flag)
-        # formDict = request.form.to_dict()
-        # print('formDict:::',formDict)
-        # search_limit=formDict.get('search_limit')
-        # if formDict.get('refine_search_button'):
-            # print('@@@@@@ refine_search_button')
-            # query_file_name = search_criteria_dictionary_util(formDict)
-            
-            # return redirect(url_for('main.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                # investigation_data_list_page=0,search_limit=search_limit))
-        # elif formDict.get('load_previous'):
-            # investigation_data_list_page=investigation_data_list_page-1
-            
-            # return redirect(url_for('main.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                # investigation_data_list_page=investigation_data_list_page,
-                # search_limit=search_limit))
-        # elif formDict.get('load_next'):
-            # investigation_data_list_page=investigation_data_list_page+1
-            
-            # return redirect(url_for('main.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                # investigation_data_list_page=investigation_data_list_page,
-                # search_limit=search_limit))            
-        # elif formDict.get('view'):
-            # re_id_for_dash=formDict.get('view')
-            # return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
-            
-    # print('3investigation_data_list:::', len(investigation_data_list), 'page::',investigation_data_list_page)
-    # print('search_criteria_dictionary loaded to page:', search_criteria_dictionary)
-
-    
-    # return render_template('search_recalls.html', table_data=investigation_data_list[int(investigation_data_list_page)], 
-        # column_names_dict=column_names_dict, column_names=column_names,
-        # len=len, make_list = make_list, query_file_name=query_file_name,
-        # search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
-        # investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
-        # investigation_data_list_page=investigation_data_list_page, disable_load_previous=disable_load_previous,
-        # disable_load_next=disable_load_next)
