@@ -8,7 +8,9 @@ elif os.environ.get('USER')=='sanjose':
     with open('/home/sanjose/Documents/environments/config.json') as config_file:
         config = json.load(config_file)
 else:
-    print('Error with ',os.path.abspath(os.getcwd()),'/config.py')
+    with open('/home/ubuntu/environments/config.json') as config_file:
+        config = json.load(config_file)
+
 
 
 class Config:
@@ -17,8 +19,8 @@ class Config:
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_PASSWORD = config.get('MAIL_PASSWORD_CBC')
-    MAIL_USERNAME = config.get('MAIL_USERNAME_CBC')
+    MAIL_PASSWORD = config.get('MAIL_PASSWORD_KM')
+    MAIL_USERNAME = config.get('MAIL_USERNAME_KM')
     DEBUG = True
     UPLOADED_FILES_FOLDER = os.path.join(os.path.dirname(__file__), 'static/files')
     UTILITY_FILES_FOLDER = os.path.join(os.path.dirname(__file__), 'static/utility_files')
