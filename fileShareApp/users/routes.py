@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
-    Response
+    Response, current_app, send_from_directory
 from fileShareApp import db, bcrypt, mail
 from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
@@ -18,7 +18,8 @@ import io
 from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
-from fileShareApp.users.utils import save_picture, send_reset_email, userPermission
+from fileShareApp.users.utils import save_picture, send_reset_email, userPermission, \
+    formatExcelHeader
 
 users = Blueprint('users', __name__)
 
@@ -141,3 +142,64 @@ def reset_token(token):
         flash(f'Your password has been updated! You are now able to login', 'success')
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', legend='Reset Password', form=form)
+
+
+
+
+@users.route('/database_page', methods=["GET","POST"])
+@login_required
+def database_page():
+    # form=DatabaseForm()
+    tableNamesList= db.engine.table_names()
+    legend='Database downloads'
+    if request.method == 'POST':
+        formDict = request.form.to_dict()
+        if formDict.get('downloadTables')=="True":
+            
+            # filesForDelete=glob.glob(os.path.join(current_app.config['FILES_DATABASE'], '*.xlsx'))
+            # for file in filesForDelete:
+                # os.remove(file)
+            
+            # if os.path.exists(os.path.join(current_app.config['FILES_DATABASE'], '*.xlsx')):
+            for file in os.listdir(current_app.config['FILES_DATABASE']):
+                os.remove(os.path.join(current_app.config['FILES_DATABASE'], file))
+            
+            
+            
+            timeStamp = datetime.now().strftime("%y%m%d_%H%M%S")
+            reportName=f"database_tables{timeStamp}.xlsx"
+            excelObj=pd.ExcelWriter(os.path.join(current_app.config['FILES_DATABASE'], reportName),
+                date_format='yyyy/mm/dd', datetime_format='yyyy/mm/dd')
+            workbook=excelObj.book
+            
+            dictKeyList=[i for i in list(formDict.keys()) if i in tableNamesList]
+            dfDictionary={h : pd.read_sql_table(h, db.engine) for h in dictKeyList}
+            for name, df in dfDictionary.items():
+                if len(df)>900000:
+                    flash(f'Too many rows in {name} table', 'warning')
+                    return render_template('database.html',legend=legend, tableNamesList=tableNamesList)
+                df.to_excel(excelObj,sheet_name=name, index=False)
+                worksheet=excelObj.sheets[name]
+                start_row=1
+                formatExcelHeader(workbook,worksheet, df, start_row)
+                if name=='dmrs':
+                    dmrDateFormat = workbook.add_format({'num_format': 'yyyy-mm-dd'})
+                    worksheet.set_column(1,1, 15, dmrDateFormat)
+                
+            print('path of reports:::',os.path.join(current_app.config['FILES_DATABASE'], 'static/reports/'))
+            excelObj.close()
+            return send_from_directory(current_app.config['FILES_DATABASE'],reportName, as_attachment=True)
+
+        # elif formDict.get('uploadExcel'):
+            # formDict = request.form.to_dict()
+            # print(formDict)
+            # uploadData=request.files['excelFileUpload']
+            # excelFileName=uploadData.filename
+            # uploadData.save(os.path.join(current_app.root_path, 'static', excelFileName))
+            # wb = openpyxl.load_workbook(uploadData)
+            # sheetNames=json.dumps(wb.sheetnames)
+            # tableNamesList=json.dumps(tableNamesList)
+
+            # return redirect(url_for('users.databaseUpload',legend=legend,tableNamesList=tableNamesList,
+                # sheetNames=sheetNames, excelFileName=excelFileName))
+    return render_template('database_page.html', legend=legend, tableNamesList=tableNamesList)

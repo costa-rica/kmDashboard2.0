@@ -8,7 +8,7 @@
 
         
                 
-        <form method="POST" action="" enctype="multipart/form-data">
+    <form method="POST" action="" enctype="multipart/form-data">
             <div class="search_heading_re">
                 <h4>Search <u><b>Recalls</b></u></h4>
             </div>
@@ -82,52 +82,52 @@
                         {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "exact"-->
                         </div>
                     {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->
-                {% endfor %}<!-- { for criteria in column_names } -->
+                    {% endfor %}<!-- { for criteria in column_names } -->
                 
 
-<!-- Add Categories search input box-->
-                {% for x,y in category_dict.items() %}
-                    <div class="label_search_form">
-                        KM {{ x }}:
-                    </div>
-                    <div class="text_search_form">
-                        <input type="text" class="text_input" name="{{ 'sc_' + x }}"  list="categoryList"
-                            value= "{{ y.0 }}">
-                        <datalist id="categoryList">
-                            {% for i in category_list %}
-                                <option>{{ i }}</option>
-                            {% endfor %}
-                        </datalist>
-                    </div>
-                    {% if len(category_dict)>1 %}
-                    <div class="checkbox_search_form">
-                        <!--No checkbox becuase it would be very difficult to exact filter on column with so much csv data-->
-                        <input type="submit" class="search_remove_category_button" name="remove_category" value="{{ x }}">
-                    </div>
-                    {% else %}
+                    <!-- Add Categories search input box-->
+                    {% for x,y in category_dict.items() %}
+                        <div class="label_search_form">
+                            KM {{ x }}:
+                        </div>
+                        <div class="text_search_form">
+                            <input type="text" class="text_input" name="{{ 'sc_' + x }}"  list="categoryList"
+                                value= "{{ y.0 }}">
+                            <datalist id="categoryList">
+                                {% for i in category_list %}
+                                    <option>{{ i }}</option>
+                                {% endfor %}
+                            </datalist>
+                        </div>
+                        {% if len(category_dict)>1 %}
+                        <div class="checkbox_search_form">
+                            <!--No checkbox becuase it would be very difficult to exact filter on column with so much csv data-->
+                            <input type="submit" class="search_remove_category_button" name="remove_category" value="{{ x }}">
+                        </div>
+                        {% else %}
+                        <div></div>
+                        {% endif %}
+                    {% endfor %}
                     <div></div>
-                    {% endif %}
-                {% endfor %}
-                <div></div>
-                <div>
-                    
-                    <input type="submit" class="search_add_category_button" name="add_category" 
-                        value="Add Category">
+                    <div>
+                        
+                        <input type="submit" class="search_add_category_button" name="add_category" 
+                            value="Add Category">
+                    </div>
+                
+
+
                 </div>
                 
-
-
+                <div class="search_button">
+                    <input type="submit" name="refine_search_button" value="Refine Search">
+                </div>
             </div>
-            
-            <div class="search_button">
-                <input type="submit" name="refine_search_button" value="Refine Search">
-            </div>
-        </div>
-        <!--
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
-            Save Search
-        </button>
-        -->
+            <!--
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
+                Save Search
+            </button>
+            -->
 
 
 

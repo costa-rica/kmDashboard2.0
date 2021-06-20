@@ -37,15 +37,15 @@
                             <div class="checkbox_search_form">
                             {% if search_criteria_dictionary.get(db_name).1 == "less_than" %}
                                 <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" checked=true> Less Than
-                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact Match
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact
                                 <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" > Greater Than
                             {% elif search_criteria_dictionary.get(db_name).1 == "greater_than" %}
                                 <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" > Less Than
-                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact Match
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact
                                 <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" checked=true> Greater Than                           
                             {% else %}
                                 <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than"> Less Than
-                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact Match
+                                <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact
                                 <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than"> Greater Than
                             {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "less_than"; get(criteria).1 == "greater_than" -->
                             </div>
@@ -74,9 +74,9 @@
 
                             <div class="checkbox_search_form">
                             {% if search_criteria_dictionary.get(criteria).1 == "exact" %}
-                                <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact Match
+                                <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact
                                 {% else %}
-                                <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact"> Exact Match
+                                <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact"> Exact
                             {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "exact"-->
                             </div>
                         {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->

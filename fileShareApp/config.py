@@ -23,6 +23,7 @@ class Config:
     MAIL_USERNAME = config.get('MAIL_USERNAME_KM')
     DEBUG = True
     UPLOADED_FILES_FOLDER = os.path.join(os.path.dirname(__file__), 'static/files')
-    UTILITY_FILES_FOLDER = os.path.join(os.path.dirname(__file__), 'static/utility_files')
+    UTILITY_FILES_FOLDER = os.path.join(os.path.dirname(__file__), 'static/files_utility')
     QUERIES_FOLDER = os.path.join(os.path.dirname(__file__), 'static/queries')
+    FILES_DATABASE = os.path.join(os.path.dirname(__file__), 'static/files_database')
     
