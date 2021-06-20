@@ -149,16 +149,12 @@ def reset_token(token):
 @users.route('/database_page', methods=["GET","POST"])
 @login_required
 def database_page():
-    # form=DatabaseForm()
+
     tableNamesList= db.engine.table_names()
     legend='Database downloads'
     if request.method == 'POST':
         formDict = request.form.to_dict()
         if formDict.get('downloadTables')=="True":
-            
-            # filesForDelete=glob.glob(os.path.join(current_app.config['FILES_DATABASE'], '*.xlsx'))
-            # for file in filesForDelete:
-                # os.remove(file)
             
             # if os.path.exists(os.path.join(current_app.config['FILES_DATABASE'], '*.xlsx')):
             for file in os.listdir(current_app.config['FILES_DATABASE']):
@@ -188,8 +184,8 @@ def database_page():
                 
             print('path of reports:::',os.path.join(current_app.config['FILES_DATABASE'], 'static/reports/'))
             excelObj.close()
-            return send_from_directory(current_app.config['FILES_DATABASE'],reportName, as_attachment=True)
-
+            # return send_from_directory(current_app.config['FILES_DATABASE'],reportName, as_attachment=True)
+        return send_from_directory(current_app.config['FILES_DATABASE'],reportName, as_attachment=True)
         # elif formDict.get('uploadExcel'):
             # formDict = request.form.to_dict()
             # print(formDict)
