@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+
+{% block main %}
+
+<form method="POST" action="" enctype="multipart/form-data">
+Database page
+{% for table in tableNamesList %}
+<input type="checkbox" id={{ table }} name={{ table }} value=True>
+<label for={{ table }}> {{ table }}</label><br>
+{% endfor %}
+
+<button type="submit" class="btn btn-primary" name="downloadTables" value=True>Download tables</button>
+<br/>
+	
+</form>
+{% endblock %}

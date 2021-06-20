@@ -58,3 +58,18 @@ def send_reset_email(user):
 If you did not make this request, ignore email and there will be no change
 '''
     mail.send(msg)
+    
+    
+    
+#return excel files formatted
+def formatExcelHeader(workbook,worksheet, df, startRow):
+    header_format = workbook.add_format({
+        'bold': True,
+        'text_wrap': True,
+        'valign': 'top',
+        'align':'center',
+        'border': 0})
+    for col_num, value in enumerate(df.columns.values):
+        worksheet.write(startRow, col_num, value,header_format)
+        width=len(value)+1 if len(value)>8 else 8
+        worksheet.set_column(col_num,col_num,width)

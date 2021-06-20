@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
-    Response
+    Response, current_app, send_from_directory
 from fileShareApp import db, bcrypt, mail
 from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
@@ -18,7 +18,8 @@ import io
 from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
-from fileShareApp.users.utils import save_picture, send_reset_email, userPermission
+from fileShareApp.users.utils import save_picture, send_reset_email, userPermission, \
+    formatExcelHeader
 
 users = Blueprint('users', __name__)
 
@@ -141,3 +142,60 @@ def reset_token(token):
         flash(f'Your password has been updated! You are now able to login', 'success')
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', legend='Reset Password', form=form)
+
+
+@users.route('/database_page',methods = ["GET","POST"])
+def database_page():
+    tableNamesList= db.engine.table_names()
+    legend='Database downloads'
+    if request.method == 'POST':
+        formDict = request.form.to_dict()
+        if formDict.get('downloadTables')=="True":
+        
+            timeStamp = datetime.now().strftime("%y%m%d_%H%M%S")
+            reportName=f"database_tables{timeStamp}.xlsx"
+            excelObj=pd.ExcelWriter(os.path.join(current_app.config['DATABASE_FILES_FOLDER'], reportName),
+                date_format='yyyy/mm/dd', datetime_format='yyyy/mm/dd')
+            workbook=excelObj.book
+            
+            dictKeyList=[i for i in list(formDict.keys()) if i in tableNamesList]
+            dfDictionary={h : pd.read_sql_table(h, db.engine) for h in dictKeyList}
+            for name, df in dfDictionary.items():
+                if len(df)>900000:
+                    flash(f'Too many rows in {name} table', 'warning')
+                    return redirect(url_for('users.database_page',legend=legend,tableNamesList=tableNamesList,
+                        sheetNames=sheetNames, excelFileName=excelFileName))
+                
+                df.to_excel(excelObj,sheet_name=name, index=False)
+                worksheet=excelObj.sheets[name]
+                start_row=0
+                formatExcelHeader(workbook,worksheet, df, start_row)
+                # if name=='dmrs':
+                    # dmrDateFormat = workbook.add_format({'num_format': 'yyyy-mm-dd'})
+                    # worksheet.set_column(1,1, 15, dmrDateFormat)
+
+            path_name=r"D:\\OneDrive\\Documents\\professional\\20210610kmDashboard2.0\\fileShareApp\\static\\files_database"
+            # print('path of reports:::',os.path.join(path_name,reportName))
+            excelObj.close()
+            return send_from_directory(current_app.config['DATABASE_FILES_FOLDER'],str(reportName), as_attachment=True)
+
+            
+            return send_from_directory(path_name,reportName, as_attachment=True)
+            # return send_from_directory(os.path.join(current_app.config['UTILITY_FILES_FOLDER']),'Investigation_files.zip', as_attachment=True)
+
+
+
+        # elif formDict.get('uploadExcel'):
+            # formDict = request.form.to_dict()
+            # print(formDict)
+            # uploadData=request.files['excelFileUpload']
+            # excelFileName=uploadData.filename
+            # uploadData.save(os.path.join(current_app.root_path, 'static', excelFileName))
+            # wb = openpyxl.load_workbook(uploadData)
+            # sheetNames=json.dumps(wb.sheetnames)
+            # tableNamesList=json.dumps(tableNamesList)
+
+            # return redirect(url_for('users.database_page',legend=legend,tableNamesList=tableNamesList,
+                # sheetNames=sheetNames, excelFileName=excelFileName))
+    
+    return render_template('database_page.html', tableNamesList=tableNamesList)
