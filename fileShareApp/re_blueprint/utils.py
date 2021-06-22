@@ -107,7 +107,8 @@ def recalls_query_util(query_file_name):
                 recalls = recalls.filter(getattr(Recalls,i)>j[0])
         elif j[1] =="string_contains" and j[0]!='':
             recalls = recalls.filter(getattr(Recalls,i).contains(j[0]))
-    # recalls=recalls.filter(getattr(recalls,'YEAR')>2015).all()
+    recalls=recalls.filter(getattr(Recalls,'ODATE')>="2011-01-01")
+    
     recalls=recalls.all()
     msg="""END recalls_query_util(query_file_name), returns recalls,
 search_criteria_dict. len(recalls) is 
@@ -146,12 +147,7 @@ def search_criteria_dictionary_util(formDict):
 def update_recall(dict, **kwargs):
     print('START update_recall')
     date_flag=False
-    # print('in updateInvestigation - dict:::',dict,'kwargs:::',kwargs)
-    # formToDbCrosswalkDict = {'inv_number':'NHTSA_ACTION_NUMBER','inv_make':'MAKE',
-        # 'inv_model':'MODEL','inv_year':'YEAR','inv_compname':'COMPNAME',
-        # 'inv_mfr_name': 'MFR_NAME', 'inv_odate': 'ODATE', 'inv_cdate': 'CDATE',
-        # 'inv_campno':'CAMPNO','inv_subject': 'SUBJECT', 'inv_summary_textarea': 'SUMMARY',
-        # 'inv_km_notes_textarea': 'km_notes', 'investigation_file': 'files'}
+
 
     formToDbCrosswalkDict ={'re_Record ID':'RECORD_ID','re_CAMPNO':'CAMPNO',
         're_MFGCAMPNO':'MFGCAMPNO','re_COMPNAME':'COMPNAME','re_BGMAN':'BGMAN',
@@ -172,17 +168,18 @@ def update_recall(dict, **kwargs):
         're_DATEA', 're_RPNO', 're_FMVSS', 're_DESC_DEFECT', 're_CONSEQUENCE_DEFCT',
         're_CORRECTIVE_ACTION', 're_NOTES', 're_RCL_CMPT_ID', 're_Make', 're_Model', 're_Year',
         're_Manufacturer Name', 're_Open Date']
-    not_category_list=['re_km_notes_textarea','update_re','verified_by_user']
+    not_category_list=['re_km_notes_textarea','update_re','verified_by_user','recall_file']
     assigned_categories=''
     for i in dict:
         if i not in no_update_list + not_category_list:
+            print('dict value in assigned category:::',i)
             if assigned_categories=='':
                 assigned_categories=i
             else:
                 assigned_categories=assigned_categories +', '+ i
     
     update_data['categories']=assigned_categories
-    
+    print('assigned_categories:::', assigned_categories)
     
     existing_data = db.session.query(Recalls).get(kwargs.get('re_id_for_dash'))
     Recalls_attr=['km_notes', 'categories']
@@ -190,25 +187,32 @@ def update_recall(dict, **kwargs):
     #loop over existing data attributes
     print('update_data:::', update_data)
     
+    
+    
+    
     for i in Recalls_attr:
-        if update_data.get(i):
-            print('for i in Recalls_attr - loop::',i)
-            if str(getattr(existing_data, i)) != update_data.get(i):
-                
-                print('This should get triggered when updateing summary')
-                at_least_one_field_changed = True
-                newTrack= Tracking_re(field_updated=i,updated_from=getattr(existing_data, i),
-                    updated_to=update_data.get(i), updated_by=current_user.id,
-                    recalls_table_id=kwargs.get('re_id_for_dash'))
-                db.session.add(newTrack)
-                # print('added ',i,'==', update_data.get(i),' to KmTracker')
-                #Actually change database data here:
-                setattr(existing_data, i ,update_data.get(i))
 
-                # print('updated investigations table with ',i,'==', update_data.get(i))
-                db.session.commit()
+        if str(getattr(existing_data, i)) != update_data.get(i):
+            if update_data.get(i)==None:
+                update_value=''
             else:
-                print(i, ' has no change')
+                update_value=update_data.get(i)                
+            
+            at_least_one_field_changed = True
+            
+            #Track change in Track_inv table here
+            newTrack= Tracking_re(field_updated=i,updated_from=getattr(existing_data, i),
+                updated_to=update_data.get(i), updated_by=current_user.id,
+                recalls_table_id=kwargs.get('re_id_for_dash'))
+            db.session.add(newTrack)
+            
+            #Actually change database data here:
+            setattr(existing_data, i ,update_data.get(i))
+
+            # print('updated investigations table with ',i,'==', update_data.get(i))
+            db.session.commit()
+        else:
+            print(i, ' has no change')
 
     if dict.get('verified_by_user'):
         if any(current_user.email in s for s in kwargs.get('verified_by_list')):

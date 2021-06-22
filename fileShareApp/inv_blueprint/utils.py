@@ -90,8 +90,13 @@ def investigations_query_util(query_file_name):
                 investigations = investigations.filter(getattr(Investigations,i)>j[0])
         elif j[1] =="string_contains" and j[0]!='':
             investigations = investigations.filter(getattr(Investigations,i).contains(j[0]))
-    # investigations=investigations.filter(getattr(Investigations,'YEAR')>2015).all()
+    print('filtered all investigations except Odate restriction ::', len(investigations.all()))
+    investigations=investigations.filter(getattr(Investigations,'ODATE')>="2011-01-01")
+    
+    print('filtered all investigations::', len(investigations.all()))
     investigations=investigations.all()
+    print('filtered complte')
+    
     msg="""END investigations_query_util(query_file_name), returns investigations,
 search_criteria_dict. len(investigations) is 
     """
@@ -126,7 +131,7 @@ def search_criteria_dictionary_util(formDict):
     
 def updateInvestigation(formDict, **kwargs):
     date_flag=False
-    print('in updateInvestigation - formDict:::',formDict,'kwargs:::',kwargs)
+    print('START investigation UPdate')
     formToDbCrosswalkDict = {'inv_number':'NHTSA_ACTION_NUMBER','inv_make':'MAKE',
         'inv_model':'MODEL','inv_year':'YEAR','inv_compname':'COMPNAME',
         'inv_mfr_name': 'MFR_NAME', 'inv_odate': 'ODATE', 'inv_cdate': 'CDATE',
@@ -145,6 +150,7 @@ def updateInvestigation(formDict, **kwargs):
     assigned_categories=''
     for i in formDict:
         if i not in no_update_list + not_category_list:
+            print('dict value in assigned category:::',i)
             if assigned_categories=='':
                 assigned_categories=i
             else:
@@ -155,8 +161,11 @@ def updateInvestigation(formDict, **kwargs):
     #database columns to potentially update
     Investigations_attr=['km_notes','files', 'categories']
     at_least_one_field_changed = False
+    print('update data:::', update_data)
+    
     
     for i in Investigations_attr:
+    
         if str(getattr(existing_data, i)) != update_data.get(i):
             if update_data.get(i)==None:
                 update_value=''

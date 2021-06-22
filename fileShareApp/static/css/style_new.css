@@ -633,10 +633,15 @@ section.dashboard .checkbox_group {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  font-size: .7em;
 }
 
 section.dashboard .checkbox_group > label {
   text-align: left;
+}
+
+section.dashboard .btn_yellow {
+  color: black;
 }
 
 section.dashboard .inv_update {

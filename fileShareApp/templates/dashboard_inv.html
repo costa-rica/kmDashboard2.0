@@ -50,6 +50,12 @@
                 Summary:
                 <textarea class="" name="inv_summary_textarea"  row=3 readonly>{{ dash_inv_list[10] }}</textarea>
             </label>
+            {% if dash_inv_list[14] %}
+            <label class="inv_summary">
+                Assigned Categories:
+                <textarea class="" name="inv_summary_textarea"  row=3 readonly>{{ str(dash_inv_list[14])[1:-1] }}</textarea>
+            </label>
+            {% endif %}
 
             <label class="inv_km_notes">
                 KM Notes:

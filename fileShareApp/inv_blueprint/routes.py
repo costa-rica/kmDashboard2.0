@@ -245,8 +245,17 @@ def investigations_dashboard():
         dash_inv_categories=[i.strip() for i in dash_inv_categories]
         print('dash_inv_categories:::',dash_inv_categories)
     
+    # if dash_inv.ODATE='':
+        # dash_inv_ODATE=''
+    # else:
+        # dash_inv_ODATE=dash_inv.ODATE.strftime("%Y-%m-%d")
+
+    dash_inv_ODATE=None if dash_inv.ODATE ==None else dash_inv.ODATE.strftime("%Y-%m-%d")
+    dash_inv_CDATE=None if dash_inv.CDATE ==None else dash_inv.CDATE.strftime("%Y-%m-%d")
+    
+    
     dash_inv_list = [dash_inv.NHTSA_ACTION_NUMBER,dash_inv.MAKE,dash_inv.MODEL,dash_inv.YEAR,
-        dash_inv.ODATE.strftime("%Y-%m-%d"),dash_inv.CDATE.strftime("%Y-%m-%d"),dash_inv.CAMPNO,
+        dash_inv_ODATE,dash_inv_CDATE,dash_inv.CAMPNO,
         dash_inv.COMPNAME, dash_inv.MFR_NAME, dash_inv.SUBJECT, dash_inv.SUMMARY,
         dash_inv.km_notes, dash_inv.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_inv_files,
         dash_inv_categories]
@@ -264,8 +273,14 @@ def investigations_dashboard():
         # category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
     category_list_dict=category_list_dict_util()
     
+    print('category_list_dict.keys():::', category_list_dict.keys())
+    
     category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
-
+    
+    # check_group='Door Zone'
+    # for i,j in category_group_dict_no_space.items()
+        # if any item in cat_list_dict then 
+        # if i==category_list_dict
     
     
     if request.method == 'POST':

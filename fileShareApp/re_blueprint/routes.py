@@ -235,11 +235,17 @@ def recalls_dashboard():
         dash_re_categories=[i.strip() for i in dash_re_categories]
         print('dash_re_categories:::',dash_re_categories)
     
+    dash_re_BGMAN=None if dash_re.BGMAN==None else dash_re.BGMAN.strftime("%Y-%m-%d")
+    dash_re_ODATE= None if dash_re.ODATE == None else dash_re.ODATE.strftime("%Y-%m-%d")
+    dash_re_RCDATE=None if dash_re.RCDATE==None else dash_re.RCDATE.strftime("%Y-%m-%d")
+    dash_re_DATEA=None if dash_re.DATEA==None else dash_re.DATEA.strftime("%Y-%m-%d")
+    
+    
     dash_re_list = [dash_re.RECORD_ID, dash_re.CAMPNO, dash_re.MAKETXT, dash_re.MODELTXT, dash_re.YEAR,
-        dash_re.MFGCAMPNO, dash_re.COMPNAME, dash_re.MFGNAME, dash_re.BGMAN.strftime("%Y-%m-%d"),
-        dash_re.ENDMAN, dash_re.RCLTYPECD, dash_re.POTAFF, dash_re.ODATE.strftime("%Y-%m-%d"),
-        dash_re.INFLUENCED_BY, dash_re.MFGTXT, dash_re.RCDATE.strftime("%Y-%m-%d"), 
-        dash_re.DATEA.strftime("%Y-%m-%d"), dash_re.RPNO, dash_re.FMVSS, dash_re.DESC_DEFECT, dash_re.CONSEQUENCE_DEFCT,
+        dash_re.MFGCAMPNO, dash_re.COMPNAME, dash_re.MFGNAME, dash_re_BGMAN,
+        dash_re.ENDMAN, dash_re.RCLTYPECD, dash_re.POTAFF, dash_re_ODATE,
+        dash_re.INFLUENCED_BY, dash_re.MFGTXT, dash_re_RCDATE, 
+        dash_re_DATEA, dash_re.RPNO, dash_re.FMVSS, dash_re.DESC_DEFECT, dash_re.CONSEQUENCE_DEFCT,
         dash_re.CORRECTIVE_ACTION,dash_re.NOTES, dash_re.RCL_CMPT_ID,dash_re.km_notes,
         dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files, dash_re_categories]
 
@@ -274,9 +280,9 @@ def recalls_dashboard():
         filesDict = request.files.to_dict()
         
         if formDict.get('update_re'):
-            print('formDict:::',formDict)
+            # print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
-            print('filesDict::::',filesDict)
+            # print('filesDict::::',filesDict)
             update_recall(formDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
 
             if request.files.get('recall_file'):

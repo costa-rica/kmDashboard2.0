@@ -456,9 +456,14 @@ section.dashboard {
     }
     .checkbox_group {
         display:flex;
+        font-size: .7em;
+        
     }
     .checkbox_group > label {
         text-align: left;
+    }
+    .btn_yellow {
+        color: black;
     }
     .inv_update {
         grid-area: inv_update;
