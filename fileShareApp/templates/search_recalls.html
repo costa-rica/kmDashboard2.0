@@ -13,13 +13,138 @@
                 <h4>Search <u><b>Recalls</b></u></h4>
             </div>
             
+<div class="rows_search_form_2">
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+
+
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+
+
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+    <div class="dict_serach_2">
+        <div class="label_search_form">
+            Label
+        </div>
+        <div class="text_search_form">
+            <input type="text">
+        </div>
+        <div class="checkbox_search_form">
+            <input type="radio" name="{{ 'match_type_' }}" value="less_than" checked=true> Less Than
+            <input type="radio" name="{{ 'match_type_' }}" value="exact" > Exact
+            <input type="radio" name="{{ 'match_type_'}}" value="greater_than" > Greater Than
+        </div>
+    </div>
+
+
+</div>
+
+
             <div class="rows_search_form">
-                <div class="dict_search">
-                    {% for db_name, criteria in column_names_dict.items() %}
-                        {% if db_name in ('RECORD_ID','ODATE', 'CDATE','YEAR', 'RCDATE', 'DATEA', 'BGMAN', 'ENDMAN') %}
+                
+                {% for db_name, criteria in column_names_dict.items() %}
+
+                    {% if db_name in ('RECORD_ID','ODATE', 'CDATE','YEAR', 'RCDATE', 'DATEA', 'BGMAN', 'ENDMAN') %}
+                    <div class="dict_search">
                         <div class="label_search_form">
                             {{ criteria }}
                         </div>
+
                         {% if db_name == 'RECORD_ID' %}
                         <div class="text_search_form">
                             <input type="text" class="" name="{{ 'sc_' + db_name }}" 
@@ -51,12 +176,12 @@
                             <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than"> Greater Than
                         {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "less_than"; get(criteria).1 == "greater_than" -->
                         </div>
-                    
-                    {% else %}
+                    </div>
+                {% else %}
+                    <div class="dict_search">
                         <div class="label_search_form">
                             {{ criteria }}
                         </div>
-                        
                         {% if db_name == 'MAKETXT' %}
                         <div class="text_search_form">
                             <input type="text" class="text_input" name="{{ 'sc_' + db_name }}"  list="makeList"
@@ -81,48 +206,51 @@
                             <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact"> Exact
                         {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "exact"-->
                         </div>
-                    {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->
-                    {% endfor %}<!-- { for criteria in column_names } -->
-                
-
-                    <!-- Add Categories search input box-->
-                    {% for x,y in category_dict.items() %}
-                        <div class="label_search_form">
-                            KM {{ x }}:
-                        </div>
-                        <div class="text_search_form">
-                            <input type="text" class="text_input" name="{{ 'sc_' + x }}"  list="categoryList"
-                                value= "{{ y.0 }}">
-                            <datalist id="categoryList">
-                                {% for i in category_list %}
-                                    <option>{{ i }}</option>
-                                {% endfor %}
-                            </datalist>
-                        </div>
-                        {% if len(category_dict)>1 %}
-                        <div class="checkbox_search_form">
-                            <!--No checkbox becuase it would be very difficult to exact filter on column with so much csv data-->
-                            <input type="submit" class="search_remove_category_button" name="remove_category" value="{{ x }}">
-                        </div>
-                        {% else %}
-                        <div></div>
-                        {% endif %}
-                    {% endfor %}
-                    <div></div>
-                    <div>
-                        
-                        <input type="submit" class="search_add_category_button" name="add_category" 
-                            value="Add Category">
                     </div>
+                {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->
                 
+                {% endfor %}<!-- { for criteria in column_names } -->
+            
 
-
+                <!-- Add Categories search input box-->
+                {% for x,y in category_dict.items() %}
+                <div class="dict_search">
+                    <div class="label_search_form">
+                        KM {{ x }}:
+                    </div>
+                    <div class="text_search_form">
+                        <input type="text" class="text_input" name="{{ 'sc_' + x }}"  list="categoryList"
+                            value= "{{ y.0 }}">
+                        <datalist id="categoryList">
+                            {% for i in category_list %}
+                                <option>{{ i }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    {% if len(category_dict)>1 %}
+                    <div class="checkbox_search_form">
+                        <!--No checkbox becuase it would be very difficult to exact filter on column with so much csv data-->
+                        <input type="submit" class="search_remove_category_button" name="remove_category" value="{{ x }}">
+                    </div>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+                {% endfor %}
+                <div></div>
+                <div>
+                    
+                    <input type="submit" class="search_add_category_button" name="add_category" 
+                        value="Add Category">
                 </div>
+                </div>
+
+
                 
+            </div>
                 <div class="search_button">
                     <input type="submit" name="refine_search_button" value="Refine Search">
                 </div>
-            </div>
+            
             <!--
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
                 Save Search
