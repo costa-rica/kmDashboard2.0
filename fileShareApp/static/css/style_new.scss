@@ -246,18 +246,21 @@ section.search {
 
     .dict_search {
         /* new -START */
-        max-width: fit-content;
+        max-width: 30em;
+        min-width: 16em;
         padding: .2em;
-        border-color:rgb(182, 182, 182);
+        border-color:rgb(82, 82, 82);
         border-style: solid;
         border-radius: 1em;
+        background: tan;
         /* new - END */
-        
+
         /* old
         display: grid;
         grid-template-columns: 20% 21% auto;
         */
     }
+
     /*
     .dict_search div:nth-child(3n-2) {
         
@@ -285,49 +288,6 @@ section.search {
             font-size: .8em;
         }
     }
-/*START TESTING rows_search_form*/
-    .rows_search_form_2 {
-        
-        justify-items: center;
-        display: grid;
-        
-        
-        grid-template-columns: 1fr 1fr 1fr;
-        /*
-        grid-auto-flow: column;
-        grid-gap: 20px;
-        
-        */
-        /*
-        display: flex;
-        
-        flex-direction: column;
-        flex-wrap: wrap;
-        height: 240px;
-        align-content: flex-start;
-        */
-        .checkbox_search_form{
-            font-size: .8em;
-            
-        }
-        .label_search_form{
-            font-size: .8em;
-        }
-    }
-
-
-
-    
-    .dict_serach_2 {
-        max-width: fit-content;
-        padding: .2em;
-        border-color:rgb(182, 182, 182);
-        border-style: solid;
-        border-radius: 1em;
-
-    }
-
-/*END TESTING rows_search_form*/
 }
 
 
