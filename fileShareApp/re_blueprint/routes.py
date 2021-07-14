@@ -57,6 +57,9 @@ def search_recalls():
     else:
         category_dict={'category1':''}
     
+    #user_list for searching userlist
+    user_list=db.session.query(Tracking_re.updated_to).filter(Tracking_re.field_updated=='verified_by_user').distinct().all()
+    user_list=[i[0] for i in user_list]
     
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
@@ -181,7 +184,8 @@ def search_recalls():
         search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
         recall_count=f'{recall_count:,}', loaded_dict=loaded_dict,
         recall_data_list_page=recall_data_list_page, disable_load_previous=disable_load_previous,
-        disable_load_next=disable_load_next, category_list=category_list,category_dict=category_dict)
+        disable_load_next=disable_load_next, category_list=category_list,category_dict=category_dict,
+        user_list=user_list)
 
 
 

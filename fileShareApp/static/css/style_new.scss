@@ -225,6 +225,7 @@ section.search {
         width:85%;
     }
 
+
     .search_heading_inv  {
         b {color: rgb(214, 116, 36);}
     }
@@ -240,13 +241,20 @@ section.search {
         padding-right: 2%;
     }
     .text_search_form {
-        width:100%;
+        input {
+            width: 250px;
+            height: 20px;
+            font-size: small;
+        }
+        
     }
 
 
     .dict_search {
         display: grid;
         grid-template-columns: 20% 21% auto;
+        height: 20px;
+
         /*grid-template-columns: repeat(auto-fill,
             minmax(19rem, 1fr), minmax(19rem, 1fr));*/
     }
@@ -255,8 +263,10 @@ section.search {
         justify-self: end;
         padding-right: 2%;
         padding-top:1em;
+       
+        height:20px;
     }
-    
+
     .search_limit_form {
         background: rgb(200,200,200);
         padding-top: 1em;
@@ -264,15 +274,20 @@ section.search {
         padding-left:.2em;
     }
     .rows_search_form {
+        
         .checkbox_search_form{
             font-size: .8em;
-            
+            padding-left: 5px;
+            margin-top:5px;
         }
         .label_search_form{
             font-size: .8em;
+            margin-top:-10px;
         }
     }
-
+    .add_cateogry_button{
+        padding-left: 300px;
+    }
 }
 
 

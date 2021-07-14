@@ -344,8 +344,10 @@ section.search .custom_search div:nth-child(3n-2) {
   padding-right: 2%;
 }
 
-section.search .text_search_form {
-  width: 100%;
+section.search .text_search_form input {
+  width: 250px;
+  height: 20px;
+  font-size: small;
 }
 
 section.search .dict_search {
@@ -353,6 +355,7 @@ section.search .dict_search {
   display: grid;
   -ms-grid-columns: 20% 21% auto;
       grid-template-columns: 20% 21% auto;
+  height: 20px;
   /*grid-template-columns: repeat(auto-fill,
             minmax(19rem, 1fr), minmax(19rem, 1fr));*/
 }
@@ -362,6 +365,7 @@ section.search .dict_search div:nth-child(3n-2) {
       justify-self: end;
   padding-right: 2%;
   padding-top: 1em;
+  height: 20px;
 }
 
 section.search .search_limit_form {
@@ -373,10 +377,17 @@ section.search .search_limit_form {
 
 section.search .rows_search_form .checkbox_search_form {
   font-size: .8em;
+  padding-left: 5px;
+  margin-top: 5px;
 }
 
 section.search .rows_search_form .label_search_form {
   font-size: .8em;
+  margin-top: -10px;
+}
+
+section.search .add_cateogry_button {
+  padding-left: 300px;
 }
 
 .table_contents {
