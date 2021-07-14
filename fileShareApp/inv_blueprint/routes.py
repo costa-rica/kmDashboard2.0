@@ -16,7 +16,7 @@ import io
 from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
-from fileShareApp.inv_blueprint.utils import investigations_query_util, queryToDict, search_criteria_dictionary_util, \
+from fileShareApp.inv_blueprint.utils import investigations_query_util, queryToDict, \
     updateInvestigation, create_categories_xlsx, update_files, existing_report, column_names_inv_util, \
     column_names_dict_inv_util
 import openpyxl
@@ -28,7 +28,7 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
     RequestResetForm, ResetPasswordForm
 import re
 import logging
-from fileShareApp.inv_blueprint.utils_general import category_list_dict_util
+from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, search_criteria_dictionary_util
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -142,7 +142,7 @@ def search_investigations():
         search_limit=formDict.get('search_limit')
         if formDict.get('refine_search_button'):
             print('@@@@@@ refine_search_button')
-            query_file_name = search_criteria_dictionary_util(formDict)
+            query_file_name = search_criteria_dictionary_util(formDict, 'current_query_inv.txt')
             
             return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 investigation_data_list_page=0,search_limit=search_limit))
@@ -166,11 +166,11 @@ def search_investigations():
         
         
         elif formDict.get('add_category'):
-            new_category='category' + str(len(category_dict)+1)
+            new_category='sc_category' + str(len(category_dict)+1)
             formDict[new_category]=''
-            del formDict['add_category']
+            # del formDict['add_category']
             # formDict['add_category']=''
-            query_file_name = search_criteria_dictionary_util(formDict)
+            query_file_name = search_criteria_dictionary_util(formDict, 'current_query_inv.txt')
             return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 investigation_data_list_page=0,search_limit=search_limit))
         elif formDict.get('remove_category'):
@@ -183,7 +183,7 @@ def search_investigations():
             del formDict[form_dict_cat_element]
             print('formDict:::',formDict)
             
-            query_file_name = search_criteria_dictionary_util(formDict)
+            query_file_name = search_criteria_dictionary_util(formDict, 'current_query_inv.txt')
             return redirect(url_for('inv_blueprint.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 investigation_data_list_page=0,search_limit=search_limit))
     

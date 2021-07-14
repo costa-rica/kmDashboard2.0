@@ -51,14 +51,14 @@ def recalls_query_util(query_file_name):
         search_criteria_dict=json.load(json_file)
         json_file.close()
 
-    if search_criteria_dict.get("refine_search_button"):
-        del search_criteria_dict["refine_search_button"]
-    if search_criteria_dict.get("save_search_name"):
-        del search_criteria_dict["save_search_name"]
-    if search_criteria_dict.get('save_query_button'):
-        del search_criteria_dict['save_query_button']
-    if search_criteria_dict.get('search_limit'):
-        del search_criteria_dict['search_limit']
+    # if search_criteria_dict.get("refine_search_button"):
+        # del search_criteria_dict["refine_search_button"]
+    # if search_criteria_dict.get("save_search_name"):
+        # del search_criteria_dict["save_search_name"]
+    # if search_criteria_dict.get('save_query_button'):
+        # del search_criteria_dict['save_query_button']
+    # if search_criteria_dict.get('search_limit'):
+        # del search_criteria_dict['search_limit']
 
     #put all 'category' elements in another dictionary
     category_dict={}
@@ -70,8 +70,8 @@ def recalls_query_util(query_file_name):
     for i,j in category_dict.items():
         del search_criteria_dict[i]
             
-    if category_dict.get('remove_category'):
-        del category_dict['remove_category']
+    # if category_dict.get('remove_category'):
+        # del category_dict['remove_category']
     
 
     #filter recalls query by anything that contains
@@ -123,20 +123,30 @@ def search_criteria_dictionary_util(formDict):
     print('START search_criteria_dictionary_util')
     # print('formDict in search_criteria_dictionary_util:::',formDict)
     #remove prefix 'sc_'
-    formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
+    # formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
+    
+    #make search dict with only 'sc_' items but take out 'sc_' :["", "string_contains"]
+    search_query_dict={i[3:] :[j,"string_contains"] for i,j in formDict.items() if "sc_" in i}
+    
+    #make match_type dict, remove 'match_type' from key and keep value
+    match_type_dict={i[11:]: j for i,j in formDict.items() if "match_type_" in i}
+    
+    #Loop over match_type dict, for key in in match_type dict, replace value in search_dict with [search_dict[key][0],value]
+    search_query_dict = {i:([j[0],match_type_dict[i]] if i in match_type_dict.keys() else j) for i,j in search_query_dict.items() }
+    
     
     #make dict of any exact items
-    match_type_dict={}
-    for i,j in formDict.items():
-        if "match_type_" in i:
-            match_type_dict[i[11:]]=j
+    # match_type_dict={}
+    # for i,j in formDict.items():
+        # if "match_type_" in i:
+            # match_type_dict[i[11:]]=j
 
     #make search dict w/out exact keys
-    search_query_dict = {i:[j,"string_contains"] for i,j in formDict.items() if "match_type_" not in i}
+    # search_query_dict = {i:[j,"string_contains"] for i,j in formDict.items() if "match_type_" not in i}
     
     #if match_type
-    for i,j in match_type_dict.items():
-        search_query_dict[i]=[list(search_query_dict[i])[0],j]
+    # for i,j in match_type_dict.items():
+        # search_query_dict[i]=[list(search_query_dict[i])[0],j]
 
     query_file_name='current_query_re.txt'
     with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:

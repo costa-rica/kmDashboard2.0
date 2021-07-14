@@ -105,29 +105,29 @@ search_criteria_dict. len(investigations) is
     return (investigations,search_criteria_dict, category_dict)
 
 
-def search_criteria_dictionary_util(formDict):   
-    print('formDict in search_criteria_dictionary_util:::',formDict)
-    #remove prefix 'sc_'
-    formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
+# def search_criteria_dictionary_util(formDict):   
+    # print('formDict in search_criteria_dictionary_util:::',formDict)
+    # remove prefix 'sc_'
+    # formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
     
-    #make dict of any exact items
-    match_type_dict={}
-    for i,j in formDict.items():
-        if "match_type_" in i:
-            match_type_dict[i[11:]]=j
+    # make dict of any exact items
+    # match_type_dict={}
+    # for i,j in formDict.items():
+        # if "match_type_" in i:
+            # match_type_dict[i[11:]]=j
 
-    #make search dict w/out exact keys
-    search_query_dict = {i:[j,"string_contains"] for i,j in formDict.items() if "match_type_" not in i}
+    # make search dict w/out exact keys
+    # search_query_dict = {i:[j,"string_contains"] for i,j in formDict.items() if "match_type_" not in i}
     
-    #if match_type
-    for i,j in match_type_dict.items():
-        search_query_dict[i]=[list(search_query_dict[i])[0],j]
+    # if match_type
+    # for i,j in match_type_dict.items():
+        # search_query_dict[i]=[list(search_query_dict[i])[0],j]
 
-    query_file_name='current_query_inv.txt'
-    with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
-        json.dump(search_query_dict,dict_file)
-    print('END search_criteria_dictionary_util(formDict), returns query_file_name')
-    return query_file_name
+    # query_file_name='current_query_inv.txt'
+    # with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
+        # json.dump(search_query_dict,dict_file)
+    # print('END search_criteria_dictionary_util(formDict), returns query_file_name')
+    # return query_file_name
     
 def updateInvestigation(formDict, **kwargs):
     date_flag=False

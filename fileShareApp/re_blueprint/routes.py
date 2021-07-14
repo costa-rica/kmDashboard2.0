@@ -16,7 +16,7 @@ import io
 from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
-from fileShareApp.re_blueprint.utils import recalls_query_util, queryToDict, search_criteria_dictionary_util, \
+from fileShareApp.re_blueprint.utils import recalls_query_util, queryToDict, \
     update_recall, create_categories_xlsx, update_files_re, column_names_dict_re_util, \
     column_names_re_util
 import openpyxl
@@ -28,7 +28,8 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
     RequestResetForm, ResetPasswordForm
 import re
 import logging
-from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, remove_category_util
+from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, remove_category_util, \
+    search_criteria_dictionary_util
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -138,31 +139,26 @@ def search_recalls():
         search_limit=formDict.get('search_limit')
         if formDict.get('refine_search_button'):
             print('@@@@@@ refine_search_button')
-            query_file_name = search_criteria_dictionary_util(formDict)
-            
+            query_file_name = search_criteria_dictionary_util(formDict, 'current_query_re.txt')
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 recall_data_list_page=0,search_limit=search_limit))
         elif formDict.get('load_previous'):
             recall_data_list_page=recall_data_list_page-1
-            
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                recall_data_list_page=recall_data_list_page,
-                search_limit=search_limit))
+                recall_data_list_page=recall_data_list_page,search_limit=search_limit))
         elif formDict.get('load_next'):
             recall_data_list_page=recall_data_list_page+1
-            
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                recall_data_list_page=recall_data_list_page,
-                search_limit=search_limit))            
+                recall_data_list_page=recall_data_list_page,search_limit=search_limit))            
         elif formDict.get('view'):
             re_id_for_dash=formDict.get('view')
             return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
         elif formDict.get('add_category'):
-            new_category='category' + str(len(category_dict)+1)
+            new_category='sc_category' + str(len(category_dict)+1)
             formDict[new_category]=''
-            del formDict['add_category']
+            # del formDict['add_category']
             # formDict['add_category']=''
-            query_file_name = search_criteria_dictionary_util(formDict)
+            query_file_name = search_criteria_dictionary_util(formDict, 'current_query_re.txt')
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 recall_data_list_page=0,search_limit=search_limit))
         elif formDict.get('remove_category'):
@@ -175,7 +171,7 @@ def search_recalls():
             del formDict[form_dict_cat_element]
             print('formDict:::',formDict)
             
-            query_file_name = search_criteria_dictionary_util(formDict)
+            query_file_name = search_criteria_dictionary_util(formDict, 'current_query_re.txt')
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 recall_data_list_page=0,search_limit=search_limit))
             
