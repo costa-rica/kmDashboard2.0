@@ -209,6 +209,8 @@ section.EnterNewPasswordSection {
 
 /*Home*/
 
+
+
 /*Search*/
 section.search {
     .container {
@@ -223,7 +225,20 @@ section.search {
         border-style: solid;
         border-radius: 1em;
         width:85%;
+
     }
+
+    .search_items_checkbox_list{
+        width: 100%;
+        background: red;
+        display: flex;
+        flex-direction: column;
+        .criteria_and_checkbox{
+            display:flex;
+            font-size: .8em;
+        }
+    }
+
 
     .search_heading_inv  {
         b {color: rgb(214, 116, 36);}
@@ -272,6 +287,9 @@ section.search {
             font-size: .8em;
         }
     }
+
+
+
 
 }
 

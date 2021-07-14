@@ -4,16 +4,20 @@
             
 <section class="search" id="search">
     <div class="container">
-        <div class="form_color">
+    <div class="form_color">
 
         
                 
     <form method="POST" action="" enctype="multipart/form-data">
-            <div class="search_heading_re">
-                <h4>Search <u><b>Recalls</b></u></h4>
-            </div>
-            
-            <div class="rows_search_form">
+        <div class="search_heading_re">
+            <h4>Search <u><b>Recalls</b></u></h4>
+        </div>
+
+
+        <div class="row">
+
+        
+            <div class="rows_search_form col-9">
                 <div class="dict_search">
                     {% for db_name, criteria in column_names_dict.items() %}
                         {% if db_name in ('RECORD_ID','ODATE', 'CDATE','YEAR', 'RCDATE', 'DATEA', 'BGMAN', 'ENDMAN') %}
@@ -123,44 +127,59 @@
                     <input type="submit" name="refine_search_button" value="Refine Search">
                 </div>
             </div>
-            <!--
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
-                Save Search
-            </button>
-            -->
+
+            <div class="col-3">
+                <div class="search_items_checkbox_list">
+                    {% for db_name, criteria in column_names_dict.items() %}
+                    <div class="criteria_and_checkbox">
+                        <input type="checkbox" name="{{ 'show_serach_' + db_name }}" value="show" > {{ criteria }}
+                    </div>
+                    
+                    {% endfor %}
+                </div>
+            </div>
+
+            
+
+            
+        </div>
+        
+        
+        
+        
+
+
 
 
 
         <!-- Save Search Modal -->
         <div class="modal fade" id="saveSearchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="save_search_form">
+                            <label for="save_search_name">Name for query:</label>
+                            <input type="text" name="save_search_name" id="save_search_name">
+                            
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nevermind</button>
+                        <button type="submit" class="btn btn-primary" name="save_query_button"
+                        value="save_query">Save query</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-        
-                <div class="save_search_form">
-                    <label for="save_search_name">Name for query:</label>
-                    <input type="text" name="save_search_name" id="save_search_name">
-                    
-                </div>
-        
-                </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nevermind</button>
-                <button type="submit" class="btn btn-primary" name="save_query_button"
-                value="save_query">Save query</button>
-                </div>
-            </div>
             </div>
         </div>
-
+        
         
     </form>
-</div>
-</div>
+    </div>
+    </div>
 </section>
 
 
