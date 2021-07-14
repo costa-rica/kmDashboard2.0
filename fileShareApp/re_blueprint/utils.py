@@ -51,6 +51,9 @@ def recalls_query_util(query_file_name):
         search_criteria_dict=json.load(json_file)
         json_file.close()
 
+    #put anything starting with 'sc_' in a dictionary
+    
+
     if search_criteria_dict.get("refine_search_button"):
         del search_criteria_dict["refine_search_button"]
     if search_criteria_dict.get("save_search_name"):
