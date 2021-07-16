@@ -7,6 +7,7 @@ import json
 from datetime import date, datetime
 from flask_login import current_user
 import pandas as pd
+import re
 
 def column_names_inv_util():
     column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
@@ -34,14 +35,35 @@ def investigations_query_util(query_file_name):
         search_criteria_dict=json.load(json_file)
         json_file.close()
 
-    if search_criteria_dict.get("refine_search_button"):
-        del search_criteria_dict["refine_search_button"]
-    if search_criteria_dict.get("save_search_name"):
-        del search_criteria_dict["save_search_name"]
-    if search_criteria_dict.get('save_query_button'):
-        del search_criteria_dict['save_query_button']
-    if search_criteria_dict.get('search_limit'):
-        del search_criteria_dict['search_limit']
+
+    if search_criteria_dict.get('user'):
+        if search_criteria_dict.get('user')[0]!='':
+            # print('this should not fire if no user')
+        #search_criteria_dict.get('user') comes in as a list of [string containing all users or single user, 'string contains']
+            #get users verified
+            user_criteria = [a for a in re.split(r'(\s|\,)',  search_criteria_dict.get('user')[0].strip()) if len(a)>1]
+            table_ids_dict={}
+            for j in user_criteria:
+                investigations_table_ids=db.session.query(Tracking_inv.investigations_table_id).filter(Tracking_inv.updated_to.contains(j)).distinct().all()
+                investigations_table_ids=[i[0] for i in investigations_table_ids]
+                # print('recalls_table_ids:::',investigations_table_ids)
+                table_ids_dict[j]=investigations_table_ids
+            
+            # print('table_ids_dict::',table_ids_dict)
+            #get list of records users 
+            n=0
+            for i,j in table_ids_dict.items():
+                if n==0:
+                    table_ids_list=j
+                else:
+                    for k in j:
+                        if k not in table_ids_list:
+                            del[k]
+            
+            #filter recalls query by anything that contains
+            if len(table_ids_list)>0:
+                investigations = investigations.filter(getattr(Investigations,'id').in_(table_ids_list))
+
 
     #put all 'category' elements in another dictionary
     category_dict={}
@@ -52,9 +74,7 @@ def investigations_query_util(query_file_name):
     #take out all keys that contain "cateogry"
     for i,j in category_dict.items():
         del search_criteria_dict[i]
-            
-    if category_dict.get('remove_category'):
-        del category_dict['remove_category']
+
 
     #filter recalls query by anything that contains
     for i,j in category_dict.items():
@@ -89,11 +109,12 @@ def investigations_query_util(query_file_name):
                 # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 investigations = investigations.filter(getattr(Investigations,i)>j[0])
         elif j[1] =="string_contains" and j[0]!='':
-            investigations = investigations.filter(getattr(Investigations,i).contains(j[0]))
-    print('filtered all investigations except Odate restriction ::', len(investigations.all()))
+            if i not in ['user']:
+                investigations = investigations.filter(getattr(Investigations,i).contains(j[0]))
+    # print('filtered all investigations except Odate restriction ::', len(investigations.all()))
     investigations=investigations.filter(getattr(Investigations,'ODATE')>="2011-01-01")
     
-    print('filtered all investigations::', len(investigations.all()))
+    # print('filtered all investigations::', len(investigations.all()))
     investigations=investigations.all()
     print('filtered complte')
     

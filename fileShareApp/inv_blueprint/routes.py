@@ -59,7 +59,7 @@ def search_investigations():
         
     
     #user_list for searching userlist
-    user_list=db.session.query(Tracking_re.updated_to).filter(Tracking_re.field_updated=='verified_by_user').distinct().all()
+    user_list=db.session.query(Tracking_inv.updated_to).filter(Tracking_inv.field_updated=='verified_by_user').distinct().all()
     user_list=[i[0] for i in user_list]
     
     #Get/identify query to run for table

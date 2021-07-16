@@ -80,8 +80,6 @@ def recalls_query_util(query_file_name):
             if len(table_ids_list)>0:
                 recalls = recalls.filter(getattr(Recalls,'RECORD_ID').in_(table_ids_list))
 
-        # if search_criteria_dict.get('user'):
-            # del search_criteria_dict['user']
 
     #put all 'category' elements in another dictionary
     category_dict={}
