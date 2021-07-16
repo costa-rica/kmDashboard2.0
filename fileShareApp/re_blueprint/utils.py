@@ -60,12 +60,12 @@ def recalls_query_util(query_file_name):
             user_criteria = [a for a in re.split(r'(\s|\,)',  search_criteria_dict.get('user')[0].strip()) if len(a)>1]
             table_ids_dict={}
             for j in user_criteria:
-                recalls_table_ids=db.session.query(Tracking_re.recalls_table_id).filter(Tracking_re.updated_to==j).distinct().all()
+                recalls_table_ids=db.session.query(Tracking_re.recalls_table_id).filter(Tracking_re.updated_to.contains(j)).distinct().all()
                 recalls_table_ids=[i[0] for i in recalls_table_ids]
                 print('recalls_table_ids:::',recalls_table_ids)
                 table_ids_dict[j]=recalls_table_ids
             
-            print('table_ids_dict::',table_ids_dict)
+            # print('table_ids_dict::',table_ids_dict)
             #get list of records users 
             n=0
             for i,j in table_ids_dict.items():
@@ -76,13 +76,12 @@ def recalls_query_util(query_file_name):
                         if k not in table_ids_list:
                             del[k]
             
+            #filter recalls query by anything that contains
             if len(table_ids_list)>0:
-                #filter recalls query by anything that contains
-                for i in table_ids_list:
-                    recalls = recalls.filter(getattr(Recalls,'RECORD_ID').contains(j[0]))
+                recalls = recalls.filter(getattr(Recalls,'RECORD_ID').in_(table_ids_list))
 
-        if search_criteria_dict.get('user'):
-            del search_criteria_dict['user']
+        # if search_criteria_dict.get('user'):
+            # del search_criteria_dict['user']
 
     #put all 'category' elements in another dictionary
     category_dict={}
@@ -132,7 +131,8 @@ def recalls_query_util(query_file_name):
                 # j[0]=datetime.strptime(j[0].strip(),'%m/%d/%Y')
                 recalls = recalls.filter(getattr(Recalls,i)>j[0])
         elif j[1] =="string_contains" and j[0]!='':
-            recalls = recalls.filter(getattr(Recalls,i).contains(j[0]))
+            if i not in ['user']:
+                recalls = recalls.filter(getattr(Recalls,i).contains(j[0]))
     recalls=recalls.filter(getattr(Recalls,'ODATE')>="2011-01-01")
     
     recalls=recalls.all()

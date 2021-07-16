@@ -78,6 +78,7 @@ def search_recalls():
         if len(recalls_query) ==0:
             no_hits_flag = True        
 
+    print('search_criteria_dictionary:::',search_criteria_dictionary)
     
     #Make recalls to dictionary for bit table bottom of home screen
     recalls_data = queryToDict(recalls_query, column_names)#List of dicts each dict is row
