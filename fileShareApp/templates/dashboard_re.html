@@ -127,20 +127,11 @@
 
                 
                 {% for category, no_space in category_group_dict_no_space.items() %}
-                    
-                    {% for k in dash_re_list[27] %}
-                        
-                        {% if k in category_list_dict[category] %}
-                        <!--put first modal here-->
-                        <button type="button" class="btn btn-primary btn_yellow" data-bs-toggle="modal" data-bs-target="{{ '#' + no_space }}">
-                            {{ category }}
-                        </button>
-                        {% else %}
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="{{ '#' + no_space }}">
-                            {{ category }}
-                        </button>
-                        {% endif %}
-                    {% endfor %}
+                    <!--put first modal here-->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="{{ '#' + no_space }}">
+                        {{ category }}
+                    </button>
+
 
                     <!-- Modal -->
                     <div class="modal fade" id="{{ no_space }}" tabindex="-1" aria-labelledby="{{ no_space + 'Label' }}" aria-hidden="true">

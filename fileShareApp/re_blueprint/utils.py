@@ -7,6 +7,7 @@ import json
 from datetime import date, datetime
 from flask_login import current_user
 import pandas as pd
+import re
 
 
 def column_names_dict_re_util():
@@ -51,14 +52,37 @@ def recalls_query_util(query_file_name):
         search_criteria_dict=json.load(json_file)
         json_file.close()
 
-    # if search_criteria_dict.get("refine_search_button"):
-        # del search_criteria_dict["refine_search_button"]
-    # if search_criteria_dict.get("save_search_name"):
-        # del search_criteria_dict["save_search_name"]
-    # if search_criteria_dict.get('save_query_button'):
-        # del search_criteria_dict['save_query_button']
-    # if search_criteria_dict.get('search_limit'):
-        # del search_criteria_dict['search_limit']
+    if search_criteria_dict.get('user'):
+        if search_criteria_dict.get('user')[0]!='':
+            # print('this should not fire if no user')
+        #search_criteria_dict.get('user') comes in as a list of [string containing all users or single user, 'string contains']
+            #get users verified
+            user_criteria = [a for a in re.split(r'(\s|\,)',  search_criteria_dict.get('user')[0].strip()) if len(a)>1]
+            table_ids_dict={}
+            for j in user_criteria:
+                recalls_table_ids=db.session.query(Tracking_re.recalls_table_id).filter(Tracking_re.updated_to==j).distinct().all()
+                recalls_table_ids=[i[0] for i in recalls_table_ids]
+                print('recalls_table_ids:::',recalls_table_ids)
+                table_ids_dict[j]=recalls_table_ids
+            
+            print('table_ids_dict::',table_ids_dict)
+            #get list of records users 
+            n=0
+            for i,j in table_ids_dict.items():
+                if n==0:
+                    table_ids_list=j
+                else:
+                    for k in j:
+                        if k not in table_ids_list:
+                            del[k]
+            
+            if len(table_ids_list)>0:
+                #filter recalls query by anything that contains
+                for i in table_ids_list:
+                    recalls = recalls.filter(getattr(Recalls,'RECORD_ID').contains(j[0]))
+
+        if search_criteria_dict.get('user'):
+            del search_criteria_dict['user']
 
     #put all 'category' elements in another dictionary
     category_dict={}
@@ -66,17 +90,19 @@ def recalls_query_util(query_file_name):
         if 'category' in i:
             category_dict[i]=j
 
+    #filter recalls query by anything that contains
+    flag = [key for key, value in search_criteria_dict.items() if 'category' in key]
+    if len(flag)>0:
+        for i,j in category_dict.items():
+            recalls = recalls.filter(getattr(Recalls,'categories').contains(j[0]))
+
     #take out all keys that contain "cateogry"
     for i,j in category_dict.items():
         del search_criteria_dict[i]
             
-    # if category_dict.get('remove_category'):
-        # del category_dict['remove_category']
+
     
 
-    #filter recalls query by anything that contains
-    for i,j in category_dict.items():
-        recalls = recalls.filter(getattr(Recalls,'categories').contains(j[0]))
 
     for i,j in search_criteria_dict.items():
         if j[1]== "exact":
@@ -119,20 +145,20 @@ search_criteria_dict. len(recalls) is
     return (recalls,search_criteria_dict, category_dict)
 
 
-def search_criteria_dictionary_util(formDict):   
-    print('START search_criteria_dictionary_util')
+# def search_criteria_dictionary_util(formDict):   
+    # print('START search_criteria_dictionary_util')
     # print('formDict in search_criteria_dictionary_util:::',formDict)
     #remove prefix 'sc_'
     # formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
     
     #make search dict with only 'sc_' items but take out 'sc_' :["", "string_contains"]
-    search_query_dict={i[3:] :[j,"string_contains"] for i,j in formDict.items() if "sc_" in i}
+    # search_query_dict={i[3:] :[j,"string_contains"] for i,j in formDict.items() if "sc_" in i}
     
     #make match_type dict, remove 'match_type' from key and keep value
-    match_type_dict={i[11:]: j for i,j in formDict.items() if "match_type_" in i}
+    # match_type_dict={i[11:]: j for i,j in formDict.items() if "match_type_" in i}
     
     #Loop over match_type dict, for key in in match_type dict, replace value in search_dict with [search_dict[key][0],value]
-    search_query_dict = {i:([j[0],match_type_dict[i]] if i in match_type_dict.keys() else j) for i,j in search_query_dict.items() }
+    # search_query_dict = {i:([j[0],match_type_dict[i]] if i in match_type_dict.keys() else j) for i,j in search_query_dict.items() }
     
     
     #make dict of any exact items
@@ -148,11 +174,11 @@ def search_criteria_dictionary_util(formDict):
     # for i,j in match_type_dict.items():
         # search_query_dict[i]=[list(search_query_dict[i])[0],j]
 
-    query_file_name='current_query_re.txt'
-    with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
-        json.dump(search_query_dict,dict_file)
-    print('END search_criteria_dictionary_util(formDict), returns query_file_name')
-    return query_file_name
+    # query_file_name='current_query_re.txt'
+    # with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
+        # json.dump(search_query_dict,dict_file)
+    # print('END search_criteria_dictionary_util(formDict), returns query_file_name')
+    # return query_file_name
     
 def update_recall(dict, **kwargs):
     print('START update_recall')

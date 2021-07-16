@@ -145,14 +145,14 @@ def search_recalls():
             query_file_name = search_criteria_dictionary_util(formDict, 'current_query_re.txt')
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 recall_data_list_page=0,search_limit=search_limit))
-        elif formDict.get('load_previous'):
-            recall_data_list_page=recall_data_list_page-1
-            return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                recall_data_list_page=recall_data_list_page,search_limit=search_limit))
-        elif formDict.get('load_next'):
-            recall_data_list_page=recall_data_list_page+1
-            return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
-                recall_data_list_page=recall_data_list_page,search_limit=search_limit))            
+        # elif formDict.get('load_previous'):
+            # recall_data_list_page=recall_data_list_page-1
+            # return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                # recall_data_list_page=recall_data_list_page,search_limit=search_limit))
+        # elif formDict.get('load_next'):
+            # recall_data_list_page=recall_data_list_page+1
+            # return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
+                # recall_data_list_page=recall_data_list_page,search_limit=search_limit))            
         elif formDict.get('view'):
             re_id_for_dash=formDict.get('view')
             return redirect(url_for('re_blueprint.recalls_dashboard',re_id_for_dash=re_id_for_dash))
@@ -227,7 +227,8 @@ def recalls_dashboard():
     else:
         dash_re_files=dash_re.files.split(',')
     
-    #Categories
+    
+    #Categories from previous update
     if dash_re.categories=='':
         dash_re_categories=''
     else:
@@ -244,7 +245,7 @@ def recalls_dashboard():
     dash_re_list = [dash_re.RECORD_ID, dash_re.CAMPNO, dash_re.MAKETXT, dash_re.MODELTXT, dash_re.YEAR,
         dash_re.MFGCAMPNO, dash_re.COMPNAME, dash_re.MFGNAME, dash_re_BGMAN,
         dash_re.ENDMAN, dash_re.RCLTYPECD, dash_re.POTAFF, dash_re_ODATE,
-        dash_re.INFLUENCED_BY, dash_re.MFGTXT, dash_re_RCDATE, 
+        dash_re.INFLUENCED_BY, dash_re.MFGTXT, dash_re_RCDATE, #RCDATE is dash_re_list[15]
         dash_re_DATEA, dash_re.RPNO, dash_re.FMVSS, dash_re.DESC_DEFECT, dash_re.CONSEQUENCE_DEFCT,
         dash_re.CORRECTIVE_ACTION,dash_re.NOTES, dash_re.RCL_CMPT_ID,dash_re.km_notes,
         dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files, dash_re_categories]
@@ -262,16 +263,10 @@ def recalls_dashboard():
     re_entry_top2_list=zip(re_entry_top_names_list[19:],dash_re_list[19:])
     
     #make dictionary of category lists from excel file
-    # categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
-    # df=pd.read_excel(categories_excel)
-    # category_list_dict={}
-    # for i in range(0,len(df.columns)):
-        # category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
     category_list_dict=category_list_dict_util()
     
     category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
 
-    
     
     if request.method == 'POST':
         print('!!!!in POST method')

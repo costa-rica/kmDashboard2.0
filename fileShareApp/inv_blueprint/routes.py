@@ -57,7 +57,10 @@ def search_investigations():
     else:
         category_dict={'cateogry1':''}
         
-
+    
+    #user_list for searching userlist
+    user_list=db.session.query(Tracking_re.updated_to).filter(Tracking_re.field_updated=='verified_by_user').distinct().all()
+    user_list=[i[0] for i in user_list]
     
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
@@ -196,7 +199,8 @@ def search_investigations():
         search_criteria_dictionary=search_criteria_dictionary,str=str,search_limit=search_limit,
         investigation_count=f'{investigation_count:,}', loaded_dict=loaded_dict,
         investigation_data_list_page=investigation_data_list_page, disable_load_previous=disable_load_previous,
-        disable_load_next=disable_load_next, category_list=category_list,category_dict=category_dict)
+        disable_load_next=disable_load_next, category_list=category_list,category_dict=category_dict,
+        user_list=user_list)
 
 
 
@@ -237,6 +241,7 @@ def investigations_dashboard():
     else:
         dash_inv_files=dash_inv.files.split(',')
     
+    print('dash_inv.categories:::',type(dash_inv.categories), dash_inv.categories)
     #Categories
     if dash_inv.categories=='':
         dash_inv_categories=''
