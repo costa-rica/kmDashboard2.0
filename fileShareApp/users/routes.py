@@ -149,8 +149,8 @@ def reset_token(token):
 @users.route('/database_page', methods=["GET","POST"])
 @login_required
 def database_page():
-
-    tableNamesList= db.engine.table_names()
+    tableNamesList=['investigations','tracking_inv','recalls','tracking_re','user']
+    # tableNamesList= db.engine.table_names()
     legend='Database downloads'
     if request.method == 'POST':
         formDict = request.form.to_dict()
@@ -229,8 +229,10 @@ def download_db_workbook():
 @login_required
 def database_delete_data():
     legend='Clear Tables in Database'
-    dbModelsList= [cls for cls in db.Model._decl_class_registry.values() if isinstance(cls, type) and issubclass(cls, db.Model)]
-    dbModelsDict={str(h)[22:-2]:h for h in dbModelsList}
+    # dbModelsList= [cls for cls in db.Model._decl_class_registry.values() if isinstance(cls, type) and issubclass(cls, db.Model)]
+    dbModelsList=[Investigations,Tracking_inv, Recalls, Tracking_re]
+    # dbModelsDict={str(h)[22:-2]:h for h in dbModelsList}
+    dbModelsDict={str(i)[28:-2]:i for i in dbModelsList}
     tableNameList=[h for h in dbModelsDict.keys()]
     if request.method == 'POST':
         formDict = request.form.to_dict()

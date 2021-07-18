@@ -6,7 +6,7 @@
     
     <div class="container">
         <form method="POST" action="" enctype="multipart/form-data">
-
+            {{ inv_form.csrf_token }}
         <div class="above_dash">
             Viewing KM Dash Investigation ID: {{ inv_id_for_dash }}
             <a href="{{ url_for('inv_blueprint.search_investigations', query_file_name='current_query_inv.txt') }}">Back to query</a>
@@ -61,6 +61,33 @@
                 KM Notes:
                 <textarea class="" name="inv_km_notes_textarea" rows=3  >{{ dash_inv_list[11] }}</textarea>
             </label>
+            
+
+
+
+            <div class="link_records_div">
+                <div>
+                    {{ inv_form.record_type }}
+                    {{ inv_form.records_list }}
+                    
+
+
+                </div>
+
+                <br/>
+                <br/>
+                
+                    <label class="">
+                        Linked Records:
+                    </label>
+                
+
+
+            </div>
+
+
+
+
         </div>
 
 
@@ -217,4 +244,36 @@
 
 <!-- for modals-->
 <script src="../static/js/bootstrap.min.js"></script>
+
+<!-- for Dropdown-->
+<script>
+    let record_type_select = document.getElementById('record_type');
+    let records_list_select = document.getElementById('records_list');
+
+    record_type_select.onchange = function(){
+        record_type= record_type_select.value;
+        
+        fetch('/get_record/' + record_type).then(function(response){
+            response.json().then(function(data){
+                let optionHTML = '';
+                for(let record of data.records) {
+                    optionHTML += '<option value="' + record.id + '">' + record.shows_up + '</option>';
+                }
+                
+                records_list_select.innerHTML = optionHTML;
+            });
+        });
+
+    }
+</script>
+<!-- tutorial used to build dynamic dropdowns for records linking https://www.youtube.com/watch?v=I2dJuNwlIH0 -->
+<!--This makes an alert popup in javascript--> 
+<!--
+    inv_or_re_select.onchange = function(){
+        inv_or_re= inv_or_re_select.value;
+        alert(inv_or_re);
+        
+    }-->
+<!--Not use but might be helpful in future https://stackoverflow.com/questions/59486881/python-flask-dynamic-dropdown-list-->
+
 {% endblock %}

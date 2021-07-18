@@ -559,6 +559,12 @@ section.dashboard .inv_km_notes textarea {
   width: 85%;
 }
 
+section.dashboard .link_records_div {
+  background-color: #74b174;
+  padding: 1em;
+  border-radius: .3em;
+}
+
 section.dashboard .investigation_entry_bottom {
   display: -ms-grid;
   display: grid;

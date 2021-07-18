@@ -167,7 +167,7 @@ def updateInvestigation(formDict, **kwargs):
                    'inv_Close Date','inv_Recall Campaign Number', 'inv_Component Description',
                    'inv_Manufacturer Name', 'inv_subject','inv_summary_textarea']
     not_category_list=['inv_km_notes_textarea','update_inv','verified_by_user',
-        'investigation_file']
+        'investigation_file','csrf_token','inv_or_re']
     assigned_categories=''
     for i in formDict:
         if i not in no_update_list + not_category_list:

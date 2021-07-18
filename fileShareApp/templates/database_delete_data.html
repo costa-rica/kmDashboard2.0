@@ -2,19 +2,51 @@
 
 
 {% block main %}
-
+<section class="database_page">
+    
+    <div class="container">
 <form method="POST" action="" enctype="multipart/form-data">
 
 	<div class="col-5">
 		{% for table in tableNameList %}
 		<input type="checkbox" id={{ table }} name={{ table }} value=True>
-		<label for={{ table }}> {{ table }}</label><br>
+		<label for="{{ table }}"> {{ table }}</label><br>
 		{% endfor %}
 	</div>
 
-	<button type="submit" class="btn btn-primary ml-3" name="removeData" value=True>Clear Entire Table</button>
 	
+	<button type="button" class="w3-button w3-red" data-bs-toggle="modal" data-bs-target="#deleteModal">Clear Entire Table</button>
+
+	      <!-- Modal -->
+		  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="deleteModalLabel">Are you sure?</h5>
+				  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					Pressing this button will delete the data in the tables selected
+					<button type="submit" class="btn btn-primary" name="removeData" value=True>Ok, for real this time Clear Entire Table</button>
+				</div>
+				<div class="modal-footer">
+				  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nevermind</button>
+				  
+				</div>
+			  </div>
+			</div>
+		  </div>
+	
+
 </form>
+</div>
+</section>
+
 <br/><br/>
-<a href="{{ url_for('user.database_page') }}"><h5> back to database page</h5></a>
+<a href="{{ url_for('users.database_page') }}"><h5> back to database page</h5></a>
+<!-- for modals-->
+<script src="../static/js/bootstrap.min.js"></script>
+
+
+
 {% endblock %}

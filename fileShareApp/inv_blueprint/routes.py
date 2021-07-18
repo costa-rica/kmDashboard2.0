@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
-    Response, current_app, send_from_directory
+    Response, current_app, send_from_directory, jsonify
 from fileShareApp import db, bcrypt, mail
 from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
@@ -29,6 +29,8 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
 import re
 import logging
 from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, search_criteria_dictionary_util
+from fileShareApp.inv_blueprint.forms import InvForm
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -211,6 +213,22 @@ def search_investigations():
 @login_required
 def investigations_dashboard():
     print('*TOP OF def dashboard()*')
+    inv_form=InvForm()
+    
+    re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
+    df=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
+    
+    identifiers_list=df.values.tolist()
+    
+    records_array=[]
+    for i in identifiers_list:
+        list_obj = {}
+        list_obj['id']=i[0]
+        list_obj['shows_up']=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
+        records_array.append(list_obj)
+    
+    print('records_array:::',records_array)
+    inv_form.records_list.choices = [(r.get('id'),r.get('shows_up')) for r in records_array]
     
     if request.args.get('current_inv_files_dir_name'):
         current_inv_files_dir_name=request.args.get('current_inv_files_dir_name')
@@ -328,7 +346,7 @@ def investigations_dashboard():
         dash_inv_list=dash_inv_list, str=str, len=len, inv_id_for_dash=inv_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,current_inv_files_dir_name=current_inv_files_dir_name,
-        category_group_dict_no_space=category_group_dict_no_space)
+        category_group_dict_no_space=category_group_dict_no_space, inv_form=inv_form)
 
 
 
@@ -356,7 +374,7 @@ def delete_file_inv(inv_id_for_dash,filename):
     
     
     #Remove files from files dir
-    current_inv_files_dir_name = dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
+    current_inv_files_dir_name = 'Investigation_'+dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
     current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
     files_dir_and_filename=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],
         current_inv_files_dir_name, filename)
@@ -440,8 +458,27 @@ def categories_report_download():
 
 
 
-
-
+@inv_blueprint.route('/get_record/<record_type>')
+def get_record(record_type):
+    # req=request.json
+    # inv_or_re=req.get('inv_or_re')
+    if record_type=='investigations':
+        inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
+        df=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
+    else:
+        re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
+        df=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
+    
+    identifiers_list=df.values.tolist()
+    
+    records_array=[]
+    for i in identifiers_list:
+        list_obj = {}
+        list_obj['id']=i[0]
+        list_obj['shows_up']=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
+        records_array.append(list_obj)
+        
+    return jsonify({'records':records_array})
 
 
 

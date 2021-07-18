@@ -2,8 +2,12 @@ __pycache__/
 *.ipynb
 fileShareApp/__pycache__/
 *.zip
-*.xlsx
 awsVmSockMethod/
 *log.txt
 investigations_recall_files/
 fileShareApp/static/files/
+database_table.xlsx
+investigation_report.xlsx
+recalls_report.xlsx
+profile_pics/
+screenshots/
