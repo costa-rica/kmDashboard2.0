@@ -519,18 +519,31 @@ def categories_report_download():
 
 @inv_blueprint.route('/get_record/<record_type>/<inv_id_for_dash>')
 def get_record(record_type,inv_id_for_dash):
-    print('somethign')
-    # inv_id_for_dash=request.args.get('inv_id_for_dash')
-    print('inv_id_for_dash::::',inv_id_for_dash)
+
+    dash_inv= db.session.query(Investigations).get(int(inv_id_for_dash))
+    investigation_id_list=[]
+    recalls_id_list=[]
+    if len(dash_inv.linked_records)>0:
+        linked_dict=json.loads(dash_inv.linked_records)
+        for i,j in linked_dict.items():
+            if 'investigation' in i:
+                investigation_id_list.append(int(i[14:]))
+            elif 'recalls' in i:
+                recalls_id_list.append(int(i[7:]))
+    
     if record_type=='investigations':
         inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
         df=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
+        if len(investigation_id_list)>0:
+            df=df[~df['id'].isin(investigation_id_list)]
     else:
         re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
         df=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
+        if len(recalls_id_list)>0:
+            df=df[~df['RECORD_ID'].isin(recalls_id_list)]
     
     identifiers_list=df.values.tolist()
-    
+    print('identifiers_list::::',identifiers_list[0:3])
     records_array=[]
     for i in identifiers_list:
         list_obj = {}
@@ -539,7 +552,7 @@ def get_record(record_type,inv_id_for_dash):
         records_array.append(list_obj)
         
     return jsonify({'records':records_array})
-    # return jsonify({'records':'this whould work'})
+    
 
 
 
