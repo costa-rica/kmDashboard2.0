@@ -215,8 +215,13 @@ def investigations_dashboard():
     print('*TOP OF def dashboard()*')
     inv_form=InvForm()
     
-    re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
-    df=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
+    #TODO - make so that it puts in whatever was last or investigations as default
+    if request.args.get('record_type')=='Recalls':
+        re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
+        df=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
+    else:
+        inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
+        df=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
     
     identifiers_list=df.values.tolist()
     
@@ -227,7 +232,7 @@ def investigations_dashboard():
         list_obj['shows_up']=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
         records_array.append(list_obj)
     
-    print('records_array:::',records_array)
+    # print('records_array:::',records_array)
     inv_form.records_list.choices = [(r.get('id'),r.get('shows_up')) for r in records_array]
     
     if request.args.get('current_inv_files_dir_name'):
@@ -268,6 +273,10 @@ def investigations_dashboard():
         dash_inv_categories=[i.strip() for i in dash_inv_categories]
         print('dash_inv_categories:::',dash_inv_categories)
     
+    #check for linked_records
+    
+    
+    
     # if dash_inv.ODATE='':
         # dash_inv_ODATE=''
     # else:
@@ -281,7 +290,7 @@ def investigations_dashboard():
         dash_inv_ODATE,dash_inv_CDATE,dash_inv.CAMPNO,
         dash_inv.COMPNAME, dash_inv.MFR_NAME, dash_inv.SUBJECT, dash_inv.SUMMARY,
         dash_inv.km_notes, dash_inv.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_inv_files,
-        dash_inv_categories]
+        dash_inv_categories, dash_inv.linked_records]
     
     #Make lists for investigation_entry_top
     inv_entry_top_names_list=['NHTSA Action Number','Make','Model','Year','Open Date','Close Date',
@@ -311,12 +320,14 @@ def investigations_dashboard():
         formDict = request.form.to_dict()
         argsDict = request.args.to_dict()
         filesDict = request.files.to_dict()
+        del formDict['inv_summary_textarea']
+        del formDict['csrf_token']
+        record_type=formDict['record_type']
         
         if formDict.get('update_inv'):
-            print('formDict:::',formDict)
+            # print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
             # print('filesDict::::',filesDict)
-            
 
             if request.files.get('investigation_file'):
                 #updates file name in database
@@ -340,8 +351,56 @@ def investigations_dashboard():
             else:
                 updateInvestigation(formDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
             return redirect(url_for('inv_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash,
-                current_inv_files_dir_name=current_inv_files_dir_name))
-        
+                current_inv_files_dir_name=current_inv_files_dir_name, record_type=record_type))
+        elif formDict.get('link_record'):
+            print('LINKED RECORD formDict:::::', formDict)
+            
+            #make list in current record to specified record ['type', 'id']
+            current_to_specified={
+                'record_type':formDict.get('record_type'),
+                'record_id':formDict.get('records_list')
+                }
+            specified_to_current={
+                'record_type':'investigations',
+                'record_id':str(inv_id_for_dash)
+                }
+                
+            #if existing record has something in linked_records then convert to dict
+            if len(dash_inv.linked_records)>0:
+                linked_records_dict_current=json.loads(dash_inv.linked_records)
+                linked_records_dict_current[formDict.get('record_type')+formDict.get('records_list')]=current_to_specified
+            else:
+                linked_records_dict_current={formDict.get('record_type')+formDict.get('records_list'):current_to_specified}
+              
+
+            
+            #check if linked record has
+            if formDict.get('record_type')=='investigations':
+                #get query of linked record:
+                dash_inv_linked= db.session.query(Investigations).get(int(formDict.get('records_list')))
+                if len(dash_inv_linked.linked_records)>0:
+                    linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
+                    linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
+                else:
+                    linked_records_dict_for_linked={'investigations'+str(inv_id_for_dash):specified_to_current}
+            elif formDict.get('record_type')=='recalls':
+                #get query of linked record:
+                dash_inv_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
+                if len(dash_inv_linked.linked_records)>0:
+                    linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
+                    linked_records_dict_for_linked['recalls'+str(inv_id_for_dash)]=specified_to_current
+                else:
+                    linked_records_dict_for_linked={'recalls'+str(inv_id_for_dash):specified_to_current}
+                    
+            #add list to current record db linked_record
+            dash_inv.linked_records=json.dumps(linked_records_dict_current)
+            dash_inv_linked.linked_records=json.dumps(linked_records_dict_for_linked)
+            db.session.commit()
+            
+            
+            return redirect(url_for('inv_blueprint.investigations_dashboard', record_type=record_type, 
+                inv_id_for_dash=inv_id_for_dash,current_inv_files_dir_name=current_inv_files_dir_name))
+                
     return render_template('dashboard_inv.html',inv_entry_top_list=inv_entry_top_list,
         dash_inv_list=dash_inv_list, str=str, len=len, inv_id_for_dash=inv_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
@@ -458,10 +517,11 @@ def categories_report_download():
 
 
 
-@inv_blueprint.route('/get_record/<record_type>')
-def get_record(record_type):
-    # req=request.json
-    # inv_or_re=req.get('inv_or_re')
+@inv_blueprint.route('/get_record/<record_type>/<inv_id_for_dash>')
+def get_record(record_type,inv_id_for_dash):
+    print('somethign')
+    # inv_id_for_dash=request.args.get('inv_id_for_dash')
+    print('inv_id_for_dash::::',inv_id_for_dash)
     if record_type=='investigations':
         inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
         df=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
@@ -479,6 +539,7 @@ def get_record(record_type):
         records_array.append(list_obj)
         
     return jsonify({'records':records_array})
+    # return jsonify({'records':'this whould work'})
 
 
 

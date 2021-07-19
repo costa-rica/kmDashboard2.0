@@ -6,6 +6,11 @@ from flask_login import UserMixin
 
 from flask_script import Manager
 
+
+
+
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -70,6 +75,7 @@ class Investigations(db.Model):
     date_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
     files = db.Column(db.Text)
     categories=db.Column(db.Text)
+    # linked_records=db.Column(JsonEncodedDict)
     linked_records=db.Column(db.Text)
     km_tracking_id = db.relationship('Tracking_inv', backref='update_inv_record', lazy=True)
     
@@ -133,6 +139,7 @@ class Recalls(db.Model):
     date_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
     files = db.Column(db.Text)
     categories=db.Column(db.Text)
+    # linked_records=db.Column(JsonEncodedDict)
     linked_records=db.Column(db.Text)
     km_tracking_id = db.relationship('Tracking_re', backref='update_re_record', lazy=True)
     

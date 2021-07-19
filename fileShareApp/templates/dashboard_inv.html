@@ -67,27 +67,15 @@
 
             <div class="link_records_div">
                 <div>
-                    {{ inv_form.record_type }}
+                    Link this investigation to another record:<br/>
+                    {{ inv_form.record_type }}<br/>
                     {{ inv_form.records_list }}
-                    
-
+                    <input type="submit" class="update_inv link_record_button" name="link_record" value="Link Record">
 
                 </div>
-
                 <br/>
-                <br/>
-                
-                    <label class="">
-                        Linked Records:
-                    </label>
-                
-
-
+                Linked Records:
             </div>
-
-
-
-
         </div>
 
 
@@ -188,45 +176,6 @@
                 {% endfor %}
 
 
-
-                <!--put second modal here
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sideCarCatModal">
-                    {{ list(category_list_dict)[1] }}
-                </button>
-
-                
-                <div class="modal fade" id="sideCarCatModal" tabindex="-1" aria-labelledby="sideCarCatModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                        <h5 class="modal-title" id="sideCarCatModalLabel"> {{ list(category_list_dict)[1] }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="km_categories_checkboxes">
-                                {% for i in category_list_dict[list(category_list_dict)[1]] %}
-                                
-                                <div class="checkbox_group">
-                                    {% if i in dash_inv_list[14] %}
-                                    <input type="checkbox"  name="{{ i }}" id="{{ i }}" value="Yes" checked/>
-                                    <label for="{{ i }}">{{ i }}</label>
-                                    {% else %}
-                                    <input type="checkbox"  name="{{ i }}" id="{{ i }}" value="Yes"/>
-                                    <label for="{{ i }}">{{ i }}</label>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                            </div>
-
-                        </div>
-                        <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                -->
             
 
                 
@@ -247,13 +196,17 @@
 
 <!-- for Dropdown-->
 <script>
+    var inv_id_for_dash = "{{ inv_id_for_dash }}"
+
     let record_type_select = document.getElementById('record_type');
     let records_list_select = document.getElementById('records_list');
+    
 
     record_type_select.onchange = function(){
         record_type= record_type_select.value;
         
-        fetch('/get_record/' + record_type).then(function(response){
+        
+        fetch('/get_record/' + record_type +'/' + inv_id_for_dash).then(function(response){
             response.json().then(function(data){
                 let optionHTML = '';
                 for(let record of data.records) {
@@ -275,5 +228,8 @@
         
     }-->
 <!--Not use but might be helpful in future https://stackoverflow.com/questions/59486881/python-flask-dynamic-dropdown-list-->
+
+
+
 
 {% endblock %}

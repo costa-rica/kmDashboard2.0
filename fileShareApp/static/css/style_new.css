@@ -683,6 +683,10 @@ section.dashboard .update_inv {
       align-self: flex-end;
 }
 
+section.dashboard .link_record_button {
+  background-color: green;
+}
+
 section.dashboard .verify_box_and_label {
   display: -webkit-box;
   display: -ms-flexbox;
