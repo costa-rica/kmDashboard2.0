@@ -47,3 +47,99 @@ def search_criteria_dictionary_util(formDict, query_file_name):
         json.dump(search_query_dict,dict_file)
     print('END search_criteria_dictionary_util(formDict), returns query_file_name')
     return query_file_name
+    
+    
+def record_remover_util(current_record_type,linked_record_type,id_for_dash):
+
+    # determine current_record_type and #get record query and linked_records
+    if current_record_type=='investigations':
+        current_record= db.session.query(Investigations).get(int(id_for_dash))
+    elif current_record_type=='recalls':
+        current_record= db.session.query(Recalls).get(int(id_for_dash))
+    
+    investigation_id_list=[]
+    recalls_id_list=[]
+    #if linked_records>0 then make lists of existing links from 
+    if len(current_record.linked_records)>0:
+        linked_dict=json.loads(current_record.linked_records)
+        for i,j in linked_dict.items():
+            if 'investigations' in i:
+                investigation_id_list.append(int(i[14:]))
+            elif 'recalls' in i:
+                recalls_id_list.append(int(i[7:]))
+    
+    
+    #prepare Inv AND Re df for 1)dropdown list by removing the id's from previous section
+    #2)linked_records list for current record
+    inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
+    df_inv=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
+    
+    df_inv_for_dropdown=df_inv[~df_inv['id'].isin(investigation_id_list)]#df for dropdown if investigations
+    
+    #make list of Investigations linked to current record - if any
+    records_array_inv=[]
+    if len(investigation_id_list)>0:
+        df_inv_for_dashboard_list=df_inv[df_inv['id'].isin(investigation_id_list)]#df for linked investigations
+        inv_records_list_array= df_inv_for_dashboard_list.values.tolist()#list for linked investigations
+
+        #make investigations list ['Investigation', 'id', NHTSA_ACTION_NUMBER, Make, Model, component]
+        for i in inv_records_list_array:
+            i.insert(0,'Investigations')
+
+        records_array_inv=[]
+        for i in inv_records_list_array:
+            thing=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
+            records_array_inv.append(thing)
+    #END make list of Investigations linked to current record - if any
+
+    re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
+    df_re=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
+    
+    df_re_for_dropdown=df_re[~df_re['RECORD_ID'].isin(recalls_id_list)]#df for dropdown if recalls
+    
+    #make list of Recalls linked to current record - if any
+    records_array_re=[]
+    if len(recalls_id_list)>0:
+        df_re_for_dashboard_list=df_re[df_re['RECORD_ID'].isin(recalls_id_list)]#df for linked recalls
+        re_records_list_array= df_re_for_dashboard_list.values.tolist()#list for linked recalls
+        
+        for i in re_records_list_array:
+            i.insert(0,'Recalls')
+
+        records_array_re=[]
+        for i in re_records_list_array:
+            thing=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
+            records_array_re.append(thing)
+    #END make list of Recalls linked to current record - if any
+
+    #convert df dropdowns to
+    if linked_record_type=='investigations':
+        identifiers_list=df_inv_for_dropdown.values.tolist()
+    else:
+        identifiers_list=df_re_for_dropdown.values.tolist()
+    
+    #format dropdown list i.e. records_array
+    records_array=[]
+    for i in identifiers_list:
+        list_obj = {}
+        list_obj['id']=i[0]
+        list_obj['shows_up']=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
+        records_array.append(list_obj)
+
+    
+    all_records=records_array_inv+records_array_re
+    
+    return (records_array, all_records)
+
+
+
+
+
+
+
+
+
+
+
+
+

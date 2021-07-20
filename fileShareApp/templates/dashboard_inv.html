@@ -74,7 +74,22 @@
 
                 </div>
                 <br/>
-                Linked Records:
+                
+                <div class="file_list">
+                    {% if dash_inv_list[15] %}
+                    <h4><u>Linked Records:</u></h4>
+                    {% endif %}
+                    {% for i in dash_inv_list[15] %}
+                        
+                        
+                    {{ i }}
+                    <a class="remove-image" 
+                        href="{{url_for('inv_blueprint.delete_linked_record', inv_id_for_dash=inv_id_for_dash,linked_record= i )}}" 
+                        style="display: inline;">&#215;</a>
+                    <br/>
+                    {% endfor %}
+                </div>
+
             </div>
         </div>
 
@@ -87,7 +102,7 @@
                     {% if len(dash_inv_list[13])>0 %}
 
                         {%for file in dash_inv_list[13] %}
-                        <a href="{{ url_for('static', filename='files/'+ current_inv_files_dir_name+ '/' + file ) }}"> {{ file }} </a>
+                        <a href="{{ url_for('static', filename='files/' + current_inv_files_dir_name + '/' + file ) }}"> {{ file }} </a>
                         <!--https://codepen.io/eliorivero/pen/zEFqb-->
                         <a class="remove-image" 
                         href="{{ url_for('inv_blueprint.delete_file_inv', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 

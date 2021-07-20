@@ -28,7 +28,8 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
     RequestResetForm, ResetPasswordForm
 import re
 import logging
-from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, search_criteria_dictionary_util
+from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, search_criteria_dictionary_util, \
+    record_remover_util
 from fileShareApp.inv_blueprint.forms import InvForm
 
 
@@ -215,25 +216,7 @@ def investigations_dashboard():
     print('*TOP OF def dashboard()*')
     inv_form=InvForm()
     
-    #TODO - make so that it puts in whatever was last or investigations as default
-    if request.args.get('record_type')=='Recalls':
-        re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
-        df=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
-    else:
-        inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
-        df=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
-    
-    identifiers_list=df.values.tolist()
-    
-    records_array=[]
-    for i in identifiers_list:
-        list_obj = {}
-        list_obj['id']=i[0]
-        list_obj['shows_up']=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
-        records_array.append(list_obj)
-    
-    # print('records_array:::',records_array)
-    inv_form.records_list.choices = [(r.get('id'),r.get('shows_up')) for r in records_array]
+
     
     if request.args.get('current_inv_files_dir_name'):
         current_inv_files_dir_name=request.args.get('current_inv_files_dir_name')
@@ -273,14 +256,20 @@ def investigations_dashboard():
         dash_inv_categories=[i.strip() for i in dash_inv_categories]
         print('dash_inv_categories:::',dash_inv_categories)
     
-    #check for linked_records
     
+    #------start get linked reocrds----
+    current_record_type='investigations'
+    linked_record_type='investigations'
+    id_for_dash=inv_id_for_dash
+    records_util=record_remover_util(current_record_type,linked_record_type,id_for_dash)
     
+    records_array=records_util[0]#list for dropdown
+    # insert list of choices for linked records -- entering dashbaord from search:
+    inv_form.records_list.choices = [(r.get('id'),r.get('shows_up')) for r in records_array]
     
-    # if dash_inv.ODATE='':
-        # dash_inv_ODATE=''
-    # else:
-        # dash_inv_ODATE=dash_inv.ODATE.strftime("%Y-%m-%d")
+    dash_inv_linked_records=records_util[1] #list of linked records for dashboard
+    #------End of linked reocrds----
+
 
     dash_inv_ODATE=None if dash_inv.ODATE ==None else dash_inv.ODATE.strftime("%Y-%m-%d")
     dash_inv_CDATE=None if dash_inv.CDATE ==None else dash_inv.CDATE.strftime("%Y-%m-%d")
@@ -290,7 +279,7 @@ def investigations_dashboard():
         dash_inv_ODATE,dash_inv_CDATE,dash_inv.CAMPNO,
         dash_inv.COMPNAME, dash_inv.MFR_NAME, dash_inv.SUBJECT, dash_inv.SUMMARY,
         dash_inv.km_notes, dash_inv.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_inv_files,
-        dash_inv_categories, dash_inv.linked_records]
+        dash_inv_categories, dash_inv_linked_records]
     
     #Make lists for investigation_entry_top
     inv_entry_top_names_list=['NHTSA Action Number','Make','Model','Year','Open Date','Close Date',
@@ -305,7 +294,7 @@ def investigations_dashboard():
         # category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
     category_list_dict=category_list_dict_util()
     
-    print('category_list_dict.keys():::', category_list_dict.keys())
+    # print('category_list_dict.keys():::', category_list_dict.keys())
     
     category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
     
@@ -518,41 +507,64 @@ def categories_report_download():
 
 
 @inv_blueprint.route('/get_record/<record_type>/<inv_id_for_dash>')
+@login_required
 def get_record(record_type,inv_id_for_dash):
-
-    dash_inv= db.session.query(Investigations).get(int(inv_id_for_dash))
-    investigation_id_list=[]
-    recalls_id_list=[]
-    if len(dash_inv.linked_records)>0:
-        linked_dict=json.loads(dash_inv.linked_records)
-        for i,j in linked_dict.items():
-            if 'investigation' in i:
-                investigation_id_list.append(int(i[14:]))
-            elif 'recalls' in i:
-                recalls_id_list.append(int(i[7:]))
-    
-    if record_type=='investigations':
-        inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
-        df=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
-        if len(investigation_id_list)>0:
-            df=df[~df['id'].isin(investigation_id_list)]
-    else:
-        re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
-        df=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
-        if len(recalls_id_list)>0:
-            df=df[~df['RECORD_ID'].isin(recalls_id_list)]
-    
-    identifiers_list=df.values.tolist()
-    print('identifiers_list::::',identifiers_list[0:3])
-    records_array=[]
-    for i in identifiers_list:
-        list_obj = {}
-        list_obj['id']=i[0]
-        list_obj['shows_up']=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
-        records_array.append(list_obj)
+    current_record_type='investigations'
+    linked_record_type=record_type
+    id_for_dash=inv_id_for_dash
+    records_array=record_remover_util(current_record_type,linked_record_type,id_for_dash)[0]
         
     return jsonify({'records':records_array})
     
+
+
+@inv_blueprint.route('/delete_linked_record/<inv_id_for_dash>/<linked_record>', methods=["GET","POST"])
+@login_required
+def delete_linked_record(inv_id_for_dash,linked_record):
+    print('ENTER -delete_linked_record')
+
+    #get current record sqlalchemy
+    current_record=db.session.query(Investigations).get(int(inv_id_for_dash))
+    
+    #get linked_record_type
+    #get linked_record id
+    if linked_record[0:3]=="Inv":
+        linked_record_type=linked_record[:14]
+        linked_record_id=linked_record[15:15+linked_record[15:].find('|')]
+    elif linked_record[0:3]=="Rec":
+        linked_record_type=linked_record[:8].lower()
+        linked_record_id=linked_record[9:9+linked_record[9:].find('|')]
+    
+    #make linked_record_key= linked_record_type + id
+    linked_record_key=linked_record_type.lower()+linked_record_id
+    
+    #delete linked_record from current.linked_record using linked_record_key
+    cur_records_dict=json.loads(current_record.linked_records)
+    print('cur_records_dict::::',cur_records_dict)
+    del cur_records_dict[linked_record_key]
+    
+    current_record.linked_records=json.dumps(cur_records_dict)
+    print('cur_records_dict after deleted and should be in 317s linked_records::::',cur_records_dict)
+    #Edit LINKED_RECORD's linked record
+    #get linked reocrd sqlalchemy
+    if linked_record[0:3]=="Inv":
+        linked_record_sql=db.session.query(Investigations).get(int(linked_record_id))
+    elif linked_record[0:3]=="Rec":
+        linked_record_sql=db.session.query(Recalls).get(int(linked_record_id))
+        
+    #make current_record_key= 'investigations' + id
+    current_record_key='investigations' + inv_id_for_dash
+    #delete linked_record from linked_record.linked_record using current_record_key
+    linked_records_dict=json.loads(linked_record_sql.linked_records)
+    print('linked_records_dict::::',linked_records_dict)
+    del linked_records_dict[current_record_key]
+    linked_record_sql.linked_records=json.dumps(linked_records_dict)
+    db.session.commit()
+    print('linked_records_dict after deleted and should be in selected linked_records::::',linked_records_dict)
+    return redirect(url_for('inv_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
+
+
+
 
 
 

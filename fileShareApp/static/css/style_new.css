@@ -595,7 +595,7 @@ section.dashboard .inv_files .file_input {
   padding: 10px 0 0 0;
 }
 
-section.dashboard .inv_files .remove-image {
+section.dashboard .remove-image {
   display: none;
   top: -10px;
   right: -10px;
@@ -615,14 +615,14 @@ section.dashboard .inv_files .remove-image {
   margin-left: 20px;
 }
 
-section.dashboard .inv_files .remove-image:hover {
+section.dashboard .remove-image:hover {
   background: #E54E4E;
   padding: 3px 7px 5px;
   top: -11px;
   right: -11px;
 }
 
-section.dashboard .inv_files .remove-image:active {
+section.dashboard .remove-image:active {
   background: #E54E4E;
   top: -10px;
   right: -11px;
