@@ -377,9 +377,9 @@ def investigations_dashboard():
                 dash_inv_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
                 if len(dash_inv_linked.linked_records)>0:
                     linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
-                    linked_records_dict_for_linked['recalls'+str(inv_id_for_dash)]=specified_to_current
+                    linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
                 else:
-                    linked_records_dict_for_linked={'recalls'+str(inv_id_for_dash):specified_to_current}
+                    linked_records_dict_for_linked={'investigations'+str(inv_id_for_dash):specified_to_current}
                     
             #add list to current record db linked_record
             dash_inv.linked_records=json.dumps(linked_records_dict_current)
@@ -522,7 +522,8 @@ def get_record(record_type,inv_id_for_dash):
 @login_required
 def delete_linked_record(inv_id_for_dash,linked_record):
     print('ENTER -delete_linked_record')
-
+    print('inv_id_for_dash::::', inv_id_for_dash)
+    print('linked_record::::',linked_record)
     #get current record sqlalchemy
     current_record=db.session.query(Investigations).get(int(inv_id_for_dash))
     
@@ -532,8 +533,8 @@ def delete_linked_record(inv_id_for_dash,linked_record):
         linked_record_type=linked_record[:14]
         linked_record_id=linked_record[15:15+linked_record[15:].find('|')]
     elif linked_record[0:3]=="Rec":
-        linked_record_type=linked_record[:8].lower()
-        linked_record_id=linked_record[9:9+linked_record[9:].find('|')]
+        linked_record_type=linked_record[:7].lower()
+        linked_record_id=linked_record[8:8+linked_record[8:].find('|')]
     
     #make linked_record_key= linked_record_type + id
     linked_record_key=linked_record_type.lower()+linked_record_id
