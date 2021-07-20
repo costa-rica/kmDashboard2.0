@@ -53,6 +53,8 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     #this function: 1)removes records from dropdown;
     #2)makes list of records dashboard, directly taken from removed records in #1
 
+    print('This should flag before error','current_record_type::::', current_record_type)
+    
     # determine current_record_type and #get record query and linked_records
     if current_record_type=='investigations':
         current_record= db.session.query(Investigations).get(int(id_for_dash))

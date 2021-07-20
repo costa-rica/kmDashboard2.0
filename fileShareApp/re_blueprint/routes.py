@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
-    Response, current_app, send_from_directory
+    Response, current_app, send_from_directory, jsonify
 from fileShareApp import db, bcrypt, mail
 from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
@@ -29,7 +29,11 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
 import re
 import logging
 from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, remove_category_util, \
-    search_criteria_dictionary_util
+    search_criteria_dictionary_util,record_remover_util
+from fileShareApp.re_blueprint.forms import ReForm
+
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -195,6 +199,7 @@ def search_recalls():
 @login_required
 def recalls_dashboard():
     print('*TOP OF def dashboard()*')
+    re_form=ReForm()
     
     #for deleting files only
     if request.args.get('current_re_files_dir_name'):
@@ -225,8 +230,7 @@ def recalls_dashboard():
         dash_re_files=''
     else:
         dash_re_files=dash_re.files.split(',')
-    
-    
+        
     #Categories from previous update
     if dash_re.categories=='':
         dash_re_categories=''
@@ -234,6 +238,21 @@ def recalls_dashboard():
         dash_re_categories=dash_re.categories.split(',')
         dash_re_categories=[i.strip() for i in dash_re_categories]
         print('dash_re_categories:::',dash_re_categories)
+    
+    
+    #------start get linked reocrds----
+    current_record_type='recalls'
+    linked_record_type='recalls'
+    id_for_dash=re_id_for_dash
+    records_util=record_remover_util(current_record_type,linked_record_type,id_for_dash)
+    
+    records_array=records_util[0]#list for dropdown
+    # insert list of choices for linked records -- entering dashbaord from search:
+    re_form.records_list.choices = [(r.get('id'),r.get('shows_up')) for r in records_array]
+    
+    dash_re_linked_records=records_util[1] #list of linked records for dashboard
+    #------End of linked reocrds----
+    
     
     dash_re_BGMAN=None if dash_re.BGMAN==None else dash_re.BGMAN.strftime("%Y-%m-%d")
     dash_re_ODATE= None if dash_re.ODATE == None else dash_re.ODATE.strftime("%Y-%m-%d")
@@ -247,7 +266,8 @@ def recalls_dashboard():
         dash_re.INFLUENCED_BY, dash_re.MFGTXT, dash_re_RCDATE, #RCDATE is dash_re_list[15]
         dash_re_DATEA, dash_re.RPNO, dash_re.FMVSS, dash_re.DESC_DEFECT, dash_re.CONSEQUENCE_DEFCT,
         dash_re.CORRECTIVE_ACTION,dash_re.NOTES, dash_re.RCL_CMPT_ID,dash_re.km_notes,
-        dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files, dash_re_categories]
+        dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files, dash_re_categories,
+        dash_re_linked_records]
 
 #files 24
 
@@ -272,6 +292,7 @@ def recalls_dashboard():
         formDict = request.form.to_dict()
         argsDict = request.args.to_dict()
         filesDict = request.files.to_dict()
+        record_type=formDict['record_type']
         
         if formDict.get('update_re'):
             # print('formDict:::',formDict)
@@ -301,12 +322,64 @@ def recalls_dashboard():
             return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash,
                 current_re_files_dir_name=current_re_files_dir_name))
         
+        elif formDict.get('link_record'):
+            print('LINKED RECORD formDict:::::', formDict)
+            
+            #make list in current record to specified record ['type', 'id']
+            current_to_specified={
+                'record_type':formDict.get('record_type'),
+                'record_id':formDict.get('records_list')
+                }
+            specified_to_current={
+                'record_type':'recalls',
+                'record_id':str(re_id_for_dash)
+                }
+                
+            #if existing record has something in linked_records then convert to dict
+            if len(dash_re.linked_records)>0:
+                linked_records_dict_current=json.loads(dash_re.linked_records)
+                linked_records_dict_current[formDict.get('record_type')+formDict.get('records_list')]=current_to_specified
+            else:
+                linked_records_dict_current={formDict.get('record_type')+formDict.get('records_list'):current_to_specified}
+              
+
+            
+            #check if linked record has
+            if formDict.get('record_type')=='investigations':
+                #get query of linked record:
+                dash_inv_linked= db.session.query(Investigations).get(int(formDict.get('records_list')))
+                if len(dash_inv_linked.linked_records)>0:
+                    linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
+                    linked_records_dict_for_linked['recalls'+str(re_id_for_dash)]=specified_to_current
+                else:
+                    linked_records_dict_for_linked={'recalls'+str(re_id_for_dash):specified_to_current}
+            elif formDict.get('record_type')=='recalls':
+                #get query of linked record:
+                dash_re_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
+                if len(dash_re_linked.linked_records)>0:
+                    linked_records_dict_for_linked=json.loads(dash_re_linked.linked_records)
+                    linked_records_dict_for_linked['recalls'+str(re_id_for_dash)]=specified_to_current
+                else:
+                    linked_records_dict_for_linked={'recalls'+str(re_id_for_dash):specified_to_current}
+                    
+            #add list to current record db linked_record
+            dash_re.linked_records=json.dumps(linked_records_dict_current)
+            dash_inv_linked.linked_records=json.dumps(linked_records_dict_for_linked)
+            db.session.commit()
+            
+            
+            return redirect(url_for('re_blueprint.recalls_dashboard', record_type=record_type, 
+                re_id_for_dash=re_id_for_dash,current_re_files_dir_name=current_re_files_dir_name))
+        
+        
+        
+        
     return render_template('dashboard_re.html',re_entry_top_list=re_entry_top_list,
         dash_re_list=dash_re_list, str=str, len=len, re_id_for_dash=re_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,
         category_group_dict_no_space=category_group_dict_no_space, re_entry_top2_list=re_entry_top2_list,
-        current_re_files_dir_name=current_re_files_dir_name)
+        current_re_files_dir_name=current_re_files_dir_name, re_form=re_form)
 
 
 
@@ -357,6 +430,78 @@ def delete_file_re(re_id_for_dash,filename):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+@re_blueprint.route('/get_record_recall/<record_type>/<re_id_for_dash>')
+@login_required
+def get_record_recall(record_type,re_id_for_dash):
+    
+    current_record_type='recalls'
+    print('In Recalls get_record def and current record is:::', current_record_type)
+    linked_record_type=record_type
+    id_for_dash=re_id_for_dash
+    records_array=record_remover_util(current_record_type,linked_record_type,id_for_dash)[0]
+        
+    return jsonify({'records':records_array})
+
+
+
+@re_blueprint.route('/delete_linked_record/<re_id_for_dash>/<linked_record>', methods=["GET","POST"])
+@login_required
+def delete_linked_record(re_id_for_dash,linked_record):
+    print('ENTER -delete_linked_record')
+    print('re_id_for_dash::::', re_id_for_dash)
+    print('linked_record::::',linked_record)
+    #get current record sqlalchemy
+    current_record=db.session.query(Recalls).get(int(re_id_for_dash))
+    
+    #get linked_record_type
+    #get linked_record id
+    if linked_record[0:3]=="Inv":
+        linked_record_type=linked_record[:14]
+        linked_record_id=linked_record[15:15+linked_record[15:].find('|')]
+    elif linked_record[0:3]=="Rec":
+        linked_record_type=linked_record[:7].lower()
+        linked_record_id=linked_record[8:8+linked_record[8:].find('|')]
+    
+    #make linked_record_key= linked_record_type + id
+    linked_record_key=linked_record_type.lower()+linked_record_id
+    
+    #delete linked_record from current.linked_record using linked_record_key
+    cur_records_dict=json.loads(current_record.linked_records)
+    print('cur_records_dict::::',cur_records_dict)
+    del cur_records_dict[linked_record_key]
+    
+    current_record.linked_records=json.dumps(cur_records_dict)
+    print('cur_records_dict after deleted and should be in 317s linked_records::::',cur_records_dict)
+    #Edit LINKED_RECORD's linked record
+    #get linked reocrd sqlalchemy
+    if linked_record[0:3]=="Inv":
+        linked_record_sql=db.session.query(Investigations).get(int(linked_record_id))
+    elif linked_record[0:3]=="Rec":
+        linked_record_sql=db.session.query(Recalls).get(int(linked_record_id))
+        
+    #make current_record_key= 'recalls' + id
+    current_record_key='recalls' + re_id_for_dash
+    #delete linked_record from linked_record.linked_record using current_record_key
+    linked_records_dict=json.loads(linked_record_sql.linked_records)
+    print('linked_records_dict::::',linked_records_dict)
+    del linked_records_dict[current_record_key]
+    linked_record_sql.linked_records=json.dumps(linked_records_dict)
+    db.session.commit()
+    print('linked_records_dict after deleted and should be in selected linked_records::::',linked_records_dict)
+    return redirect(url_for('re_blueprint.investigations_dashboard', re_id_for_dash=re_id_for_dash))
 
 
 

@@ -67,6 +67,34 @@
                 KM Notes:
                 <textarea class="" name="re_km_notes_textarea" rows=3  >{{ dash_re_list[24] }}</textarea>
             </label>
+
+            <div class="link_records_div">
+                <div>
+                    Link this recall to another record:<br/>
+                    {{ re_form.record_type }}<br/>
+                    {{ re_form.records_list }}
+                    <input type="submit" class="update_inv link_record_button" name="link_record" value="Link Record">
+
+                </div>
+                <br/>
+                
+                <div class="file_list">
+                    {% if dash_re_list[28] %}
+                    <h4><u>Linked Records:</u></h4>
+                    {% endif %}
+                    {% for i in dash_re_list[28] %}
+                        
+                        
+                    {{ i }}
+                    <a class="remove-image" 
+                        href="{{url_for('re_blueprint.delete_linked_record', re_id_for_dash=re_id_for_dash,linked_record= i )}}" 
+                        style="display: inline;">&#215;</a>
+                    <br/>
+                    {% endfor %}
+                </div>
+
+            </div>
+
         </div>
 
 
@@ -225,4 +253,32 @@
 
 <!-- for modals-->
 <script src="../static/js/bootstrap.min.js"></script>
+
+<!-- for Dropdown-->
+<script>
+    var re_id_for_dash = "{{ re_id_for_dash }}"
+
+    let record_type_select = document.getElementById('record_type');
+    let records_list_select = document.getElementById('records_list');
+    
+
+    record_type_select.onchange = function(){
+        record_type= record_type_select.value;
+        
+        
+        fetch('/get_record_recall/' + record_type +'/' + re_id_for_dash).then(function(response){
+            response.json().then(function(data){
+                let optionHTML = '';
+                for(let record of data.records) {
+                    optionHTML += '<option value="' + record.id + '">' + record.shows_up + '</option>';
+                }
+                
+                records_list_select.innerHTML = optionHTML;
+            });
+        });
+
+    }
+</script>
+
+
 {% endblock %}
