@@ -73,7 +73,9 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     
     #prepare Inv AND Re df for 1)dropdown list by removing the id's from previous section
     #2)linked_records list for current record
-    inv_list_identifiers=db.session.query(Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
+    inv_list_identifiers=db.session.query(
+        Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).filter(
+        getattr(Investigations,'ODATE')>="2011-01-01").all()
     df_inv=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
     
     df_inv_for_dropdown=df_inv[~df_inv['id'].isin(investigation_id_list)]#df for dropdown if investigations
@@ -94,7 +96,9 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
             records_array_inv.append(thing)
     #END make list of Investigations linked to current record - if any
 
-    re_list_identifiers=db.session.query(Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
+    re_list_identifiers=db.session.query(
+        Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).filter(
+        getattr(Recalls,'ODATE')>="2011-01-01").all()
     df_re=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
     
     df_re_for_dropdown=df_re[~df_re['RECORD_ID'].isin(recalls_id_list)]#df for dropdown if recalls
