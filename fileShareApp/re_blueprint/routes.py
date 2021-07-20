@@ -347,9 +347,9 @@ def recalls_dashboard():
             #check if linked record has
             if formDict.get('record_type')=='investigations':
                 #get query of linked record:
-                dash_inv_linked= db.session.query(Investigations).get(int(formDict.get('records_list')))
-                if len(dash_inv_linked.linked_records)>0:
-                    linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
+                dash_re_linked= db.session.query(Investigations).get(int(formDict.get('records_list')))
+                if len(dash_re_linked.linked_records)>0:
+                    linked_records_dict_for_linked=json.loads(dash_re_linked.linked_records)
                     linked_records_dict_for_linked['recalls'+str(re_id_for_dash)]=specified_to_current
                 else:
                     linked_records_dict_for_linked={'recalls'+str(re_id_for_dash):specified_to_current}
@@ -364,7 +364,7 @@ def recalls_dashboard():
                     
             #add list to current record db linked_record
             dash_re.linked_records=json.dumps(linked_records_dict_current)
-            dash_inv_linked.linked_records=json.dumps(linked_records_dict_for_linked)
+            dash_re_linked.linked_records=json.dumps(linked_records_dict_for_linked)
             db.session.commit()
             
             
@@ -457,9 +457,9 @@ def get_record_recall(record_type,re_id_for_dash):
 
 
 
-@re_blueprint.route('/delete_linked_record/<re_id_for_dash>/<linked_record>', methods=["GET","POST"])
+@re_blueprint.route('/delete_linked_record_recalls/<re_id_for_dash>/<linked_record>', methods=["GET","POST"])
 @login_required
-def delete_linked_record(re_id_for_dash,linked_record):
+def delete_linked_record_recalls(re_id_for_dash,linked_record):
     print('ENTER -delete_linked_record')
     print('re_id_for_dash::::', re_id_for_dash)
     print('linked_record::::',linked_record)
@@ -501,7 +501,7 @@ def delete_linked_record(re_id_for_dash,linked_record):
     linked_record_sql.linked_records=json.dumps(linked_records_dict)
     db.session.commit()
     print('linked_records_dict after deleted and should be in selected linked_records::::',linked_records_dict)
-    return redirect(url_for('re_blueprint.investigations_dashboard', re_id_for_dash=re_id_for_dash))
+    return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash))
 
 
 

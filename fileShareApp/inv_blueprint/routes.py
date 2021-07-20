@@ -373,16 +373,16 @@ def investigations_dashboard():
                     linked_records_dict_for_linked={'investigations'+str(inv_id_for_dash):specified_to_current}
             elif formDict.get('record_type')=='recalls':
                 #get query of linked record:
-                dash_re_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
-                if len(dash_re_linked.linked_records)>0:
-                    linked_records_dict_for_linked=json.loads(dash_re_linked.linked_records)
+                dash_inv_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
+                if len(dash_inv_linked.linked_records)>0:
+                    linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
                     linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
                 else:
                     linked_records_dict_for_linked={'investigations'+str(inv_id_for_dash):specified_to_current}
                     
             #add list to current record db linked_record
             dash_inv.linked_records=json.dumps(linked_records_dict_current)
-            dash_re_linked.linked_records=json.dumps(linked_records_dict_for_linked)
+            dash_inv_linked.linked_records=json.dumps(linked_records_dict_for_linked)
             db.session.commit()
             
             
@@ -517,9 +517,9 @@ def get_record(record_type,inv_id_for_dash):
     
 
 
-@inv_blueprint.route('/delete_linked_record/<inv_id_for_dash>/<linked_record>', methods=["GET","POST"])
+@inv_blueprint.route('/delete_linked_record_investigations/<inv_id_for_dash>/<linked_record>', methods=["GET","POST"])
 @login_required
-def delete_linked_record(inv_id_for_dash,linked_record):
+def delete_linked_record_investigations(inv_id_for_dash,linked_record):
     print('ENTER -delete_linked_record')
     print('inv_id_for_dash::::', inv_id_for_dash)
     print('linked_record::::',linked_record)
