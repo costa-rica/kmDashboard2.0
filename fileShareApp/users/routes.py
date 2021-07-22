@@ -20,6 +20,8 @@ import xlsxwriter
 from flask_mail import Message
 from fileShareApp.users.utils import save_picture, send_reset_email, userPermission, \
     formatExcelHeader
+import openpyxl
+import json
 
 users = Blueprint('users', __name__)
 
@@ -203,9 +205,9 @@ def database_page():
             sheetNames=json.dumps(wb.sheetnames)
             tableNamesList=json.dumps(tableNamesList)
 
-            # return redirect(url_for('users.databaseUpload',legend=legend,tableNamesList=tableNamesList,
-                # sheetNames=sheetNames, excelFileName=excelFileName))
-            return redirect(url_for('users.database_page'))
+            return redirect(url_for('users.database_upload',legend=legend,tableNamesList=tableNamesList,
+                sheetNames=sheetNames, excelFileName=excelFileName))
+            # return redirect(url_for('users.database_page'))
     return render_template('database_page.html', legend=legend, tableNamesList=tableNamesList)
 
 
@@ -219,11 +221,6 @@ def download_db_workbook():
     
     return send_from_directory(os.path.join(current_app.config['FILES_DATABASE']),workbook_name, as_attachment=True)
     
-    # return send_from_directory(os.path.join(current_app.config['FILES_DATABASE']),workbook_name, as_attachment=True)
-    
-    # return send_from_directory(os.path.join(current_app.root_path, 'static','files_database'),"database_table.xlsx", as_attachment=True)
-    # return send_from_directory('D:\\OneDrive\\Documents\\professional\\20210610kmDashboard2.0\\fileShareApp\\static\\files_database',"database_table.xlsx", as_attachment=True)
-
 
 @users.route('/database_delete_data', methods=["GET","POST"])
 @login_required
@@ -254,37 +251,35 @@ def database_upload():
     excelFileName=request.args['excelFileName']
     legend='Upload Excel to Database'
     uploadFlag=True
-    # if request.method == 'POST':
+    if request.method == 'POST':
         
-        # formDict = request.form.to_dict()
-        # if formDict.get('appendExcel'):
-            # wb=os.path.join(current_app.root_path, 'static', excelFileName)
-            # for sheet in sheetNames:                
-                # sheetUpload=pd.read_excel(wb,engine='openpyxl',sheet_name=sheet)
-                # if sheet=='dmrs':
-                    # sheetUpload["dmrDate"] = pd.to_datetime(sheetUpload["dmrDate"]).dt.strftime('%Y-%m-%d')
-                # if sheet=='shifts':
-                    # sheetUpload["shiftDate"] = pd.to_datetime(sheetUpload["shiftDate"]).dt.strftime('%Y-%m-%d')
-                # if sheet=='post':
-                    # sheetUpload=sheetUpload.replace(r'_x000D_','', regex=True) 
-                # try:
-                    # sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
-                # except IndexError:
-                    # pass
-                # except:
-                    # os.remove(os.path.join(current_app.root_path, 'static', excelFileName))
-                    # uploadFlag=False
-                    # flash(f"""Problem uploading {sheet} table. Check for uniquness make 
-                        # sure not duplicate ids are being added.""", 'warning')
-                    # return render_template('database_upload.html',  legend=legend,
-                        # tableNamesList=tableNamesList, sheetNames=sheetNames,uploadFlag=uploadFlag)
-                        
-            # os.remove(os.path.join(current_app.root_path, 'static', excelFileName))
-            # print(excelFileName,' should be removed from static/')
-            # flash(f'Table(s) successfully uploaded to database!', 'success')
+        formDict = request.form.to_dict()
+        if formDict.get('appendExcel'):
+            wb=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], excelFileName)
+            for sheet in sheetNames:                
+                sheetUpload=pd.read_excel(wb,engine='openpyxl',sheet_name=sheet)
 
-            # return render_template('database_upload.html',  legend=legend,
-                # tableNamesList=tableNamesList, sheetNames=sheetNames,uploadFlag=uploadFlag)
+                # sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
+                # print('upload SUCCESS!: ', sheet)
+                try:
+                    sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
+                    print('upload SUCCESS!: ', sheet)
+                except IndexError:
+                    pass
+                except:
+                    os.remove(os.path.join(current_app.config['UTILITY_FILES_FOLDER'], excelFileName))
+                    uploadFlag=False
+                    flash(f"""Problem uploading {sheet} table. Check for uniquness make 
+                        sure not duplicate ids are being added.""", 'warning')
+                    return render_template('database_upload.html',  legend=legend,
+                        tableNamesList=tableNamesList, sheetNames=sheetNames,uploadFlag=uploadFlag)
+                        
+            os.remove(os.path.join(current_app.config['UTILITY_FILES_FOLDER'], excelFileName))
+            print(excelFileName,' should be removed from static/')
+            flash(f'Table(s) successfully uploaded to database!', 'success')
+
+            return render_template('database_upload.html',  legend=legend,
+                tableNamesList=tableNamesList, sheetNames=sheetNames,uploadFlag=uploadFlag)
                 
     return render_template('database_upload.html',legend=legend,tableNamesList=tableNamesList,
                 sheetNames=sheetNames, excelFileName=excelFileName,uploadFlag=uploadFlag)

@@ -7,7 +7,12 @@ body {
 
 
 .navbar {
-    background: white;
+    /*background: white;*/
+    /*for dev 
+    background: rgb(240, 211, 158);*/
+    /*for dev */
+    background: rgb(169, 238, 40);
+
     padding: 2em;
     
     img.km-logo {
@@ -590,9 +595,17 @@ section.database_page {
         border-style: solid;
         border-radius: 1em;
         width:85%;
+        margin-top:10px;
     }
     .ul_no_bullets{
         list-style-type:none;
+    }
+    .upload_tan {
+
+        background:tan;
+        padding-bottom:3px;
+        /*border-style: outset;
+        border-radius: 10px*/
     }
 }
 

@@ -6,7 +6,11 @@ body {
 }
 
 .navbar {
-  background: white;
+  /*background: white;*/
+  /*for dev 
+    background: rgb(240, 211, 158);*/
+  /*for dev */
+  background: #a9ee28;
   padding: 2em;
 }
 
@@ -794,9 +798,17 @@ section.database_page .container {
   border-style: solid;
   border-radius: 1em;
   width: 85%;
+  margin-top: 10px;
 }
 
 section.database_page .ul_no_bullets {
   list-style-type: none;
+}
+
+section.database_page .upload_tan {
+  background: tan;
+  padding-bottom: 3px;
+  /*border-style: outset;
+        border-radius: 10px*/
 }
 /*# sourceMappingURL=style_new.css.map */

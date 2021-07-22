@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+
+{% block main %}
+<section class="database_page ">
+    <div class="container upload_tan">
+
+<form method="POST" action="" enctype="multipart/form-data">
+	
+    <div >
+	What table do you want to upload each sheet to (sheet names of files are on the left):<br/>
+	{% for sheet in sheetNames %}
+		<div class="row mb-2">
+			<div class="col-2 ml-3 mt-3">{{ sheet }}</div>
+			<div class="col-3 mt-3">
+			<input type="text" name={{ sheet }} list='tableList'>
+				<datalist id="tableList">
+					{% for tableName in tableNamesList %}
+					<option>{{ tableName }}</option>
+					{% endfor %}
+				</datalist>	
+			</div>
+		</div>
+	{% endfor %}
+	</div>
+	<br/>
+	{% if uploadFlag %}
+	<button type="submit" class="btn btn-primary" name="appendExcel" value=True>Append Excel to Database</button>
+	<a href="{{ url_for('users.database_page') }}"><h5> back to database page</h5></a>
+	{% else %}
+	
+	<a href="{{ url_for('users.database_page') }}"><h5> back to database page</h5></a>
+	{% endif %}
+
+</form>
+</div>
+</section>
+{% endblock %}
