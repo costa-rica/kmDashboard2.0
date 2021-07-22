@@ -12,3 +12,4 @@ recalls_report.xlsx
 profile_pics/
 screenshots/
 fileShareApp/static/files_database/*
+!fileShareApp/static/files_database/.gitkeep
