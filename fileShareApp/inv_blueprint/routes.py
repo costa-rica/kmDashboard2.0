@@ -64,9 +64,10 @@ def search_investigations():
     #user_list for searching userlist
     user_list=db.session.query(Tracking_inv.updated_to).filter(Tracking_inv.field_updated=='verified_by_user').distinct().all()
     user_list=[i[0] for i in user_list]
-    
+    print('query_File_naem:::', request.args.get('query_file_name'))
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
+        print('does this fire???')
         query_file_name=request.args.get('query_file_name')
         investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name)
         no_hits_flag = False
@@ -77,6 +78,8 @@ def search_investigations():
     else:
         query_file_name= 'default_query_inv.txt'
         investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name)
+        print('does thre default_query_inv.txt:::')
+        print('length of investigations_query::::',len(investigations_query))
         no_hits_flag = False
         if len(investigations_query) ==0:
             no_hits_flag = True        

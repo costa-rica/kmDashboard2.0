@@ -35,7 +35,7 @@ def investigations_query_util(query_file_name):
         search_criteria_dict=json.load(json_file)
         json_file.close()
 
-
+    print('1investigations lentght::::',len(investigations.all()))
     if search_criteria_dict.get('user'):
         if search_criteria_dict.get('user')[0]!='':
             # print('this should not fire if no user')
@@ -64,13 +64,13 @@ def investigations_query_util(query_file_name):
             if len(table_ids_list)>0:
                 investigations = investigations.filter(getattr(Investigations,'id').in_(table_ids_list))
 
-
+    print('2investigations lentght::::',len(investigations.all()))
     #put all 'category' elements in another dictionary
     category_dict={}
     for i,j in search_criteria_dict.items():
         if 'category' in i:
             category_dict[i]=j
-
+    print('category_dict::::', category_dict)
     #take out all keys that contain "cateogry"
     for i,j in category_dict.items():
         del search_criteria_dict[i]
@@ -78,9 +78,10 @@ def investigations_query_util(query_file_name):
 
     #filter recalls query by anything that contains
     for i,j in category_dict.items():
-        investigations = investigations.filter(getattr(Investigations,'categories').contains(j[0]))
+        if j[0]!='':
+            investigations = investigations.filter(getattr(Investigations,'categories').contains(j[0]))
 
-
+    print('3investigations lentght::::',len(investigations.all()))
     for i,j in search_criteria_dict.items():
         if j[1]== "exact":
             if i in ['id','YEAR'] and j[0]!='':
@@ -113,7 +114,7 @@ def investigations_query_util(query_file_name):
                 investigations = investigations.filter(getattr(Investigations,i).contains(j[0]))
     # print('filtered all investigations except Odate restriction ::', len(investigations.all()))
     investigations=investigations.filter(getattr(Investigations,'ODATE')>="2011-01-01")
-    
+    print('4investigations lentght::::',len(investigations.all()))
     # print('filtered all investigations::', len(investigations.all()))
     investigations=investigations.all()
     print('filtered complte')

@@ -91,7 +91,8 @@ def recalls_query_util(query_file_name):
     flag = [key for key, value in search_criteria_dict.items() if 'category' in key]
     if len(flag)>0:
         for i,j in category_dict.items():
-            recalls = recalls.filter(getattr(Recalls,'categories').contains(j[0]))
+            if j[0]!='':
+                recalls = recalls.filter(getattr(Recalls,'categories').contains(j[0]))
 
     #take out all keys that contain "cateogry"
     for i,j in category_dict.items():

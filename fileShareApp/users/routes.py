@@ -258,7 +258,8 @@ def database_upload():
             wb=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], excelFileName)
             for sheet in sheetNames:                
                 sheetUpload=pd.read_excel(wb,engine='openpyxl',sheet_name=sheet)
-
+                # if sheet=='recalls':
+                    # sheetUpload["BGMAN"] = pd.to_datetime(sheetUpload["BGMAN"]).dt.strftime('%Y/%m/%d')
                 # sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
                 # print('upload SUCCESS!: ', sheet)
                 try:
