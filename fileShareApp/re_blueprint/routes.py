@@ -226,7 +226,7 @@ def recalls_dashboard():
         checkbox_verified = ''
     
     #FILES This turns the string in files column to a list if something exists
-    if dash_re.files=='':
+    if dash_re.files==''  or dash_re.files==None:
         dash_re_files=''
     else:
         dash_re_files=dash_re.files.split(',')

@@ -245,10 +245,12 @@ def investigations_dashboard():
         checkbox_verified = ''
     
     #FILES This turns the string in files column to a list if something exists
-    if dash_inv.files=='':
+    if dash_inv.files=='' or dash_inv.files==None:
         dash_inv_files=''
     else:
-        dash_inv_files=dash_inv.files.split(',')
+        if ',' in dash_inv.files:
+            dash_inv_files=dash_inv.files.split(',')
+
     
     #Categories
     if dash_inv.categories=='':
