@@ -253,7 +253,7 @@ def investigations_dashboard():
 
     
     #Categories
-    if dash_inv.categories=='':
+    if dash_inv.categories=='' or dash_inv.categories==None:
         dash_inv_categories=''
     else:
         dash_inv_categories=dash_inv.categories.split(',')

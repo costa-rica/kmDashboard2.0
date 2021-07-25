@@ -232,7 +232,7 @@ def recalls_dashboard():
         dash_re_files=dash_re.files.split(',')
         
     #Categories from previous update
-    if dash_re.categories=='':
+    if dash_re.categories=='' or dash_re.categories==None:
         dash_re_categories=''
     else:
         dash_re_categories=dash_re.categories.split(',')
