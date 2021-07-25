@@ -258,8 +258,10 @@ def database_upload():
             wb=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], excelFileName)
             for sheet in sheetNames:                
                 sheetUpload=pd.read_excel(wb,engine='openpyxl',sheet_name=sheet)
-                # if sheet=='recalls':
-                    # sheetUpload["BGMAN"] = pd.to_datetime(sheetUpload["BGMAN"]).dt.strftime('%Y/%m/%d')
+                if sheet=='user':
+                    existing_emails=[i[0] for i in db.session.query(User.email).all()]
+                    sheetUpload=pd.read_excel(wb,engine='openpyxl',sheet_name='user')
+                    sheetUpload=sheetUpload[~sheetUpload['email'].isin(existing_emails)]
                 # sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
                 # print('upload SUCCESS!: ', sheet)
                 try:

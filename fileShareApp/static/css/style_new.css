@@ -811,4 +811,8 @@ section.database_page .upload_tan {
   /*border-style: outset;
         border-radius: 10px*/
 }
+
+.wider_input_login {
+  width: 300px;
+}
 /*# sourceMappingURL=style_new.css.map */

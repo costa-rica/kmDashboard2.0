@@ -24,7 +24,7 @@
 	<button type="submit" class="btn btn-primary ml-3" name="download_db_workbook" value=True>Download Workbook</button>
 	<br/>
 
-
+	{% if current_user.email == 'nickrodriguez@kineticmetrics.com' %}
 	<hr>
 	<h5>Upload data into database</h5>
 	<div style="color: gray"> To upload data to the Kinetic Metrics Dashboard database upload an Excel workbook below. 
@@ -39,12 +39,12 @@
 
 
 
-	
+
 	<hr>
 	<h5>Delete contents in database table</h5>
 	<div style="color: gray"> The link below will take you to a form to delete tables.</div><br/>
 	<a href="{{ url_for('users.database_delete_data') }}"><h5>Clear Database Tables Form</h5></a>
-
+	{% endif %}
 </form>
 </div>
 </section>
