@@ -8,6 +8,7 @@ from datetime import date, datetime
 from flask_login import current_user
 import pandas as pd
 import re
+from fileShareApp.inv_blueprint.utils_general import track_util
 
 def column_names_inv_util():
     column_names=['id','NHTSA_ACTION_NUMBER', 'MAKE','MODEL','YEAR','COMPNAME','MFR_NAME',
@@ -128,30 +129,29 @@ search_criteria_dict. len(investigations) is
 
 
     
-def updateInvestigation(formDict, **kwargs):
-    date_flag=False
-    print('START investigation UPdate')
-    print('updateInv - formDict::',formDict)
+def update_investigation(dict, inv_id_for_dash, verified_by_list):
+    # date_flag=False
+    # print('START investigation UPdate')
+    # print('updateInv - formDict::',formDict)
     formToDbCrosswalkDict = {'inv_number':'NHTSA_ACTION_NUMBER','inv_make':'MAKE',
         'inv_model':'MODEL','inv_year':'YEAR','inv_compname':'COMPNAME',
         'inv_mfr_name': 'MFR_NAME', 'inv_odate': 'ODATE', 'inv_cdate': 'CDATE',
         'inv_campno':'CAMPNO','inv_subject': 'SUBJECT', 'inv_summary_textarea': 'SUMMARY',
-        'inv_km_notes_textarea': 'km_notes'}
+        'inv_km_notes': 'km_notes','investigation_file': 'files'}
 
-    update_data = {formToDbCrosswalkDict.get(i): j for i,j in formDict.items()}
-    del update_data['SUMMARY']
+    update_data = {formToDbCrosswalkDict.get(i): j for i,j in dict.items()}
+    # del update_data['SUMMARY']
     # print('update_data::::',update_data)
     
     #get categories from formDict --was formDict
     no_update_list=['inv_NHTSA Action Number','inv_Make', 'inv_Model','inv_Year','inv_Open Date',
                    'inv_Close Date','inv_Recall Campaign Number', 'inv_Component Description',
-                   'inv_Manufacturer Name', 'inv_subject','inv_summary_textarea']
-    not_category_list=['inv_km_notes_textarea','update_inv','verified_by_user',
-        'investigation_file','csrf_token','inv_or_re','record_type',
-        'records_list']
+                   'inv_Manufacturer Name', 'inv_subject','inv_summary_textarea','inv_km_notes',
+                   'update_inv','verified_by_user','investigation_file','csrf_token',
+                   'inv_or_re','record_type','records_list']
     assigned_categories=''
-    for i in formDict:
-        if i not in no_update_list + not_category_list:
+    for i in dict:
+        if i not in no_update_list:
             # print('dict value in assigned category:::',i)
             if assigned_categories=='':
                 assigned_categories=i
@@ -159,63 +159,70 @@ def updateInvestigation(formDict, **kwargs):
                 assigned_categories=assigned_categories +', '+ i
     update_data['categories']=assigned_categories
     
-    existing_data = db.session.query(Investigations).get(kwargs.get('inv_id_for_dash'))
+    existing_data = db.session.query(Investigations).get(int(inv_id_for_dash))
     #database columns to potentially update
     # Investigations_attr=['km_notes','files', 'categories']
     Investigations_attr=['km_notes', 'categories']
-    at_least_one_field_changed = False
+    # at_least_one_field_changed = False
     # print('update data:::', update_data)
     # print('Does existing_data have any files?:::',existing_data.files)
     
     for i in Investigations_attr:
-        print('**Attribute to update:::',str(i))
-        print('Begininng of loop, files status:::',existing_data.files)
+        # print('**Attribute to update:::',str(i))
+        # print('Begininng of loop, files status:::',existing_data.files)
         if str(getattr(existing_data, i)) != update_data.get(i):
+        
+            update_from=str(getattr(existing_data, i))
+            
             if update_data.get(i)==None:
                 update_value=''
             else:
                 update_value=update_data.get(i)
 
-            at_least_one_field_changed = True
+            #Actually change database data here:
+            setattr(existing_data, i ,update_data.get(i))
+
+            #Change timestamp of record last update
+            setattr(existing_data, 'date_updated' ,datetime.now())
+            
+            db.session.commit()
             
             #Track change in Track_inv table here
-            newTrack= Tracking_inv(field_updated=i,updated_from=getattr(existing_data, i),
-                updated_to=update_value, updated_by=current_user.id,
-                investigations_table_id=kwargs.get('inv_id_for_dash'))
-            db.session.add(newTrack)
-
-            # Actually change database data here:
-            setattr(existing_data, i ,update_value)
-
-            db.session.commit()
-        else:
-            print(i, ' has no change')
-        print('End of loop, files status:::',existing_data.files)
+            track_util('investigations', i,update_from, update_data.get(i),inv_id_for_dash)
+        # else:
+            # print(i, ' has no change')
+        # print('End of loop, files status:::',existing_data.files)
     # print('After loop throug attributes---Does existing_data have any files?:::',existing_data.files)
-    if formDict.get('verified_by_user'):
-        if any(current_user.email in s for s in kwargs.get('verified_by_list')):
-            print('do nothing')
-        else:
-            print('user verified adding to Tracking_inv table')
-            at_least_one_field_changed = True
-            newTrack=Tracking_inv(field_updated='verified_by_user',
-                updated_to=current_user.email, updated_by=current_user.id,
-                investigations_table_id=kwargs.get('inv_id_for_dash'))
-            db.session.add(newTrack)
-            db.session.commit()
-    else:
-        print('no verified user added')
-        if any(current_user.email in s for s in kwargs.get('verified_by_list')):
-            db.session.query(Tracking_inv).filter_by(investigations_table_id=kwargs.get('inv_id_for_dash'),
-                field_updated='verified_by_user',updated_to=current_user.email).delete()
-            db.session.commit()
+    
+    if dict.get('verified_by_user'):
+    
+        if current_user.email not in verified_by_list:
+            track_util('investigations', 'verified_by_user','',current_user.email,inv_id_for_dash)
+    
+    
+        # if any(current_user.email in s for s in kwargs.get('verified_by_list')):
+            # print('do nothing')
+        # else:
+            # print('user verified adding to Tracking_inv table')
+            # at_least_one_field_changed = True
+            # newTrack=Tracking_inv(field_updated='verified_by_user',
+                # updated_to=current_user.email, updated_by=current_user.id,
+                # investigations_table_id=kwargs.get('inv_id_for_dash'))
+            # db.session.add(newTrack)
+            # db.session.commit()
+    # else:
+        # print('no verified user added')
+        # if any(current_user.email in s for s in kwargs.get('verified_by_list')):
+            # db.session.query(Tracking_inv).filter_by(investigations_table_id=kwargs.get('inv_id_for_dash'),
+                # field_updated='verified_by_user',updated_to=current_user.email).delete()
+            # db.session.commit()
             
-    if at_least_one_field_changed:
-        print('at_least_one_field_changed::::',at_least_one_field_changed)
-        setattr(existing_data, 'date_updated' ,datetime.now())
-        db.session.commit()
-    if date_flag:
-        flash(date_flag, 'warning')
+    # if at_least_one_field_changed:
+        # print('at_least_one_field_changed::::',at_least_one_field_changed)
+        # setattr(existing_data, 'date_updated' ,datetime.now())
+        # db.session.commit()
+    # if date_flag:
+        # flash(date_flag, 'warning')
     
     # print('end updateInvestigation util')
         #if there is a corresponding update different from existing_data:

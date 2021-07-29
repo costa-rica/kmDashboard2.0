@@ -237,7 +237,7 @@ def recalls_dashboard():
     else:
         dash_re_categories=dash_re.categories.split(',')
         dash_re_categories=[i.strip() for i in dash_re_categories]
-        print('dash_re_categories:::',dash_re_categories)
+        # print('dash_re_categories:::',dash_re_categories)
     
     
     #------start get linked reocrds----
@@ -296,7 +296,7 @@ def recalls_dashboard():
         verified_by_list_util=[i[0] for i in verified_by_list]
         
         if formDict.get('update_re'):
-            print('formDict:::',formDict)
+            # print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
             print('filesDict::::',filesDict)
             
@@ -312,7 +312,6 @@ def recalls_dashboard():
                     track_util('recalls', 'files',update_from, dash_re.files,re_id_for_dash)
                 
             #update notes, categories or verified_by
-            # if formDict.get('km_notes') or formDict.get('categories'):
             update_data_list=['re_km_notes','categories','verified_by_user'] 
             if any(item in update_data_list for item in formDict.keys()):
                 print('*****item in update_data_list and formDict.keys')

@@ -158,7 +158,7 @@ def update_recall(dict, re_id_for_dash, verified_by_list):
         're_DATEA':'DATEA','re_RPNO':'RPNO','re_FMVSS':'FMVSS', 're_DESC_DEFECT':'DESC_DEFECT',
         're_CONSEQUENCE_DEFCT':'CONSEQUENCE_DEFCT','re_CORRECTIVE_ACTION':'CORRECTIVE_ACTION',
         're_NOTES':'NOTES', 're_RCL_CMPT_ID':'RCL_CMPT_ID','re_km_notes': 'km_notes',
-        'investigation_file': 'files'}
+        'recall_file': 'files'}
     update_data = {formToDbCrosswalkDict.get(i): j for i,j in dict.items()}
     # print('update_data::::',update_data)
     
@@ -178,7 +178,6 @@ def update_recall(dict, re_id_for_dash, verified_by_list):
                 assigned_categories=i
             else:
                 assigned_categories=assigned_categories +', '+ i
-    
     update_data['categories']=assigned_categories
     #END important for category list
     
@@ -202,10 +201,8 @@ def update_recall(dict, re_id_for_dash, verified_by_list):
             setattr(existing_data, i ,update_data.get(i))
             
             #Change timestamp of record last update
-            # at_least_one_field_changed = True
             setattr(existing_data, 'date_updated' ,datetime.now())
             
-            # print('updated investigations table with ',i,'==', update_data.get(i))
             db.session.commit()
             
             #Track change in Track_inv table here

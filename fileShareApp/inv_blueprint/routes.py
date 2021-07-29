@@ -17,8 +17,8 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.inv_blueprint.utils import investigations_query_util, queryToDict, \
-    updateInvestigation, create_categories_xlsx, existing_report, column_names_inv_util, \
-    column_names_dict_inv_util
+    create_categories_xlsx, existing_report, column_names_inv_util, \
+    column_names_dict_inv_util, update_investigation
 import openpyxl
 from werkzeug.utils import secure_filename
 import json
@@ -219,8 +219,6 @@ def investigations_dashboard():
     print('*TOP OF def dashboard()*')
     inv_form=InvForm()
     
-
-    
     if request.args.get('current_inv_files_dir_name'):
         current_inv_files_dir_name=request.args.get('current_inv_files_dir_name')
     else:
@@ -250,7 +248,6 @@ def investigations_dashboard():
     else:
         # if ',' in dash_inv.files:
         dash_inv_files=dash_inv.files.split(',')
-        
     
     #Categories
     if dash_inv.categories=='' or dash_inv.categories==None:
@@ -291,21 +288,9 @@ def investigations_dashboard():
     inv_entry_top_list=zip(inv_entry_top_names_list,dash_inv_list[:9])
     
     #make dictionary of category lists from excel file
-    # categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
-    # df=pd.read_excel(categories_excel)
-    # category_list_dict={}
-    # for i in range(0,len(df.columns)):
-        # category_list_dict[df.columns[i]] =df.iloc[:,i:i+1][df.columns[i]].dropna().tolist()
     category_list_dict=category_list_dict_util()
     
-    # print('category_list_dict.keys():::', category_list_dict.keys())
-    
     category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
-    
-    # check_group='Door Zone'
-    # for i,j in category_group_dict_no_space.items()
-        # if any item in cat_list_dict then 
-        # if i==category_list_dict
     
     
     if request.method == 'POST':
@@ -316,9 +301,10 @@ def investigations_dashboard():
         # del formDict['inv_summary_textarea']
         # del formDict['csrf_token']
         record_type=formDict['record_type']
+        verified_by_list_util=[i[0] for i in verified_by_list]
         
         if formDict.get('update_inv'):
-            # print('formDict:::',formDict)
+            print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
             print('filesDict::::',filesDict)
 
@@ -332,13 +318,24 @@ def investigations_dashboard():
                 
                 if file_added_flag == 'file_added':
                     track_util('investigations', 'files',update_from, dash_inv.files,inv_id_for_dash)
+                
+            #update notes, categories or verified_by
+            update_data_list=['re_km_notes','categories','verified_by_user'] 
+            if any(item in update_data_list for item in formDict.keys()):
+                print('*****item in update_data_list and formDict.keys')
+                update_investigation(formDict, inv_id_for_dash, verified_by_list_util)
 
-                
-                
-            if formDict.get('km_notes') or formDict.get('categories'):
-                updateInvestigation(formDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
+            #This can only be case if update + user verified previously but no unchecked
+            if (current_user.email in verified_by_list_util) and (
+                formDict.get('verified_by_user')==None):
+                db.session.query(Tracking_inv).filter_by(investigations_table_id=int(inv_id_for_dash),
+                    field_updated='verified_by_user',updated_to=current_user.email).delete()
+                db.session.commit()
+            
+            
             return redirect(url_for('inv_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash,
                 current_inv_files_dir_name=current_inv_files_dir_name, record_type=record_type))
+                
         elif formDict.get('link_record'):
             # print('!!!!LINKED RECORD formDict:::::', formDict)
             
