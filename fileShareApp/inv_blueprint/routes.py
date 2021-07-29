@@ -17,7 +17,7 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.inv_blueprint.utils import investigations_query_util, queryToDict, \
-    updateInvestigation, create_categories_xlsx, update_files, existing_report, column_names_inv_util, \
+    updateInvestigation, create_categories_xlsx, existing_report, column_names_inv_util, \
     column_names_dict_inv_util
 import openpyxl
 from werkzeug.utils import secure_filename
@@ -29,7 +29,7 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
 import re
 import logging
 from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, search_criteria_dictionary_util, \
-    record_remover_util
+    record_remover_util, track_util, update_files_util
 from fileShareApp.inv_blueprint.forms import InvForm
 
 
@@ -228,13 +228,13 @@ def investigations_dashboard():
     
     #view, update
     if request.args.get('inv_id_for_dash'):
-        print('request.args.get(inv_id_for_dash, should build verified_by_list')
+        # print('request.args.get(inv_id_for_dash, should build verified_by_list')
         inv_id_for_dash = int(request.args.get('inv_id_for_dash'))
         dash_inv= db.session.query(Investigations).get(inv_id_for_dash)
         verified_by_list =db.session.query(Tracking_inv.updated_to, Tracking_inv.time_stamp).filter_by(
             investigations_table_id=inv_id_for_dash,field_updated='verified_by_user').all()
         verified_by_list=[[i[0],i[1].strftime('%Y/%m/%d %#I:%M%p')] for i in verified_by_list]
-        print('verified_by_list:::',verified_by_list)
+        # print('verified_by_list:::',verified_by_list)
     else:
         verified_by_list=[]
 
@@ -248,9 +248,9 @@ def investigations_dashboard():
     if dash_inv.files=='' or dash_inv.files==None:
         dash_inv_files=''
     else:
-        if ',' in dash_inv.files:
-            dash_inv_files=dash_inv.files.split(',')
-
+        # if ',' in dash_inv.files:
+        dash_inv_files=dash_inv.files.split(',')
+        
     
     #Categories
     if dash_inv.categories=='' or dash_inv.categories==None:
@@ -258,7 +258,7 @@ def investigations_dashboard():
     else:
         dash_inv_categories=dash_inv.categories.split(',')
         dash_inv_categories=[i.strip() for i in dash_inv_categories]
-        print('dash_inv_categories:::',dash_inv_categories)
+        # print('dash_inv_categories:::',dash_inv_categories)
     
     
     #------start get linked reocrds----
@@ -320,33 +320,27 @@ def investigations_dashboard():
         if formDict.get('update_inv'):
             # print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
-            # print('filesDict::::',filesDict)
+            print('filesDict::::',filesDict)
 
             if request.files.get('investigation_file'):
-                #updates file name in database
-                update_files(filesDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
+                print('!!!!request.files.get(investigation_file:::::')
                 
-                #SAVE file in dir named after NHTSA action num _ dash_id
+                #new process:
+                update_from=dash_inv.files 
                 uploaded_file = request.files['investigation_file']
-                current_inv_files_dir_name = 'Investigation_' + dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
-                current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
+                file_added_flag=update_files_util(filesDict, id_for_dash,'investigation')
                 
-                if not os.path.exists(current_inv_files_dir):
-                    os.makedirs(current_inv_files_dir)
-                uploaded_file.save(os.path.join(current_inv_files_dir,uploaded_file.filename))
+                if file_added_flag == 'file_added':
+                    track_util('investigations', 'files',update_from, dash_inv.files,inv_id_for_dash)
+
                 
-                #Investigations database files column - set value as string comma delimeted
-                if dash_inv.files =='':
-                    dash_inv.files =uploaded_file.filename
-                else:
-                    dash_inv.files =dash_inv.files +','+ uploaded_file.filename
-                db.session.commit()
-            else:
+                
+            if formDict.get('km_notes') or formDict.get('categories'):
                 updateInvestigation(formDict, inv_id_for_dash=inv_id_for_dash, verified_by_list=verified_by_list)
             return redirect(url_for('inv_blueprint.investigations_dashboard', inv_id_for_dash=inv_id_for_dash,
                 current_inv_files_dir_name=current_inv_files_dir_name, record_type=record_type))
         elif formDict.get('link_record'):
-            print('LINKED RECORD formDict:::::', formDict)
+            # print('!!!!LINKED RECORD formDict:::::', formDict)
             
             #make list in current record to specified record ['type', 'id']
             current_to_specified={
@@ -359,7 +353,7 @@ def investigations_dashboard():
                 }
                 
             #if existing record has something in linked_records then convert to dict
-            if dash_inv.linked_records!= None:
+            if dash_inv.linked_records!= None and dash_inv.linked_records!= '':
                 linked_records_dict_current=json.loads(dash_inv.linked_records)
                 linked_records_dict_current[formDict.get('record_type')+formDict.get('records_list')]=current_to_specified
             else:
@@ -371,17 +365,15 @@ def investigations_dashboard():
             if formDict.get('record_type')=='investigations':
                 #get query of linked record:
                 dash_inv_linked= db.session.query(Investigations).get(int(formDict.get('records_list')))
-                if dash_inv_linked.linked_records!= None:
-                    print('dash_inv_linked.linked_records:::',dash_inv_linked.linked_records)
+                if dash_inv_linked.linked_records!= None and dash_inv_linked.linked_records!= '':
                     linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
-                    
                     linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
                 else:
                     linked_records_dict_for_linked={'investigations'+str(inv_id_for_dash):specified_to_current}
             elif formDict.get('record_type')=='recalls':
                 #get query of linked record:
                 dash_inv_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
-                if dash_inv_linked.linked_records!= None:
+                if dash_inv_linked.linked_records!= None and dash_inv_linked.linked_records!= '':
                     linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
                     linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
                 else:
@@ -410,6 +402,7 @@ def investigations_dashboard():
 def delete_file_inv(inv_id_for_dash,filename):
     #update Investigations table files column
     dash_inv =db.session.query(Investigations).get(inv_id_for_dash)
+    update_from=dash_inv.files
     print('delete_file route - dash_inv::::',dash_inv.files)
     file_list=''
     print('filename:::',type(filename),filename)
@@ -426,9 +419,17 @@ def delete_file_inv(inv_id_for_dash,filename):
                 dash_inv.files = dash_inv.files +',' + file_list[i]
     db.session.commit()
     
+    #update tracking
+    track_util('investigations', 'files',update_from, dash_inv.files,inv_id_for_dash)
+    # newTrack=Tracking_inv(field_updated='files',
+        # updated_to=dash_inv.files, updated_by=current_user.id,
+        # investigations_table_id=inv_id_for_dash)
+    # db.session.add(newTrack)
+    # db.session.commit()
+    
     
     #Remove files from files dir
-    current_inv_files_dir_name = 'Investigation_'+dash_inv.NHTSA_ACTION_NUMBER + '_'+str(inv_id_for_dash)
+    current_inv_files_dir_name = 'Investigation_'+str(inv_id_for_dash)
     current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
     files_dir_and_filename=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],
         current_inv_files_dir_name, filename)

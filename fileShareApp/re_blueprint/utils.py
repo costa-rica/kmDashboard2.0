@@ -8,7 +8,7 @@ from datetime import date, datetime
 from flask_login import current_user
 import pandas as pd
 import re
-
+from fileShareApp.inv_blueprint.utils_general import track_util
 
 def column_names_dict_re_util():
     column_names_dict={'RECORD_ID':'Record ID','CAMPNO':'Recall Campaign Number','MAKETXT':'Make',
@@ -144,69 +144,35 @@ search_criteria_dict. len(recalls) is
     return (recalls,search_criteria_dict, category_dict)
 
 
-# def search_criteria_dictionary_util(formDict):   
-    # print('START search_criteria_dictionary_util')
-    # print('formDict in search_criteria_dictionary_util:::',formDict)
-    #remove prefix 'sc_'
-    # formDict = {(i[3:] if "sc_" in i else i) :j for i,j in formDict.items()}
-    
-    #make search dict with only 'sc_' items but take out 'sc_' :["", "string_contains"]
-    # search_query_dict={i[3:] :[j,"string_contains"] for i,j in formDict.items() if "sc_" in i}
-    
-    #make match_type dict, remove 'match_type' from key and keep value
-    # match_type_dict={i[11:]: j for i,j in formDict.items() if "match_type_" in i}
-    
-    #Loop over match_type dict, for key in in match_type dict, replace value in search_dict with [search_dict[key][0],value]
-    # search_query_dict = {i:([j[0],match_type_dict[i]] if i in match_type_dict.keys() else j) for i,j in search_query_dict.items() }
-    
-    
-    #make dict of any exact items
-    # match_type_dict={}
-    # for i,j in formDict.items():
-        # if "match_type_" in i:
-            # match_type_dict[i[11:]]=j
 
-    #make search dict w/out exact keys
-    # search_query_dict = {i:[j,"string_contains"] for i,j in formDict.items() if "match_type_" not in i}
     
-    #if match_type
-    # for i,j in match_type_dict.items():
-        # search_query_dict[i]=[list(search_query_dict[i])[0],j]
-
-    # query_file_name='current_query_re.txt'
-    # with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
-        # json.dump(search_query_dict,dict_file)
-    # print('END search_criteria_dictionary_util(formDict), returns query_file_name')
-    # return query_file_name
-    
-def update_recall(dict, **kwargs):
+def update_recall(dict, re_id_for_dash, verified_by_list):
     print('START update_recall')
-    date_flag=False
+    # date_flag=False
 
-
+    #convert formDict keys to Recalls table column names
     formToDbCrosswalkDict ={'re_Record ID':'RECORD_ID','re_CAMPNO':'CAMPNO',
         're_MFGCAMPNO':'MFGCAMPNO','re_COMPNAME':'COMPNAME','re_BGMAN':'BGMAN',
         're_ENDMAN':'ENDMAN','re_RCLTYPECD':'RCLTYPECD','re_POTAFF':'POTAFF',
         're_INFLUENCED_BY':'INFLUENCED_BY', 're_MFGTXT':'MFGTXT', 're_RCDATE':'RCDATE',
         're_DATEA':'DATEA','re_RPNO':'RPNO','re_FMVSS':'FMVSS', 're_DESC_DEFECT':'DESC_DEFECT',
         're_CONSEQUENCE_DEFCT':'CONSEQUENCE_DEFCT','re_CORRECTIVE_ACTION':'CORRECTIVE_ACTION',
-        're_NOTES':'NOTES', 're_RCL_CMPT_ID':'RCL_CMPT_ID','re_km_notes_textarea': 'km_notes',
+        're_NOTES':'NOTES', 're_RCL_CMPT_ID':'RCL_CMPT_ID','re_km_notes': 'km_notes',
         'investigation_file': 'files'}
-
-
     update_data = {formToDbCrosswalkDict.get(i): j for i,j in dict.items()}
     # print('update_data::::',update_data)
     
-    #create list of categories selected
+    #important for category list
     no_update_list=['re_Record ID', 're_CAMPNO', 're_MFGCAMPNO', 're_COMPNAME', 're_BGMAN',
         're_ENDMAN', 're_RCLTYPECD', 're_POTAFF', 're_INFLUENCED_BY', 're_MFGTXT', 're_RCDATE',
         're_DATEA', 're_RPNO', 're_FMVSS', 're_DESC_DEFECT', 're_CONSEQUENCE_DEFCT',
         're_CORRECTIVE_ACTION', 're_NOTES', 're_RCL_CMPT_ID', 're_Make', 're_Model', 're_Year',
-        're_Manufacturer Name', 're_Open Date']
-    not_category_list=['re_km_notes_textarea','update_re','verified_by_user','recall_file']
+        're_Manufacturer Name', 're_Open Date','update_re','verified_by_user','recall_file',
+        'record_type','records_list','re_km_notes']
+    #removed from no_update_list: 're_km_notes_textarea',
     assigned_categories=''
     for i in dict:
-        if i not in no_update_list + not_category_list:
+        if i not in no_update_list:
             print('dict value in assigned category:::',i)
             if assigned_categories=='':
                 assigned_categories=i
@@ -214,67 +180,79 @@ def update_recall(dict, **kwargs):
                 assigned_categories=assigned_categories +', '+ i
     
     update_data['categories']=assigned_categories
-    print('assigned_categories:::', assigned_categories)
+    #END important for category list
     
-    existing_data = db.session.query(Recalls).get(kwargs.get('re_id_for_dash'))
+    existing_data = db.session.query(Recalls).get(int(re_id_for_dash))
     Recalls_attr=['km_notes', 'categories']
-    at_least_one_field_changed = False
+    # at_least_one_field_changed = False
     #loop over existing data attributes
     print('update_data:::', update_data)
     
-    
-    
-    
     for i in Recalls_attr:
-
         if str(getattr(existing_data, i)) != update_data.get(i):
+            
+            update_from=str(getattr(existing_data, i))
+            
             if update_data.get(i)==None:
                 update_value=''
             else:
                 update_value=update_data.get(i)                
             
-            at_least_one_field_changed = True
-            
-            #Track change in Track_inv table here
-            newTrack= Tracking_re(field_updated=i,updated_from=getattr(existing_data, i),
-                updated_to=update_data.get(i), updated_by=current_user.id,
-                recalls_table_id=kwargs.get('re_id_for_dash'))
-            db.session.add(newTrack)
-            
             #Actually change database data here:
             setattr(existing_data, i ,update_data.get(i))
-
+            
+            #Change timestamp of record last update
+            # at_least_one_field_changed = True
+            setattr(existing_data, 'date_updated' ,datetime.now())
+            
             # print('updated investigations table with ',i,'==', update_data.get(i))
             db.session.commit()
-        else:
-            print(i, ' has no change')
+            
+            #Track change in Track_inv table here
+            track_util('recalls', i,update_from, update_data.get(i),re_id_for_dash)
+            # newTrack= Tracking_re(field_updated=i,updated_from=getattr(existing_data, i),
+                # updated_to=update_data.get(i), updated_by=current_user.id,
+                # recalls_table_id=kwargs.get('re_id_for_dash'))
+            # db.session.add(newTrack)
+        # else:
+            # print(i, ' has no change')
 
     if dict.get('verified_by_user'):
-        if any(current_user.email in s for s in kwargs.get('verified_by_list')):
-            pass
+        # if current_user.email not in verified_by_list:
+            # pass
             # print('do nothing')
         # elif kwargs.get('verified_by_list') ==[] or any(current_user.email not in s for s in kwargs.get('verified_by_list')):
-        else:
-            print('user verified adding to Tracking_re table')
-            at_least_one_field_changed = True
-            newTrack=Tracking_re(field_updated='verified_by_user',
-                updated_to=current_user.email, updated_by=current_user.id,
-                recalls_table_id=kwargs.get('re_id_for_dash'))
-            db.session.add(newTrack)
-            db.session.commit()
-    else:
+        # else:
+
+        
+        
+        if current_user.email not in verified_by_list:
+            track_util('recalls', 'verified_by_user','',current_user.email,re_id_for_dash)
+            # print('user verified adding to Tracking_re table')
+            # at_least_one_field_changed = True
+            # newTrack=Tracking_re(field_updated='verified_by_user',
+                # updated_to=current_user.email, updated_by=current_user.id,
+                # recalls_table_id=kwargs.get('re_id_for_dash'))
+            # db.session.add(newTrack)
+            # db.session.commit()
+    # else:
+        # print('*****IN Else***')
+        # print('current_user.email:::',type(current_user.email),current_user.email)
+        # print('verified_by_list::::',type(verified_by_list),verified_by_list)
         # print('no verified user added')
-        if any(current_user.email in s for s in kwargs.get('verified_by_list')):
-            db.session.query(Tracking_re).filter_by(recalls_table_id=kwargs.get('re_id_for_dash'),
-                field_updated='verified_by_user',updated_to=current_user.email).delete()
-            db.session.commit()
+        # if any(current_user.email in s for s in kwargs.get('verified_by_list')):
+        # if current_user.email in verified_by_list:
+            # print('current user in verified_by_list')
+            # db.session.query(Tracking_re).filter_by(recalls_table_id=int(re_id_for_dash),
+                # field_updated='verified_by_user',updated_to=current_user.email).delete()
+            # db.session.commit()
             
-    if at_least_one_field_changed:
-        print('at_least_one_field_changed::::',at_least_one_field_changed)
-        setattr(existing_data, 'date_updated' ,datetime.now())
-        db.session.commit()
-    if date_flag:
-        flash(date_flag, 'warning')
+    # if at_least_one_field_changed:
+        # print('at_least_one_field_changed::::',at_least_one_field_changed)
+        # setattr(existing_data, 'date_updated' ,datetime.now())
+        # db.session.commit()
+    # if date_flag:
+        # flash(date_flag, 'warning')
     print('END update_recall')
     # print('end updateInvestigation util')
         #if there is a corresponding update different from existing_data:
@@ -282,32 +260,32 @@ def update_recall(dict, **kwargs):
         #2.update existing_data with change       
 
 
-def update_files_re(filesDict, **kwargs):
-    print('START update_files_re')
-    date_flag=False
+# def update_files_re(filesDict, **kwargs):
+    # print('START update_files_re')
+    # date_flag=False
     # print('in update_files - filesDict:::',filesDict,'kwargs:::',kwargs)
-    formToDbCrosswalkDict = {'investigation_file': 'files'}
+    # formToDbCrosswalkDict = {'recall_file': 'files'}
 
-    update_data = {formToDbCrosswalkDict.get(i): j for i,j in filesDict.items()}
-    existing_data = db.session.query(Recalls).get(kwargs.get('re_id_for_dash'))
+    # update_data = {formToDbCrosswalkDict.get(i): j for i,j in filesDict.items()}
+    # existing_data = db.session.query(Recalls).get(kwargs.get('re_id_for_dash'))
     
-    at_least_one_field_changed = False
-    if update_data.get('files') not in [existing_data.files,'']:
-    #if different an not null then add
-        print('files update --- values not the same')
-        at_least_one_field_changed = True
-        newTrack=Tracking_re(field_updated='verified_by_user',
-            updated_to=current_user.email, updated_by=current_user.id,
-            recalls_table_id=kwargs.get('re_id_for_dash'))
-        db.session.add(newTrack)
-        db.session.commit()
-    if at_least_one_field_changed:
-        print('at_least_one_field_changed::::',at_least_one_field_changed)
-        setattr(existing_data, 'date_updated' ,datetime.now())
-        db.session.commit()
-    if date_flag:
-        flash(date_flag, 'warning')
-    print('END update_files_re')
+    # at_least_one_field_changed = False
+    # if update_data.get('files') not in [existing_data.files,'']:
+    ##if different an not null then add
+        # print('files update --- values not the same')
+        # at_least_one_field_changed = True
+        ##newTrack=Tracking_re(field_updated='verified_by_user',
+            ##updated_to=current_user.email, updated_by=current_user.id,
+           ## recalls_table_id=kwargs.get('re_id_for_dash'))
+        ##db.session.add(newTrack)
+        ##db.session.commit()
+    # if at_least_one_field_changed:
+        # print('at_least_one_field_changed::::',at_least_one_field_changed)
+        # setattr(existing_data, 'date_updated' ,datetime.now())
+        # db.session.commit()
+    # if date_flag:
+        # flash(date_flag, 'warning')
+    # print('END update_files_re')
 
 def create_categories_xlsx(excel_file_name):
     print('START create_categories_xlsx')

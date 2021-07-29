@@ -131,6 +131,7 @@ search_criteria_dict. len(investigations) is
 def updateInvestigation(formDict, **kwargs):
     date_flag=False
     print('START investigation UPdate')
+    print('updateInv - formDict::',formDict)
     formToDbCrosswalkDict = {'inv_number':'NHTSA_ACTION_NUMBER','inv_make':'MAKE',
         'inv_model':'MODEL','inv_year':'YEAR','inv_compname':'COMPNAME',
         'inv_mfr_name': 'MFR_NAME', 'inv_odate': 'ODATE', 'inv_cdate': 'CDATE',
@@ -138,18 +139,20 @@ def updateInvestigation(formDict, **kwargs):
         'inv_km_notes_textarea': 'km_notes'}
 
     update_data = {formToDbCrosswalkDict.get(i): j for i,j in formDict.items()}
-    print('update_data::::',update_data)
+    del update_data['SUMMARY']
+    # print('update_data::::',update_data)
     
     #get categories from formDict --was formDict
     no_update_list=['inv_NHTSA Action Number','inv_Make', 'inv_Model','inv_Year','inv_Open Date',
                    'inv_Close Date','inv_Recall Campaign Number', 'inv_Component Description',
                    'inv_Manufacturer Name', 'inv_subject','inv_summary_textarea']
     not_category_list=['inv_km_notes_textarea','update_inv','verified_by_user',
-        'investigation_file','csrf_token','inv_or_re']
+        'investigation_file','csrf_token','inv_or_re','record_type',
+        'records_list']
     assigned_categories=''
     for i in formDict:
         if i not in no_update_list + not_category_list:
-            print('dict value in assigned category:::',i)
+            # print('dict value in assigned category:::',i)
             if assigned_categories=='':
                 assigned_categories=i
             else:
@@ -158,13 +161,15 @@ def updateInvestigation(formDict, **kwargs):
     
     existing_data = db.session.query(Investigations).get(kwargs.get('inv_id_for_dash'))
     #database columns to potentially update
-    Investigations_attr=['km_notes','files', 'categories']
+    # Investigations_attr=['km_notes','files', 'categories']
+    Investigations_attr=['km_notes', 'categories']
     at_least_one_field_changed = False
-    print('update data:::', update_data)
-    
+    # print('update data:::', update_data)
+    # print('Does existing_data have any files?:::',existing_data.files)
     
     for i in Investigations_attr:
-    
+        print('**Attribute to update:::',str(i))
+        print('Begininng of loop, files status:::',existing_data.files)
         if str(getattr(existing_data, i)) != update_data.get(i):
             if update_data.get(i)==None:
                 update_value=''
@@ -185,7 +190,8 @@ def updateInvestigation(formDict, **kwargs):
             db.session.commit()
         else:
             print(i, ' has no change')
-
+        print('End of loop, files status:::',existing_data.files)
+    # print('After loop throug attributes---Does existing_data have any files?:::',existing_data.files)
     if formDict.get('verified_by_user'):
         if any(current_user.email in s for s in kwargs.get('verified_by_list')):
             print('do nothing')
@@ -211,32 +217,32 @@ def updateInvestigation(formDict, **kwargs):
     if date_flag:
         flash(date_flag, 'warning')
     
-    print('end updateInvestigation util')
+    # print('end updateInvestigation util')
         #if there is a corresponding update different from existing_data:
         #1.add row to Tracking_inv datatable
         #2.update existing_data with change       
 
 
-def update_files(filesDict, **kwargs):
-    date_flag=False
-    print('in update_files - filesDict:::',filesDict,'kwargs:::',kwargs)
-    formToDbCrosswalkDict = {'investigation_file': 'files'}
+# def update_files(filesDict, **kwargs):
+    # date_flag=False
+    ## print('in update_files - filesDict:::',filesDict,'kwargs:::',kwargs)
+    # formToDbCrosswalkDict = {'investigation_file': 'files'}
 
-    update_data = {formToDbCrosswalkDict.get(i): j for i,j in filesDict.items()}
-    existing_data = db.session.query(Investigations).get(kwargs.get('inv_id_for_dash'))
+    # update_data = {formToDbCrosswalkDict.get(i): j for i,j in filesDict.items()}
+    # existing_data = db.session.query(Investigations).get(kwargs.get('inv_id_for_dash'))
     # for i in Investigations_attr:
-    at_least_one_field_changed = False
-    if update_data.get('files') not in [existing_data.files,'']:
-    #if different an not null then add
-        print('files update --- values not the same')
-        at_least_one_field_changed = True
+    # at_least_one_field_changed = False
+    ## if update_data.get('files') not in [existing_data.files,'']:
+    ## if different an not null then add
+        ## print('files update --- values not the same')
+        # at_least_one_field_changed = True
     
-    if at_least_one_field_changed:
-        print('at_least_one_field_changed::::',at_least_one_field_changed)
-        setattr(existing_data, 'date_updated' ,datetime.now())
-        db.session.commit()
-    if date_flag:
-        flash(date_flag, 'warning')
+    # if at_least_one_field_changed:
+        # print('at_least_one_field_changed::::',at_least_one_field_changed)
+        # setattr(existing_data, 'date_updated' ,datetime.now())
+        # db.session.commit()
+    # if date_flag:
+        # flash(date_flag, 'warning')
 
 
 

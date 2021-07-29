@@ -17,7 +17,7 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.re_blueprint.utils import recalls_query_util, queryToDict, \
-    update_recall, create_categories_xlsx, update_files_re, column_names_dict_re_util, \
+    update_recall, create_categories_xlsx, column_names_dict_re_util, \
     column_names_re_util
 import openpyxl
 from werkzeug.utils import secure_filename
@@ -29,7 +29,7 @@ from fileShareApp.users.forms import RegistrationForm, LoginForm, UpdateAccountF
 import re
 import logging
 from fileShareApp.inv_blueprint.utils_general import category_list_dict_util, remove_category_util, \
-    search_criteria_dictionary_util,record_remover_util
+    search_criteria_dictionary_util,record_remover_util, track_util, update_files_util
 from fileShareApp.re_blueprint.forms import ReForm
 
 
@@ -293,32 +293,39 @@ def recalls_dashboard():
         argsDict = request.args.to_dict()
         filesDict = request.files.to_dict()
         record_type=formDict['record_type']
+        verified_by_list_util=[i[0] for i in verified_by_list]
         
         if formDict.get('update_re'):
-            # print('formDict:::',formDict)
+            print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
-            # print('filesDict::::',filesDict)
-            update_recall(formDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
-
+            print('filesDict::::',filesDict)
+            
+            #update file
             if request.files.get('recall_file'):
                 #updates file name in database
-                update_files_re(filesDict, re_id_for_dash=re_id_for_dash, verified_by_list=verified_by_list)
                 
-                #SAVE file in dir named after NHTSA action num _ dash_id
+                update_from=dash_re.files 
                 uploaded_file = request.files['recall_file']
-                current_re_files_dir_name = 'Recall_'+str(re_id_for_dash)
-                current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
+                file_added_flag=update_files_util(filesDict, id_for_dash,'recall')
                 
-                if not os.path.exists(current_re_files_dir):
-                    os.makedirs(current_re_files_dir)
-                uploaded_file.save(os.path.join(current_re_files_dir,uploaded_file.filename))
+                if file_added_flag == 'file_added':
+                    track_util('recalls', 'files',update_from, dash_re.files,re_id_for_dash)
                 
-                #recalls database files column - set value as string comma delimeted
-                if dash_re.files =='':
-                    dash_re.files =uploaded_file.filename
-                else:
-                    dash_re.files =dash_re.files +','+ uploaded_file.filename
-                db.session.commit()                
+            #update notes, categories or verified_by
+            # if formDict.get('km_notes') or formDict.get('categories'):
+            update_data_list=['re_km_notes','categories','verified_by_user'] 
+            if any(item in update_data_list for item in formDict.keys()):
+                print('*****item in update_data_list and formDict.keys')
+                update_recall(formDict, re_id_for_dash, verified_by_list_util)
+            
+            #This can only be case if update + user verified previously but no unchecked
+            if (current_user.email in verified_by_list_util) and (
+                formDict.get('verified_by_user')==None):
+                db.session.query(Tracking_re).filter_by(recalls_table_id=int(re_id_for_dash),
+                    field_updated='verified_by_user',updated_to=current_user.email).delete()
+                db.session.commit()
+            
+            
             return redirect(url_for('re_blueprint.recalls_dashboard', re_id_for_dash=re_id_for_dash,
                 current_re_files_dir_name=current_re_files_dir_name))
         
@@ -336,7 +343,7 @@ def recalls_dashboard():
                 }
                 
             #if existing record has something in linked_records then convert to dict
-            if dash_re.linked_records!=None:
+            if dash_re.linked_records!=None and dash_re.linked_records!='':
                 linked_records_dict_current=json.loads(dash_re.linked_records)
                 linked_records_dict_current[formDict.get('record_type')+formDict.get('records_list')]=current_to_specified
             else:
@@ -348,7 +355,7 @@ def recalls_dashboard():
             if formDict.get('record_type')=='investigations':
                 #get query of linked record:
                 dash_re_linked= db.session.query(Investigations).get(int(formDict.get('records_list')))
-                if dash_re_linked.linked_records!=None:
+                if dash_re_linked.linked_records!=None and dash_re_linked.linked_records!='':
                     linked_records_dict_for_linked=json.loads(dash_re_linked.linked_records)
                     linked_records_dict_for_linked['recalls'+str(re_id_for_dash)]=specified_to_current
                 else:
@@ -356,7 +363,7 @@ def recalls_dashboard():
             elif formDict.get('record_type')=='recalls':
                 #get query of linked record:
                 dash_re_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
-                if dash_re_linked.linked_records!=None:
+                if dash_re_linked.linked_records!=None and dash_re_linked.linked_records!='':
                     linked_records_dict_for_linked=json.loads(dash_re_linked.linked_records)
                     linked_records_dict_for_linked['recalls'+str(re_id_for_dash)]=specified_to_current
                 else:
@@ -389,8 +396,10 @@ def recalls_dashboard():
 def delete_file_re(re_id_for_dash,filename):
     #update Investigations table files column
     dash_re =db.session.query(Recalls).get(re_id_for_dash)
+    update_from=dash_re.files
     print('delete_file route - dash_re::::',dash_re.files)
     file_list=''
+    
     if (",") in dash_re.files and len(dash_re.files)>1:
         file_list=dash_re.files.split(",")
         file_list.remove(filename)
@@ -403,10 +412,18 @@ def delete_file_re(re_id_for_dash,filename):
             else:
                 dash_re.files = dash_re.files +',' + file_list[i]
     db.session.commit()
-    
+        
+    #update tracking
+    track_util('recalls', 'files',update_from,dash_re.files,re_id_for_dash)
+    # newTrack=Tracking_re(field_updated='files',
+        # updated_to=dash_re.files, updated_by=current_user.id,
+        # recalls_table_id=re_id_for_dash)
+    # db.session.add(newTrack)
+    # db.session.commit()
     
     #Remove files from files dir
-    current_re_files_dir_name = str(dash_re.RECORD_ID) + '_'+str(re_id_for_dash)
+    # current_re_files_dir_name = str(dash_re.RECORD_ID) + '_'+str(re_id_for_dash)
+    current_re_files_dir_name = 'Recall_'+str(re_id_for_dash)
     current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
     files_dir_and_filename=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],
         current_re_files_dir_name, filename)

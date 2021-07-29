@@ -2,7 +2,7 @@ from fileShareApp import db
 from fileShareApp.models import User, Post, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 import os
-from flask import current_app
+from flask import current_app, request, flash
 import json
 from datetime import date, datetime
 from flask_login import current_user
@@ -140,9 +140,51 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
 
 
 
+def update_files_util(filesDict, id_for_dash,record_type):
+    if record_type=='investigation':
+        dash_record= db.session.query(Investigations).get(id_for_dash)
+        uploaded_file=request.files['investigation_file']
+        current_files_dir_name = 'Investigation_' +str(id_for_dash)
+    else:
+        dash_record= db.session.query(Recalls).get(id_for_dash)
+        uploaded_file=request.files['recall_file']
+        current_files_dir_name = 'Recall_' +str(id_for_dash)
+    
+    
+    
+    if uploaded_file.filename in dash_record.files:
+        flash('File already uploaded or file with same file name is associated to record.', 'warning')
+        return 'file_not_added'
+    
+    
+    current_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_files_dir_name)
+
+    if not os.path.exists(current_files_dir):
+        os.makedirs(current_files_dir)
+    uploaded_file.save(os.path.join(current_files_dir,uploaded_file.filename))
+
+    ##Investigations database files column - set value as string comma delimeted
+    if dash_record.files =='' or dash_record.files ==None:
+        dash_record.files =uploaded_file.filename
+    else:
+        dash_record.files =dash_record.files +','+ uploaded_file.filename
+    db.session.commit()
+    
+    flash('File added!', 'success')
+    return 'file_added'
 
 
-
+def track_util(record_type, update_field,update_from, update_to,id_for_dash):
+    #update tracking
+    if record_type=='recalls':
+        newTrack=Tracking_re(field_updated=update_field,updated_from=update_from,
+            updated_to=update_to, updated_by=current_user.id,recalls_table_id=id_for_dash)
+    else:
+        newTrack=Tracking_inv(field_updated=update_field,updated_from=update_from,
+            updated_to=update_to, updated_by=current_user.id,
+            investigations_table_id=id_for_dash)
+    db.session.add(newTrack)
+    db.session.commit()
 
 
 
