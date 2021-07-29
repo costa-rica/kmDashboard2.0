@@ -160,10 +160,10 @@ def update_files_util(filesDict, id_for_dash,record_type):
         current_files_dir_name = 'Recall_' +str(id_for_dash)
     
     
-    
-    if uploaded_file.filename in dash_record.files:
-        flash('File already uploaded or file with same file name is associated to record.', 'warning')
-        return 'file_not_added'
+    if dash_record.files !=None:
+        if uploaded_file.filename in dash_record.files:
+            flash('File already uploaded or file with same file name is associated to record.', 'warning')
+            return 'file_not_added'
     
     
     current_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_files_dir_name)
