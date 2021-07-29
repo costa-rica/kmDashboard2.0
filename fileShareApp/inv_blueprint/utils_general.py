@@ -53,14 +53,17 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     #this function: 1)removes records from dropdown;
     #2)makes list of records dashboard, directly taken from removed records in #1
     
+    investigation_id_list=[]
+    recalls_id_list=[]
+    
     # determine current_record_type and #get record query and linked_records
     if current_record_type=='investigations':
         current_record= db.session.query(Investigations).get(int(id_for_dash))
+        # investigation_id_list.append(int(id_for_dash))
     elif current_record_type=='recalls':
         current_record= db.session.query(Recalls).get(int(id_for_dash))
-    
-    investigation_id_list=[]
-    recalls_id_list=[]
+        # recalls_id_list.append(int(id_for_dash))
+
     #if linked_records>0 then make lists of existing links from 
     if current_record.linked_records != None:
         linked_dict=json.loads(current_record.linked_records)
@@ -79,6 +82,9 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     df_inv=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
     
     df_inv_for_dropdown=df_inv[~df_inv['id'].isin(investigation_id_list)]#df for dropdown if investigations
+    if current_record_type=='investigations':
+        df_inv_for_dropdown.drop(df_inv_for_dropdown[df_inv_for_dropdown.id==int(id_for_dash)].index,
+            inplace=True)#remove current record from list
     
     #make list of Investigations linked to current record - if any
     records_array_inv=[]
@@ -102,6 +108,9 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     df_re=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
     
     df_re_for_dropdown=df_re[~df_re['RECORD_ID'].isin(recalls_id_list)]#df for dropdown if recalls
+    if current_record_type=='recalls':
+        df_re_for_dropdown.drop(df_re_for_dropdown[df_re_for_dropdown.RECORD_ID==int(id_for_dash)].index,
+            inplace=True)#remove current record from list
     
     #make list of Recalls linked to current record - if any
     records_array_re=[]
