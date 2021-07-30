@@ -234,9 +234,11 @@ def recalls_dashboard():
     #Categories from previous update
     if dash_re.categories=='' or dash_re.categories==None:
         dash_re_categories=''
+        has_category_flag=False
     else:
         dash_re_categories=dash_re.categories.split(',')
         dash_re_categories=[i.strip() for i in dash_re_categories]
+        has_category_flag=True
         # print('dash_re_categories:::',dash_re_categories)
     
     
@@ -299,7 +301,7 @@ def recalls_dashboard():
             # print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
             print('filesDict::::',filesDict)
-            
+            print('formsDict.Keys():::',formDict.keys())
             #update file
             if request.files.get('recall_file'):
                 #updates file name in database
@@ -311,9 +313,13 @@ def recalls_dashboard():
                 if file_added_flag == 'file_added':
                     track_util('recalls', 'files',update_from, dash_re.files,re_id_for_dash)
                 
-            #update notes, categories or verified_by
-            update_data_list=['re_km_notes','categories','verified_by_user'] 
-            if any(item in update_data_list for item in formDict.keys()):
+            #Update triggered if 1) notes or verified user in formDict
+            #2)'cat_' in formDict.keys()
+            #3) if has_category_flag but no 'cat_' in formDict.keys()
+            update_data_list=['re_km_notes','verified_by_user'] 
+            if any(key in update_data_list for key in formDict.keys()) or any(
+                'cat_' in key[:4] for key in formDict.keys()) or (
+                has_category_flag and not any('cat_' in key[:4] for key in formDict.keys())):
                 print('*****item in update_data_list and formDict.keys')
                 update_recall(formDict, re_id_for_dash, verified_by_list_util)
             

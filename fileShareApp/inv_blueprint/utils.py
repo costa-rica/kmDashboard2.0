@@ -129,7 +129,7 @@ search_criteria_dict. len(investigations) is
 
 
     
-def update_investigation(dict, inv_id_for_dash, verified_by_list):
+def update_investigation(formDict, inv_id_for_dash, verified_by_list):
     # date_flag=False
     # print('START investigation UPdate')
     # print('updateInv - formDict::',formDict)
@@ -139,24 +139,28 @@ def update_investigation(dict, inv_id_for_dash, verified_by_list):
         'inv_campno':'CAMPNO','inv_subject': 'SUBJECT', 'inv_summary_textarea': 'SUMMARY',
         'inv_km_notes': 'km_notes','investigation_file': 'files'}
 
-    update_data = {formToDbCrosswalkDict.get(i): j for i,j in dict.items()}
+    update_data = {formToDbCrosswalkDict.get(i): j for i,j in formDict.items()}
     # del update_data['SUMMARY']
     # print('update_data::::',update_data)
     
+    
+    # no_update_list=['inv_NHTSA Action Number','inv_Make', 'inv_Model','inv_Year','inv_Open Date',
+                   # 'inv_Close Date','inv_Recall Campaign Number', 'inv_Component Description',
+                   # 'inv_Manufacturer Name', 'inv_subject','inv_summary_textarea','inv_km_notes',
+                   # 'update_inv','verified_by_user','investigation_file','csrf_token',
+                   # 'inv_or_re','record_type','records_list']
+    
+    
     #get categories from formDict --was formDict
-    no_update_list=['inv_NHTSA Action Number','inv_Make', 'inv_Model','inv_Year','inv_Open Date',
-                   'inv_Close Date','inv_Recall Campaign Number', 'inv_Component Description',
-                   'inv_Manufacturer Name', 'inv_subject','inv_summary_textarea','inv_km_notes',
-                   'update_inv','verified_by_user','investigation_file','csrf_token',
-                   'inv_or_re','record_type','records_list']
     assigned_categories=''
-    for i in dict:
-        if i not in no_update_list:
-            # print('dict value in assigned category:::',i)
+    for i in formDict:
+        if i[:4]=='cat_':
+        # if i not in no_update_list:
+            # print('formDict value in assigned category:::',i)
             if assigned_categories=='':
-                assigned_categories=i
+                assigned_categories=i[4:]
             else:
-                assigned_categories=assigned_categories +', '+ i
+                assigned_categories=assigned_categories +', '+ i[4:]
     update_data['categories']=assigned_categories
     
     existing_data = db.session.query(Investigations).get(int(inv_id_for_dash))
@@ -194,7 +198,7 @@ def update_investigation(dict, inv_id_for_dash, verified_by_list):
         # print('End of loop, files status:::',existing_data.files)
     # print('After loop throug attributes---Does existing_data have any files?:::',existing_data.files)
     
-    if dict.get('verified_by_user'):
+    if formDict.get('verified_by_user'):
     
         if current_user.email not in verified_by_list:
             track_util('investigations', 'verified_by_user','',current_user.email,inv_id_for_dash)

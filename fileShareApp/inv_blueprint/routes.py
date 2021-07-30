@@ -252,9 +252,11 @@ def investigations_dashboard():
     #Categories
     if dash_inv.categories=='' or dash_inv.categories==None:
         dash_inv_categories=''
+        has_category_flag=False
     else:
         dash_inv_categories=dash_inv.categories.split(',')
         dash_inv_categories=[i.strip() for i in dash_inv_categories]
+        has_category_flag=True
         # print('dash_inv_categories:::',dash_inv_categories)
     
     
@@ -307,6 +309,7 @@ def investigations_dashboard():
             print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
             print('filesDict::::',filesDict)
+            print('formsDict.Keys():::',formDict.keys())
 
             if request.files.get('investigation_file'):
                 print('!!!!request.files.get(investigation_file:::::')
@@ -319,9 +322,13 @@ def investigations_dashboard():
                 if file_added_flag == 'file_added':
                     track_util('investigations', 'files',update_from, dash_inv.files,inv_id_for_dash)
                 
-            #update notes, categories or verified_by
-            update_data_list=['re_km_notes','categories','verified_by_user'] 
-            if any(item in update_data_list for item in formDict.keys()):
+            #Update triggered if 1) notes or verified user in formDict
+            #2)'cat_' in formDict.keys()
+            #3) if has_category_flag but no 'cat_' in formDict.keys()
+            update_data_list=['re_km_notes','verified_by_user'] 
+            if any(key in update_data_list for key in formDict.keys()) or any(
+                'cat_' in key[:4] for key in formDict.keys()) or (
+                has_category_flag and not any('cat_' in key[:4] for key in formDict.keys())):
                 print('*****item in update_data_list and formDict.keys')
                 update_investigation(formDict, inv_id_for_dash, verified_by_list_util)
 

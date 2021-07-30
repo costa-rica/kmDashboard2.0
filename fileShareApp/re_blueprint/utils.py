@@ -146,7 +146,7 @@ search_criteria_dict. len(recalls) is
 
 
     
-def update_recall(dict, re_id_for_dash, verified_by_list):
+def update_recall(formDict, re_id_for_dash, verified_by_list):
     print('START update_recall')
     # date_flag=False
 
@@ -159,25 +159,26 @@ def update_recall(dict, re_id_for_dash, verified_by_list):
         're_CONSEQUENCE_DEFCT':'CONSEQUENCE_DEFCT','re_CORRECTIVE_ACTION':'CORRECTIVE_ACTION',
         're_NOTES':'NOTES', 're_RCL_CMPT_ID':'RCL_CMPT_ID','re_km_notes': 'km_notes',
         'recall_file': 'files'}
-    update_data = {formToDbCrosswalkDict.get(i): j for i,j in dict.items()}
+    update_data = {formToDbCrosswalkDict.get(i): j for i,j in formDict.items()}
     # print('update_data::::',update_data)
     
     #important for category list
-    no_update_list=['re_Record ID', 're_CAMPNO', 're_MFGCAMPNO', 're_COMPNAME', 're_BGMAN',
-        're_ENDMAN', 're_RCLTYPECD', 're_POTAFF', 're_INFLUENCED_BY', 're_MFGTXT', 're_RCDATE',
-        're_DATEA', 're_RPNO', 're_FMVSS', 're_DESC_DEFECT', 're_CONSEQUENCE_DEFCT',
-        're_CORRECTIVE_ACTION', 're_NOTES', 're_RCL_CMPT_ID', 're_Make', 're_Model', 're_Year',
-        're_Manufacturer Name', 're_Open Date','update_re','verified_by_user','recall_file',
-        'record_type','records_list','re_km_notes']
+    # no_update_list=['re_Record ID', 're_CAMPNO', 're_MFGCAMPNO', 're_COMPNAME', 're_BGMAN',
+        # 're_ENDMAN', 're_RCLTYPECD', 're_POTAFF', 're_INFLUENCED_BY', 're_MFGTXT', 're_RCDATE',
+        # 're_DATEA', 're_RPNO', 're_FMVSS', 're_DESC_DEFECT', 're_CONSEQUENCE_DEFCT',
+        # 're_CORRECTIVE_ACTION', 're_NOTES', 're_RCL_CMPT_ID', 're_Make', 're_Model', 're_Year',
+        # 're_Manufacturer Name', 're_Open Date','update_re','verified_by_user','recall_file',
+        # 'record_type','records_list','re_km_notes']
     #removed from no_update_list: 're_km_notes_textarea',
     assigned_categories=''
-    for i in dict:
-        if i not in no_update_list:
-            print('dict value in assigned category:::',i)
+    for i in formDict:
+        # if i not in no_update_list:
+        if i[:4]=='cat_':
+            print('formDict value in assigned category:::',i)
             if assigned_categories=='':
-                assigned_categories=i
+                assigned_categories=i[4:]
             else:
-                assigned_categories=assigned_categories +', '+ i
+                assigned_categories=assigned_categories +', '+ i[4:]
     update_data['categories']=assigned_categories
     #END important for category list
     
@@ -214,7 +215,7 @@ def update_recall(dict, re_id_for_dash, verified_by_list):
         # else:
             # print(i, ' has no change')
 
-    if dict.get('verified_by_user'):
+    if formDict.get('verified_by_user'):
         # if current_user.email not in verified_by_list:
             # pass
             # print('do nothing')
