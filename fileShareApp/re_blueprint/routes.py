@@ -200,12 +200,6 @@ def search_recalls():
 def recalls_dashboard():
     print('*TOP OF def dashboard()*')
     re_form=ReForm()
-    
-    #for deleting files only
-    if request.args.get('current_re_files_dir_name'):
-        current_re_files_dir_name=request.args.get('current_re_files_dir_name')
-    else:
-        current_re_files_dir_name='No file passed'
         
     #view, update
     if request.args.get('re_id_for_dash'):
@@ -218,6 +212,11 @@ def recalls_dashboard():
         # print('verified_by_list:::',verified_by_list)
     else:
         verified_by_list=[]
+
+    #for viewing and deleting files
+    current_re_files_dir_name = 'Recall_'+str(re_id_for_dash)
+    current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
+
 
     #pass check or no check for current_user
     if any(current_user.email in s for s in verified_by_list):

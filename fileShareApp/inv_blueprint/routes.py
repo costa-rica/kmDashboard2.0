@@ -219,11 +219,6 @@ def investigations_dashboard():
     print('*TOP OF def dashboard()*')
     inv_form=InvForm()
     
-    if request.args.get('current_inv_files_dir_name'):
-        current_inv_files_dir_name=request.args.get('current_inv_files_dir_name')
-    else:
-        current_inv_files_dir_name='No file passed'
-    
     #view, update
     if request.args.get('inv_id_for_dash'):
         # print('request.args.get(inv_id_for_dash, should build verified_by_list')
@@ -235,6 +230,11 @@ def investigations_dashboard():
         # print('verified_by_list:::',verified_by_list)
     else:
         verified_by_list=[]
+
+    #for viewing and deleting files
+    current_inv_files_dir_name = 'Investigation_'+str(inv_id_for_dash)
+    current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
+
 
     #pass check or no check for current_user
     if any(current_user.email in s for s in verified_by_list):
