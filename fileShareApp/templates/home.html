@@ -16,8 +16,10 @@
             
             <br/>
             <a href="{{ url_for('users.database_page') }}">Database</a>
-
-            
+            {% if current_user.email in allow_list %}
+            <br/>
+            <a href="{{ url_for('users.admin') }}">Permissions</a>
+            {% endif %}
 
         </div>
     </div>

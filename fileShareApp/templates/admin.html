@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+
+{% block main %}
+
+<section class="admin_page" >
+    <div class="container">
+
+        <form method="POST" action="" enctype="multipart/form-data">
+
+            <div>
+                <h2>Users</h2>
+                {% for i,j in users_list.items() %}
+                <ul class="ul_no_bullets">
+                    {% if j=='add privilege' %}
+                    <li >{{ i +'(' + j +')'}}</li>
+
+                    {% else %}
+                    <li >{{ i }} <a class="remove-image"  href="{{ url_for('users.delete_user', email=i) }}" 
+                        style="display: inline;">&#215;</a></li>
+
+                    {% endif %}
+                </ul>
+                {% endfor %}
+            </div>
+
+
+            <br/>
+            <div>
+                Add user: <input type="text" class="wider_input_login" name="add_user" >
+                <input type="checkbox" name="add_privilege" value="True"> Add Privilege
+            </div>
+
+            <br/>
+            <button type="submit" class="btn btn-primary ml-3" name="confirm_selection" value=True>Confirm</button>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

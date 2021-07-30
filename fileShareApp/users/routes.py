@@ -30,8 +30,11 @@ users = Blueprint('users', __name__)
 @users.route("/home")
 @login_required
 def home():
-    
-    return render_template('home.html')
+    with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'added_users.txt')) as json_file:
+        get_users_dict=json.load(json_file)
+        json_file.close()
+    allow_list=[i for i,j in get_users_dict.items() if j=='add privilege']
+    return render_template('home.html', allow_list=allow_list)
 
 
 
@@ -40,17 +43,24 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('users.home'))
     form= RegistrationForm()
+    
+    #Get list of emails allowed to register
+    with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'added_users.txt')) as json_file:
+        get_users=json.load(json_file)
+        json_file.close()
+    get_users_list=list(get_users.keys())
+    
     if request.method == 'POST':
         if form.validate_on_submit():
+
             hashed_password=bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-            userPermission1=userPermission(form.email.data)
-            if userPermission1[0]:
-                user=User(email=form.email.data, password=hashed_password, permission=userPermission1[1])
-            else:
+            if form.email.data in get_users_list:            
                 user=User(email=form.email.data, password=hashed_password)
-            db.session.add(user)
-            db.session.commit()
-            flash(f'You are now registered! You can login.', 'success')
+                db.session.add(user)
+                db.session.commit()
+                flash(f'You are now registered! You can login.', 'success')
+            else:
+                flash(f'You do not have permission to register', 'warning')
             return redirect(url_for('users.login'))
         else:
             flash(f'Did you mis type something? Check: 1) email is actually an email 2) password and confirm password match.', 'warning')
@@ -286,3 +296,59 @@ def database_upload():
                 
     return render_template('database_upload.html',legend=legend,tableNamesList=tableNamesList,
                 sheetNames=sheetNames, excelFileName=excelFileName,uploadFlag=uploadFlag)
+
+
+
+
+@users.route("/admin", methods=["GET","POST"])
+@login_required
+def admin():
+    users_list=[i.email for i in db.session.query(User).all()]
+    
+    with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'added_users.txt')) as json_file:
+        get_users_dict=json.load(json_file)
+        json_file.close()
+    # get_users_list=list(get_users.keys())
+    if request.method == 'POST':
+        formDict = request.form.to_dict()
+        print('formDict:::', formDict)
+        if formDict.get('add_privilege'):
+            
+            get_users_dict[formDict.get('add_user')]='add privilege'
+        else:
+            get_users_dict[formDict.get('add_user')]='no add privileges'
+        
+        added_users_file=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'added_users.txt')
+        with open(added_users_file, 'w') as json_file:
+            json.dump(get_users_dict, json_file)
+        
+        return redirect(url_for('users.admin'))
+    return render_template('admin.html', users_list=get_users_dict)
+
+@users.route("/delete_user/<email>", methods=["GET","POST"])
+@login_required
+def delete_user(email):
+    print('did we get here????', email)
+    with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'added_users.txt')) as json_file:
+        get_users_dict=json.load(json_file)
+        json_file.close()
+    
+    del get_users_dict[email]
+    
+    added_users_file=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'added_users.txt')
+    with open(added_users_file, 'w') as json_file:
+        json.dump(get_users_dict, json_file)
+        
+    if len(db.session.query(User).filter_by(email=email).all())>0:
+        db.session.query(User).filter_by(email=email).delete()
+        db.session.commit()
+    
+    
+    
+    flash(f'{email} has been deleted!', 'success')
+    return redirect(url_for('users.admin'))
+
+
+
+
+
