@@ -83,8 +83,8 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     
     df_inv_for_dropdown=df_inv[~df_inv['id'].isin(investigation_id_list)]#df for dropdown if investigations
     if current_record_type=='investigations':
-        df_inv_for_dropdown.drop(df_inv_for_dropdown[df_inv_for_dropdown.id==int(id_for_dash)].index,
-            inplace=True)#remove current record from list
+        df_inv_for_dropdown=df_inv_for_dropdown.drop(df_inv_for_dropdown[df_inv_for_dropdown.id==int(
+            id_for_dash)].index)#remove current record from list
     
     #make list of Investigations linked to current record - if any
     records_array_inv=[]
@@ -101,7 +101,7 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
             thing=F"{i[0]}|{i[1]}|{i[2]}|{i[3]}|{i[4]}"
             records_array_inv.append(thing)
     #END make list of Investigations linked to current record - if any
-
+    
     re_list_identifiers=db.session.query(
         Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).filter(
         getattr(Recalls,'ODATE')>="2011-01-01").all()
@@ -109,8 +109,8 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     
     df_re_for_dropdown=df_re[~df_re['RECORD_ID'].isin(recalls_id_list)]#df for dropdown if recalls
     if current_record_type=='recalls':
-        df_re_for_dropdown.drop(df_re_for_dropdown[df_re_for_dropdown.RECORD_ID==int(id_for_dash)].index,
-            inplace=True)#remove current record from list
+        df_re_for_dropdown=df_re_for_dropdown.drop(df_re_for_dropdown[df_re_for_dropdown.RECORD_ID==int(
+            id_for_dash)].index)#remove current record from list
     
     #make list of Recalls linked to current record - if any
     records_array_re=[]
