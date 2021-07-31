@@ -569,6 +569,10 @@ section.dashboard .link_records_div {
   border-radius: .3em;
 }
 
+section.dashboard .text_input_wide {
+  width: 95%;
+}
+
 section.dashboard .investigation_entry_bottom {
   display: -ms-grid;
   display: grid;

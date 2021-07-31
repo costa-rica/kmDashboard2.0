@@ -306,9 +306,9 @@ def investigations_dashboard():
         verified_by_list_util=[i[0] for i in verified_by_list]
         
         if formDict.get('update_inv'):
-            print('formDict:::',formDict)
+            # print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
-            print('filesDict::::',filesDict)
+            # print('filesDict::::',filesDict)
             print('formsDict.Keys():::',formDict.keys())
 
             if request.files.get('investigation_file'):
@@ -344,7 +344,7 @@ def investigations_dashboard():
                 current_inv_files_dir_name=current_inv_files_dir_name, record_type=record_type))
                 
         elif formDict.get('link_record'):
-            # print('!!!!LINKED RECORD formDict:::::', formDict)
+            print('!!!!LINKED RECORD formDict:::::', formDict)
             
             #make list in current record to specified record ['type', 'id']
             current_to_specified={
@@ -396,7 +396,8 @@ def investigations_dashboard():
         dash_inv_list=dash_inv_list, str=str, len=len, inv_id_for_dash=inv_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,current_inv_files_dir_name=current_inv_files_dir_name,
-        category_group_dict_no_space=category_group_dict_no_space, inv_form=inv_form)
+        category_group_dict_no_space=category_group_dict_no_space, inv_form=inv_form,
+        records_array=records_array)
 
 
 

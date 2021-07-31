@@ -71,8 +71,9 @@
             <div class="link_records_div">
                 <div>
                     Link this recall to another record:<br/>
-                    {{ re_form.record_type }}<br/>
-                    {{ re_form.records_list }}
+                    {{ re_form.record_type }}<br/> <!-- Textbox 1 (dropdown, not typeable )-->
+                    {{ re_form.records_list }} <!-- Textbox 2 (dropdown, not typeable)-->
+                    
                     <input type="submit" class="update_inv link_record_button" name="link_record" value="Link Record">
 
                 </div>

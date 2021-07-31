@@ -69,7 +69,24 @@
                 <div>
                     Link this investigation to another record:<br/>
                     {{ inv_form.record_type }}<br/>
-                    {{ inv_form.records_list }}
+                    
+
+<!--
+                    <textarea id="records_list2" name="records_list2" rows="4" cols="150">
+                        
+                    </textarea>
+-->
+
+
+                    <div class="">
+                        <input type="text" class="text_input_wide" name="records_list"  list="records_list3_list">
+                        <datalist id="records_list3_list">
+                            {% for i in records_array %}
+                            <option value="{{ i.id }}">{{ i.shows_up }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
                     <input type="submit" class="update_inv link_record_button" name="link_record" value="Link Record">
 
                 </div>
@@ -214,7 +231,7 @@
     var inv_id_for_dash = "{{ inv_id_for_dash }}"
 
     let record_type_select = document.getElementById('record_type');
-    let records_list_select = document.getElementById('records_list');
+    let records_list_select = document.getElementById('records_list3_list');
     
 
     record_type_select.onchange = function(){
