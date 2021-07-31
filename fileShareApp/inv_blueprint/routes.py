@@ -269,6 +269,7 @@ def investigations_dashboard():
     records_array=records_util[0]#list for dropdown
     # insert list of choices for linked records -- entering dashbaord from search:
     inv_form.records_list.choices = [(r.get('id'),r.get('shows_up')) for r in records_array]
+    #I probably don't need this line above here anymore
     
     dash_inv_linked_records=records_util[1] #list of linked records for dashboard
     #------End of linked reocrds----
@@ -345,11 +346,12 @@ def investigations_dashboard():
                 
         elif formDict.get('link_record'):
             print('!!!!LINKED RECORD formDict:::::', formDict)
-            
+            record_list_item=formDict.get('records_list')
+            record_list_id=record_list_item[:record_list_item.find('|')]
             #make list in current record to specified record ['type', 'id']
             current_to_specified={
                 'record_type':formDict.get('record_type'),
-                'record_id':formDict.get('records_list')
+                'record_id':record_list_id
                 }
             specified_to_current={
                 'record_type':'investigations',
@@ -359,16 +361,16 @@ def investigations_dashboard():
             #if existing record has something in linked_records then convert to dict
             if dash_inv.linked_records!= None and dash_inv.linked_records!= '':
                 linked_records_dict_current=json.loads(dash_inv.linked_records)
-                linked_records_dict_current[formDict.get('record_type')+formDict.get('records_list')]=current_to_specified
+                linked_records_dict_current[formDict.get('record_type')+record_list_id]=current_to_specified
             else:
-                linked_records_dict_current={formDict.get('record_type')+formDict.get('records_list'):current_to_specified}
+                linked_records_dict_current={formDict.get('record_type')+record_list_id:current_to_specified}
               
 
             
             #check if linked record has
             if formDict.get('record_type')=='investigations':
                 #get query of linked record:
-                dash_inv_linked= db.session.query(Investigations).get(int(formDict.get('records_list')))
+                dash_inv_linked= db.session.query(Investigations).get(int(record_list_id))
                 if dash_inv_linked.linked_records!= None and dash_inv_linked.linked_records!= '':
                     linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
                     linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
@@ -376,7 +378,7 @@ def investigations_dashboard():
                     linked_records_dict_for_linked={'investigations'+str(inv_id_for_dash):specified_to_current}
             elif formDict.get('record_type')=='recalls':
                 #get query of linked record:
-                dash_inv_linked= db.session.query(Recalls).get(int(formDict.get('records_list')))
+                dash_inv_linked= db.session.query(Recalls).get(int(record_list_id))
                 if dash_inv_linked.linked_records!= None and dash_inv_linked.linked_records!= '':
                     linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
                     linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current

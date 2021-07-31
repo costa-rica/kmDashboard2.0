@@ -72,7 +72,14 @@
                 <div>
                     Link this recall to another record:<br/>
                     {{ re_form.record_type }}<br/> <!-- Textbox 1 (dropdown, not typeable )-->
-                    {{ re_form.records_list }} <!-- Textbox 2 (dropdown, not typeable)-->
+                    <div class="">
+                        <input type="text" class="text_input_wide" name="records_list"  list="records_list3_list">
+                        <datalist id="records_list3_list">
+                            {% for i in records_array %}
+                            <option >{{ i.shows_up }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
                     
                     <input type="submit" class="update_inv link_record_button" name="link_record" value="Link Record">
 
@@ -217,7 +224,7 @@
     var re_id_for_dash = "{{ re_id_for_dash }}"
 
     let record_type_select = document.getElementById('record_type');
-    let records_list_select = document.getElementById('records_list');
+    let records_list_select = document.getElementById('records_list3_list');
     
 
     record_type_select.onchange = function(){
@@ -228,7 +235,7 @@
             response.json().then(function(data){
                 let optionHTML = '';
                 for(let record of data.records) {
-                    optionHTML += '<option value="' + record.id + '">' + record.shows_up + '</option>';
+                    optionHTML += '<option>' + record.shows_up + '</option>';
                 }
                 
                 records_list_select.innerHTML = optionHTML;

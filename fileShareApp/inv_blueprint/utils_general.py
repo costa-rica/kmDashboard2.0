@@ -65,7 +65,7 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
         # recalls_id_list.append(int(id_for_dash))
 
     #if linked_records>0 then make lists of existing links from 
-    if current_record.linked_records != None:
+    if current_record.linked_records != None and current_record.linked_records != '':
         linked_dict=json.loads(current_record.linked_records)
         for i,j in linked_dict.items():
             if 'investigations' in i:
