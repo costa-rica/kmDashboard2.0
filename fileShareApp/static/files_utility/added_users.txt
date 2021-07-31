@@ -1,1 +1,1 @@
-{"mark.swanson@kineticmetrics.com": "add privilege", "emily.reichard@kineticmetrics.com": "add privilege", "nickrodriguez@kineticmetrics.com": "add privilege"}
+{"mark.swanson@kineticmetrics.com": "add privilege", "emily.reichard@kineticmetrics.com": "add privilege", "nickrodriguez@kineticmetrics.com": "add privilege", "nickapeed@yahoo.com":"asdf"}
