@@ -47,10 +47,8 @@ def investigations_query_util(query_file_name):
             for j in user_criteria:
                 investigations_table_ids=db.session.query(Tracking_inv.investigations_table_id).filter(Tracking_inv.updated_to.contains(j)).distinct().all()
                 investigations_table_ids=[i[0] for i in investigations_table_ids]
-                # print('recalls_table_ids:::',investigations_table_ids)
                 table_ids_dict[j]=investigations_table_ids
             
-            # print('table_ids_dict::',table_ids_dict)
             #get list of records users 
             n=0
             for i,j in table_ids_dict.items():
@@ -65,7 +63,6 @@ def investigations_query_util(query_file_name):
             if len(table_ids_list)>0:
                 investigations = investigations.filter(getattr(Investigations,'id').in_(table_ids_list))
 
-    print('2investigations lentght::::',len(investigations.all()))
     #put all 'category' elements in another dictionary
     category_dict={}
     for i,j in search_criteria_dict.items():
@@ -82,7 +79,6 @@ def investigations_query_util(query_file_name):
         if j[0]!='':
             investigations = investigations.filter(getattr(Investigations,'categories').contains(j[0]))
 
-    print('3investigations lentght::::',len(investigations.all()))
     for i,j in search_criteria_dict.items():
         if j[1]== "exact":
             if i in ['id','YEAR'] and j[0]!='':
@@ -113,10 +109,10 @@ def investigations_query_util(query_file_name):
         elif j[1] =="string_contains" and j[0]!='':
             if i not in ['user']:
                 investigations = investigations.filter(getattr(Investigations,i).contains(j[0]))
-    # print('filtered all investigations except Odate restriction ::', len(investigations.all()))
-    investigations=investigations.filter(getattr(Investigations,'ODATE')>="2011-01-01")
-    print('4investigations lentght::::',len(investigations.all()))
-    # print('filtered all investigations::', len(investigations.all()))
+   
+    #Removed 2011 filter on 8/2/2021
+    # investigations=investigations.filter(getattr(Investigations,'ODATE')>="2011-01-01")
+    
     investigations=investigations.all()
     print('filtered complte')
     
@@ -267,7 +263,8 @@ def create_categories_xlsx(excel_file_name, column_names_for_df, formDict, db_ta
 
     queryDf = pd.read_sql_table(db_table, db.engine)
     queryDf=queryDf[column_names_for_df].copy()
-    queryDf=queryDf[(queryDf['ODATE']>datetime(2011,1,1,0,0,0))]
+    # 2011 ODATE filter removed 8/2/2021 per request
+    # queryDf=queryDf[(queryDf['ODATE']>datetime(2011,1,1,0,0,0))]
 
     
     queryDf.to_excel(excelObj,sheet_name=db_table.capitalize() + ' Data', header=False, index=False,startrow=1)

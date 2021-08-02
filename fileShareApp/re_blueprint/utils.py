@@ -132,7 +132,8 @@ def recalls_query_util(query_file_name):
         elif j[1] =="string_contains" and j[0]!='':
             if i not in ['user']:
                 recalls = recalls.filter(getattr(Recalls,i).contains(j[0]))
-    recalls=recalls.filter(getattr(Recalls,'ODATE')>="2011-01-01")
+    #removed 2011 ODATE filter 8/2/21
+    # recalls=recalls.filter(getattr(Recalls,'ODATE')>="2011-01-01")
     
     recalls=recalls.all()
     msg="""END recalls_query_util(query_file_name), returns recalls,
