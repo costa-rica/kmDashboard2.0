@@ -438,8 +438,9 @@ section.dashboard {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        height: 10em;
+        /*height: 10em;*/
         padding-left: 20px;
+        padding-bottom: 55px;
         .file_input {
             padding: 10px 0 0 0;
         }

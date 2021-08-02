@@ -595,8 +595,9 @@ section.dashboard .inv_files {
   -webkit-box-pack: start;
       -ms-flex-pack: start;
           justify-content: flex-start;
-  height: 10em;
+  /*height: 10em;*/
   padding-left: 20px;
+  padding-bottom: 55px;
 }
 
 section.dashboard .inv_files .file_input {
