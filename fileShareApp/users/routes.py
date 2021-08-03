@@ -272,6 +272,9 @@ def database_upload():
                     existing_emails=[i[0] for i in db.session.query(User.email).all()]
                     sheetUpload=pd.read_excel(wb,engine='openpyxl',sheet_name='user')
                     sheetUpload=sheetUpload[~sheetUpload['email'].isin(existing_emails)]
+
+                elif sheet in ['investigations','recalls']:
+                    sheetUpload['date_updated']=datetime.now()
                 # sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
                 # print('upload SUCCESS!: ', sheet)
                 try:
@@ -282,8 +285,8 @@ def database_upload():
                 except:
                     os.remove(os.path.join(current_app.config['UTILITY_FILES_FOLDER'], excelFileName))
                     uploadFlag=False
-                    flash(f"""Problem uploading {sheet} table. Check for uniquness make 
-                        sure not duplicate ids are being added.""", 'warning')
+                    flash(f"""Problem uploading {sheet} table. Check for 1)uniquness with id or RECORD_ID 2)date columns
+                        are in a date format in excel.""", 'warning')
                     return render_template('database_upload.html',  legend=legend,
                         tableNamesList=tableNamesList, sheetNames=sheetNames,uploadFlag=uploadFlag)
                         
