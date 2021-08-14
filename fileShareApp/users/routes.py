@@ -264,6 +264,7 @@ def database_upload():
     if request.method == 'POST':
         
         formDict = request.form.to_dict()
+        print('formDict::::', formDict)
         if formDict.get('appendExcel'):
             wb=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], excelFileName)
             for sheet in sheetNames:                
@@ -273,7 +274,7 @@ def database_upload():
                     sheetUpload=pd.read_excel(wb,engine='openpyxl',sheet_name='user')
                     sheetUpload=sheetUpload[~sheetUpload['email'].isin(existing_emails)]
 
-                elif sheet in ['investigations','recalls']:
+                elif formDict.get(sheet) in ['investigations','recalls']:
                     sheetUpload['date_updated']=datetime.now()
                 # sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
                 # print('upload SUCCESS!: ', sheet)
