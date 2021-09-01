@@ -161,15 +161,7 @@ def update_recall(formDict, re_id_for_dash, verified_by_list):
         're_NOTES':'NOTES', 're_RCL_CMPT_ID':'RCL_CMPT_ID','re_km_notes': 'km_notes',
         'recall_file': 'files'}
     update_data = {formToDbCrosswalkDict.get(i): j for i,j in formDict.items()}
-    # print('update_data::::',update_data)
-    
-    #important for category list
-    # no_update_list=['re_Record ID', 're_CAMPNO', 're_MFGCAMPNO', 're_COMPNAME', 're_BGMAN',
-        # 're_ENDMAN', 're_RCLTYPECD', 're_POTAFF', 're_INFLUENCED_BY', 're_MFGTXT', 're_RCDATE',
-        # 're_DATEA', 're_RPNO', 're_FMVSS', 're_DESC_DEFECT', 're_CONSEQUENCE_DEFCT',
-        # 're_CORRECTIVE_ACTION', 're_NOTES', 're_RCL_CMPT_ID', 're_Make', 're_Model', 're_Year',
-        # 're_Manufacturer Name', 're_Open Date','update_re','verified_by_user','recall_file',
-        # 'record_type','records_list','re_km_notes']
+
     #removed from no_update_list: 're_km_notes_textarea',
     assigned_categories=''
     for i in formDict:
@@ -209,100 +201,33 @@ def update_recall(formDict, re_id_for_dash, verified_by_list):
             
             #Track change in Track_inv table here
             track_util('recalls', i,update_from, update_data.get(i),re_id_for_dash)
-            # newTrack= Tracking_re(field_updated=i,updated_from=getattr(existing_data, i),
-                # updated_to=update_data.get(i), updated_by=current_user.id,
-                # recalls_table_id=kwargs.get('re_id_for_dash'))
-            # db.session.add(newTrack)
-        # else:
-            # print(i, ' has no change')
+
 
     if formDict.get('verified_by_user'):
-        # if current_user.email not in verified_by_list:
-            # pass
-            # print('do nothing')
-        # elif kwargs.get('verified_by_list') ==[] or any(current_user.email not in s for s in kwargs.get('verified_by_list')):
-        # else:
-
-        
         
         if current_user.email not in verified_by_list:
             track_util('recalls', 'verified_by_user','',current_user.email,re_id_for_dash)
-            # print('user verified adding to Tracking_re table')
-            # at_least_one_field_changed = True
-            # newTrack=Tracking_re(field_updated='verified_by_user',
-                # updated_to=current_user.email, updated_by=current_user.id,
-                # recalls_table_id=kwargs.get('re_id_for_dash'))
-            # db.session.add(newTrack)
-            # db.session.commit()
-    # else:
-        # print('*****IN Else***')
-        # print('current_user.email:::',type(current_user.email),current_user.email)
-        # print('verified_by_list::::',type(verified_by_list),verified_by_list)
-        # print('no verified user added')
-        # if any(current_user.email in s for s in kwargs.get('verified_by_list')):
-        # if current_user.email in verified_by_list:
-            # print('current user in verified_by_list')
-            # db.session.query(Tracking_re).filter_by(recalls_table_id=int(re_id_for_dash),
-                # field_updated='verified_by_user',updated_to=current_user.email).delete()
-            # db.session.commit()
-            
-    # if at_least_one_field_changed:
-        # print('at_least_one_field_changed::::',at_least_one_field_changed)
-        # setattr(existing_data, 'date_updated' ,datetime.now())
-        # db.session.commit()
-    # if date_flag:
-        # flash(date_flag, 'warning')
+
     print('END update_recall')
-    # print('end updateInvestigation util')
-        #if there is a corresponding update different from existing_data:
-        #1.add row to Tracking_re datatable
-        #2.update existing_data with change       
 
 
-# def update_files_re(filesDict, **kwargs):
-    # print('START update_files_re')
-    # date_flag=False
-    # print('in update_files - filesDict:::',filesDict,'kwargs:::',kwargs)
-    # formToDbCrosswalkDict = {'recall_file': 'files'}
+# def create_categories_xlsx(excel_file_name):
+    # print('START create_categories_xlsx')
+    # excelObj=pd.ExcelWriter(os.path.join(
+        # current_app.config['UTILITY_FILES_FOLDER'],excel_file_name))
 
-    # update_data = {formToDbCrosswalkDict.get(i): j for i,j in filesDict.items()}
-    # existing_data = db.session.query(Recalls).get(kwargs.get('re_id_for_dash'))
-    
-    # at_least_one_field_changed = False
-    # if update_data.get('files') not in [existing_data.files,'']:
-    ##if different an not null then add
-        # print('files update --- values not the same')
-        # at_least_one_field_changed = True
-        ##newTrack=Tracking_re(field_updated='verified_by_user',
-            ##updated_to=current_user.email, updated_by=current_user.id,
-           ## recalls_table_id=kwargs.get('re_id_for_dash'))
-        ##db.session.add(newTrack)
-        ##db.session.commit()
-    # if at_least_one_field_changed:
-        # print('at_least_one_field_changed::::',at_least_one_field_changed)
-        # setattr(existing_data, 'date_updated' ,datetime.now())
-        # db.session.commit()
-    # if date_flag:
-        # flash(date_flag, 'warning')
-    # print('END update_files_re')
+    # columnNames=Investigations.__table__.columns.keys()
+    # colNamesDf=pd.DataFrame([columnNames],columns=columnNames)
+    # colNamesDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False)
 
-def create_categories_xlsx(excel_file_name):
-    print('START create_categories_xlsx')
-    excelObj=pd.ExcelWriter(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name))
-
-    columnNames=Investigations.__table__.columns.keys()
-    colNamesDf=pd.DataFrame([columnNames],columns=columnNames)
-    colNamesDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False)
-
-    queryDf = pd.read_sql_table('investigations', db.engine)
-    queryDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False,startrow=1)
-    inv_data_workbook=excelObj.book
-    notes_worksheet = inv_data_workbook.add_worksheet('Notes')
-    notes_worksheet.write('A1','Created:')
-    notes_worksheet.set_column(1,1,len(str(datetime.now())))
-    time_stamp_format = inv_data_workbook.add_format({'num_format': 'mmm d yyyy hh:mm:ss AM/PM'})
-    notes_worksheet.write('B1',datetime.now(), time_stamp_format)
-    excelObj.close()
-    print('END create_categories_xlsx')
+    # queryDf = pd.read_sql_table('investigations', db.engine)
+    # queryDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False,startrow=1)
+    # inv_data_workbook=excelObj.book
+    # notes_worksheet = inv_data_workbook.add_worksheet('Notes')
+    # notes_worksheet.write('A1','Created:')
+    # notes_worksheet.set_column(1,1,len(str(datetime.now())))
+    # time_stamp_format = inv_data_workbook.add_format({'num_format': 'mmm d yyyy hh:mm:ss AM/PM'})
+    # notes_worksheet.write('B1',datetime.now(), time_stamp_format)
+    # excelObj.close()
+    # print('END create_categories_xlsx')
 

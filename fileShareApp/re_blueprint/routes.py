@@ -17,7 +17,7 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from fileShareApp.re_blueprint.utils import recalls_query_util, queryToDict, \
-    update_recall, create_categories_xlsx, column_names_dict_re_util, \
+    update_recall,  column_names_dict_re_util, \
     column_names_re_util
 import openpyxl
 from werkzeug.utils import secure_filename

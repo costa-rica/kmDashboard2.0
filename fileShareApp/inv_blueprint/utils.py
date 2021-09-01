@@ -126,9 +126,7 @@ search_criteria_dict. len(investigations) is
 
     
 def update_investigation(formDict, inv_id_for_dash, verified_by_list):
-    # date_flag=False
-    # print('START investigation UPdate')
-    # print('updateInv - formDict::',formDict)
+
     formToDbCrosswalkDict = {'inv_number':'NHTSA_ACTION_NUMBER','inv_make':'MAKE',
         'inv_model':'MODEL','inv_year':'YEAR','inv_compname':'COMPNAME',
         'inv_mfr_name': 'MFR_NAME', 'inv_odate': 'ODATE', 'inv_cdate': 'CDATE',
@@ -136,15 +134,7 @@ def update_investigation(formDict, inv_id_for_dash, verified_by_list):
         'inv_km_notes': 'km_notes','investigation_file': 'files'}
 
     update_data = {formToDbCrosswalkDict.get(i): j for i,j in formDict.items()}
-    # del update_data['SUMMARY']
-    # print('update_data::::',update_data)
-    
-    
-    # no_update_list=['inv_NHTSA Action Number','inv_Make', 'inv_Model','inv_Year','inv_Open Date',
-                   # 'inv_Close Date','inv_Recall Campaign Number', 'inv_Component Description',
-                   # 'inv_Manufacturer Name', 'inv_subject','inv_summary_textarea','inv_km_notes',
-                   # 'update_inv','verified_by_user','investigation_file','csrf_token',
-                   # 'inv_or_re','record_type','records_list']
+
     
     
     #get categories from formDict --was formDict
@@ -163,13 +153,10 @@ def update_investigation(formDict, inv_id_for_dash, verified_by_list):
     #database columns to potentially update
     # Investigations_attr=['km_notes','files', 'categories']
     Investigations_attr=['km_notes', 'categories']
-    # at_least_one_field_changed = False
-    # print('update data:::', update_data)
-    # print('Does existing_data have any files?:::',existing_data.files)
+
     
     for i in Investigations_attr:
-        # print('**Attribute to update:::',str(i))
-        # print('Begininng of loop, files status:::',existing_data.files)
+
         if str(getattr(existing_data, i)) != update_data.get(i):
         
             update_from=str(getattr(existing_data, i))
@@ -200,64 +187,28 @@ def update_investigation(formDict, inv_id_for_dash, verified_by_list):
             track_util('investigations', 'verified_by_user','',current_user.email,inv_id_for_dash)
     
     
-        # if any(current_user.email in s for s in kwargs.get('verified_by_list')):
-            # print('do nothing')
-        # else:
-            # print('user verified adding to Tracking_inv table')
-            # at_least_one_field_changed = True
-            # newTrack=Tracking_inv(field_updated='verified_by_user',
-                # updated_to=current_user.email, updated_by=current_user.id,
-                # investigations_table_id=kwargs.get('inv_id_for_dash'))
-            # db.session.add(newTrack)
-            # db.session.commit()
-    # else:
-        # print('no verified user added')
-        # if any(current_user.email in s for s in kwargs.get('verified_by_list')):
-            # db.session.query(Tracking_inv).filter_by(investigations_table_id=kwargs.get('inv_id_for_dash'),
-                # field_updated='verified_by_user',updated_to=current_user.email).delete()
-            # db.session.commit()
-            
-    # if at_least_one_field_changed:
-        # print('at_least_one_field_changed::::',at_least_one_field_changed)
-        # setattr(existing_data, 'date_updated' ,datetime.now())
-        # db.session.commit()
-    # if date_flag:
-        # flash(date_flag, 'warning')
-    
-    # print('end updateInvestigation util')
-        #if there is a corresponding update different from existing_data:
-        #1.add row to Tracking_inv datatable
-        #2.update existing_data with change       
 
-
-# def update_files(filesDict, **kwargs):
-    # date_flag=False
-    ## print('in update_files - filesDict:::',filesDict,'kwargs:::',kwargs)
-    # formToDbCrosswalkDict = {'investigation_file': 'files'}
-
-    # update_data = {formToDbCrosswalkDict.get(i): j for i,j in filesDict.items()}
-    # existing_data = db.session.query(Investigations).get(kwargs.get('inv_id_for_dash'))
-    # for i in Investigations_attr:
-    # at_least_one_field_changed = False
-    ## if update_data.get('files') not in [existing_data.files,'']:
-    ## if different an not null then add
-        ## print('files update --- values not the same')
-        # at_least_one_field_changed = True
-    
-    # if at_least_one_field_changed:
-        # print('at_least_one_field_changed::::',at_least_one_field_changed)
-        # setattr(existing_data, 'date_updated' ,datetime.now())
-        # db.session.commit()
-    # if date_flag:
-        # flash(date_flag, 'warning')
-
+def lookup_util(problem_dict_tup1,df_lookup_inv, df_lookup_re):
+    count=0
+    for i,j in problem_dict_tup1.items():
+        if i[0]=='r':#lookup recalls
+            temp_add=list(df_lookup_re.loc[df_lookup_re.RECORD_ID==int(i[7:])].CAMPNO)[0]
+        else:
+            temp_add=list(df_lookup_inv.loc[df_lookup_inv.id==int(i[14:])].NHTSA_ACTION_NUMBER)[0]
+        if count==0:
+            temp_add_string_list=temp_add
+        else:
+            temp_add_string_list=temp_add_string_list+', ' +temp_add
+        count+=1
+    return temp_add_string_list
 
 
 def create_categories_xlsx(excel_file_name, column_names_for_df, formDict, db_table):
+    #create excel object to store the report
     excelObj=pd.ExcelWriter(os.path.join(
         current_app.config['UTILITY_FILES_FOLDER'],excel_file_name))
 
-    # columnNames=Investigations.__table__.columns.keys()
+    # Make df for column Names
     colNamesDf=pd.DataFrame([column_names_for_df],columns=column_names_for_df)
     colNamesDf.to_excel(excelObj,sheet_name=db_table.capitalize() + ' Data', header=False, index=False)
 
@@ -266,6 +217,48 @@ def create_categories_xlsx(excel_file_name, column_names_for_df, formDict, db_ta
     # 2011 ODATE filter removed 8/2/2021 per request
     # queryDf=queryDf[(queryDf['ODATE']>datetime(2011,1,1,0,0,0))]
 
+    #if linked_records in column_names_for_df:
+    if 'linked_records' in column_names_for_df:
+        print('Adjusting linked_records')
+        #make df's for looking up ids'record id's 
+        
+        # new_id_column='CAMPNO' if db_table=='recalls' else 'NHTSA_ACTION_NUMBER'
+        # df_lookup=pd.read_sql_table(db_table, db.engine)
+        # df_lookup=df_lookup[[id_column,new_id_column]].copy()
+        df_lookup_inv=pd.read_sql_table('investigations', db.engine)
+        df_lookup_inv=df_lookup_inv[['id','NHTSA_ACTION_NUMBER']].copy()
+        df_lookup_re=pd.read_sql_table('recalls', db.engine)
+        df_lookup_re=df_lookup_re[['RECORD_ID','CAMPNO']].copy()
+        
+        #Make dictionary df id to CAMPNO/NHTSA_ACTION_NUMBER
+        id_column='RECORD_ID' if db_table=='recalls' else 'id'
+        converted_dict={}
+        for tup in list(zip(queryDf.__getattr__(id_column),queryDf.linked_records)):
+            # file1 = open("converted_dict_progress.txt","a")
+            # file1.write(str(tup[0]) + "\n")
+            # file1.close()
+            if tup[1]==None or tup[1]=='{}':
+                converted_dict[tup[0]]=None
+            else:
+                check_value=tup[1]
+                converted_dict[tup[0]]=lookup_util(json.loads(tup[1]),df_lookup_inv, df_lookup_re)
+        
+        #convert dictinoary to DF then merge with desired table
+        converted_dict_df=pd.DataFrame.from_dict(converted_dict,orient='index',columns=['linked_records_new'])
+        concat_df=pd.concat([queryDf.set_index([id_column]),converted_dict_df], axis=1)
+        # concat_df.to_excel(db_table+'_linked_records_conversion.xlsx')#file to check conversion
+        
+        #remove old lined records column
+        position_linked_records=column_names_for_df.index('linked_records')
+        column_names_for_df[position_linked_records]='linked_records_new'
+        concat_df.reset_index(inplace=True)
+        concat_df.rename(columns={'index':id_column},inplace=True)
+        queryDf=concat_df[column_names_for_df].copy()
+        
+        
+        queryDf.rename(columns={'linked_records_new':'linked_records'},inplace=True)
+        # queryDf.reset_index(inplace=True)
+    
     
     queryDf.to_excel(excelObj,sheet_name=db_table.capitalize() + ' Data', header=False, index=False,startrow=1)
     inv_data_workbook=excelObj.book

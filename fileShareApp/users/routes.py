@@ -100,9 +100,9 @@ def logout():
 def account():
     form=UpdateAccountForm()
     if form.validate_on_submit():
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-            current_user.image_file = picture_file
+        # if form.picture.data:
+            # picture_file = save_picture(form.picture.data)
+            # current_user.image_file = picture_file
         current_user.username = form.username.data
         current_user.email = form.email.data
         currentUser=User.query.get(current_user.id)
@@ -122,8 +122,8 @@ def account():
         # currentUser.theme='dark'
         # db.session.commit()
         
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='account', image_file=image_file, form=form)
+    # image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title='account', form=form)
 
 
 @users.route('/reset_password', methods = ["GET", "POST"])
