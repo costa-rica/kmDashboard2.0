@@ -167,7 +167,12 @@ def database_page():
     if request.method == 'POST':
         formDict = request.form.to_dict()
         if formDict.get('build_workbook')=="True":
-
+            
+            #check if os.listdir(current_app.config['FILES_DATABASE']), if no create:
+            if not os.path.exists(current_app.config['FILES_DATABASE']):
+                print('There is not database folder found???')
+                os.mkdir(current_app.config['FILES_DATABASE'])
+            
             for file in os.listdir(current_app.config['FILES_DATABASE']):
                 os.remove(os.path.join(current_app.config['FILES_DATABASE'], file))
 
