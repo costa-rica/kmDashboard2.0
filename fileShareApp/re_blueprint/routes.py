@@ -117,17 +117,17 @@ def search_recalls():
     #make a flag to disable load previous
     if recall_data_list_page == 0:
         disable_load_previous=True
-        print('if recall_data_list_page == 0:')
+        # print('if recall_data_list_page == 0:')
         if len(recall_data_list)==1:
             disable_load_next = True
         else:
             disable_load_next = False
-            print(' else disable_load_next = False')
+            # print(' else disable_load_next = False')
     else:
         disable_load_previous=False
         if len(recall_data_list)>recall_data_list_page+1:
             disable_load_next = False
-            print('if len(recall_data_list)>recall_data_list_page+1:')
+            # print('if len(recall_data_list)>recall_data_list_page+1:')
         else:
             disable_load_next = True
         
@@ -141,7 +141,7 @@ def search_recalls():
     if request.method == 'POST':
         print('!!!!in POST method no_hits_flag:::', no_hits_flag)
         formDict = request.form.to_dict()
-        print('formDict:::',formDict)
+        # print('formDict:::',formDict)
         search_limit=formDict.get('search_limit')
         if formDict.get('refine_search_button'):
             print('@@@@@@ refine_search_button')
@@ -172,10 +172,10 @@ def search_recalls():
             category_for_remove = 'sc_'+formDict['remove_category']
             # del category_dict[formDict['remove_category']]
             form_dict_cat_element = 'sc_' + formDict['remove_category']
-            print('form_dict_cat_element:::',form_dict_cat_element)
+            # print('form_dict_cat_element:::',form_dict_cat_element)
             
             del formDict[form_dict_cat_element]
-            print('formDict:::',formDict)
+            # print('formDict:::',formDict)
             
             query_file_name = search_criteria_dictionary_util(formDict, 'current_query_re.txt')
             return redirect(url_for('re_blueprint.search_recalls', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
@@ -234,11 +234,12 @@ def recalls_dashboard():
     if dash_re.categories=='' or dash_re.categories==None:
         dash_re_categories=''
         has_category_flag=False
+        print('dash_re_categories - [None]:::',dash_re_categories)
     else:
         dash_re_categories=dash_re.categories.split(',')
         dash_re_categories=[i.strip() for i in dash_re_categories]
         has_category_flag=True
-        # print('dash_re_categories:::',dash_re_categories)
+        print('dash_re_categories:::',dash_re_categories)
     
     
     #------start get linked reocrds----
@@ -269,6 +270,9 @@ def recalls_dashboard():
         dash_re.CORRECTIVE_ACTION,dash_re.NOTES, dash_re.RCL_CMPT_ID,dash_re.km_notes,
         dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files, dash_re_categories,
         dash_re_linked_records]
+    print('dash_re_list[27]:::',dash_re_list[27])
+    if 'FIRES_OTHER' in dash_re_list[27]:
+        print('FIRES_OTHER is in dash_re_list[27]')
 
 #files 24
 
@@ -284,9 +288,25 @@ def recalls_dashboard():
     
     #make dictionary of category lists from excel file
     category_list_dict=category_list_dict_util()
+    print('category_list_dict:::', category_list_dict)
     
     category_group_dict_no_space={i:re.sub(r"\s+","",i) for i in list(category_list_dict)}
-
+    print('category_group_dict_no_space:::', category_group_dict_no_space)
+    
+    print('****category items found:')
+    for category, no_space in category_group_dict_no_space.items():
+        if category =='Fire Issues':
+            print('--',category,'--')
+            print(category_list_dict[category])
+        for i in category_list_dict[category]:
+            # if category == 'Fire Issues':
+                # print('---->',i)
+            # if i in dash_re_list[27]:
+                # print(i)
+            if i=='FIRES_OTHER':
+                print('FIRES_OTHER -- found:')
+                print(category)
+            
     
     if request.method == 'POST':
         print('!!!!in POST method')
@@ -299,7 +319,7 @@ def recalls_dashboard():
         if formDict.get('update_re'):
             # print('formDict:::',formDict)
             # print('argsDict:::',argsDict)
-            print('filesDict::::',filesDict)
+            # print('filesDict::::',filesDict)
             # print('formsDict.Keys():::',formDict.keys())
             #update file
             if request.files.get('recall_file'):
@@ -320,6 +340,7 @@ def recalls_dashboard():
                 'cat_' in key[:4] for key in formDict.keys()) or (
                 has_category_flag and not any('cat_' in key[:4] for key in formDict.keys())):
                 print('*****item in update_data_list and formDict.keys')
+                print(':::formDict:::',formDict)
                 update_recall(formDict, re_id_for_dash, verified_by_list_util)
             
             #This can only be case if update + user verified previously but no unchecked

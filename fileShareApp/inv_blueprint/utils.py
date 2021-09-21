@@ -279,6 +279,6 @@ def existing_report(excel_file_name, db_table):
         current_app.config['UTILITY_FILES_FOLDER'],excel_file_name),
         db_table.capitalize() + ' Data')
     categories_dict={i:'checked' for i in list(categories_df.columns)}
-    # print('categories_dict:::', categories_dict)
+    print('categories_dict (existing_report):::', categories_dict)
     time_stamp = time_stamp_df.loc[0,1].to_pydatetime().strftime("%Y-%m-%d %I:%M:%S %p")
     return (categories_dict,time_stamp)

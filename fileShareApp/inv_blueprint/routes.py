@@ -459,14 +459,16 @@ def reports():
     excel_file_name_re='recalls_report.xlsx'
     
     #get columns from each reports
-    column_names_inv=Investigations.__table__.columns.keys()
-    column_names_re=Recalls.__table__.columns.keys()
+    #Id/RECORD_ID removed from options -- if not included causes problems building excel file
+    column_names_inv=Investigations.__table__.columns.keys()[1:]
+    column_names_re=Recalls.__table__.columns.keys()[1:]
+
     categories_dict_inv={}
     categories_dict_re={}
     if os.path.exists(os.path.join(
         current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv)):
         categories_dict_inv,time_stamp_inv=existing_report(excel_file_name_inv, 'investigations')
-        print('categories_dict_inv:::', type(categories_dict_inv), categories_dict_inv)
+        # print('categories_dict_inv:::', type(categories_dict_inv), categories_dict_inv)
     else:
         time_stamp_inv='no current file'
     if os.path.exists(os.path.join(
@@ -475,19 +477,22 @@ def reports():
     else:
         time_stamp_re='no current file'
 
-
+    print('categories_dict_inv:::',categories_dict_inv)
     # print('time_stamp_inv_df:::', time_stamp_inv, type(time_stamp_inv))
     if request.method == 'POST':
         formDict = request.form.to_dict()
         print('reports - formDict::::',formDict)
         if formDict.get('build_excel_report_inv'):
             
-            column_names_for_df=[i for i in column_names_inv if i in list(formDict.keys())]
-
+            column_names_for_df = [i for i in column_names_inv if i in list(formDict.keys())]
+            
+            column_names_for_df.insert(0,'id')
+            print('column_names_for_df:::',column_names_for_df)
             create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict, 'investigations')
+            
         elif formDict.get('build_excel_report_re'):
             column_names_for_df=[i for i in column_names_re if i in list(formDict.keys())]
-
+            column_names_for_df.insert(0,'RECORD_ID')
             create_categories_xlsx(excel_file_name_re, column_names_for_df, formDict, 'recalls')
         logger.info('in search page')
         return redirect(url_for('inv_blueprint.reports'))

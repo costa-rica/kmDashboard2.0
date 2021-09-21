@@ -162,10 +162,10 @@ def update_recall(formDict, re_id_for_dash, verified_by_list):
         'recall_file': 'files'}
     update_data = {formToDbCrosswalkDict.get(i): j for i,j in formDict.items()}
 
-    #removed from no_update_list: 're_km_notes_textarea',
+    #make assigned categories string
     assigned_categories=''
     for i in formDict:
-        # if i not in no_update_list:
+
         if i[:4]=='cat_':
             print('formDict value in assigned category:::',i)
             if assigned_categories=='':
